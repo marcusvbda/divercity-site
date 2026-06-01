@@ -59,7 +59,7 @@ export default function Hero() {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://placehold.co/1920x1080/1a1a2e/12C7C8?text=Divercity+Park"
+          src="/hero.png"
           alt="Divercity Park - Parque Indoor"
           fill
           priority
@@ -104,9 +104,9 @@ export default function Hero() {
           <Image
             src="/logo-ball.png"
             alt="Divercity Park"
-            width={160}
-            height={160}
-            className="h-28 w-28 drop-shadow-2xl md:h-40 md:w-40"
+            width={200}
+            height={200}
+            className="h-28 w-28 drop-shadow-2xl md:h-48 md:w-48"
             priority
           />
         </motion.div>

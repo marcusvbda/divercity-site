@@ -26,44 +26,35 @@ export default function Navbar() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100'
-          : 'bg-transparent'
+      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 shadow-lg backdrop-blur-md' : 'bg-transparent'
       }`}
     >
       <div className="container-max px-4 md:px-8 lg:px-16">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex h-16 items-center justify-between md:h-20">
           {/* Logo */}
           <button
             onClick={() => handleNavClick('#inicio')}
-            className="flex items-center gap-2 flex-shrink-0"
+            className="flex flex-shrink-0 items-center gap-2"
             aria-label="Ir para o início"
           >
             <Image
-              src="/logo-ball.png"
+              src="/logo-name.png"
               alt="Divercity Park"
-              width={48}
-              height={48}
-              className="w-10 h-10 md:w-12 md:h-12"
+              width={100}
+              height={100}
+              className="relative top-2 h-30 w-40 object-contain md:h-30 md:w-44 lg:h-30"
               priority
             />
-            <span
-              className={`font-heading font-bold text-lg hidden sm:block transition-colors ${
-                scrolled ? 'text-brand-purple' : 'text-white'
-              }`}
-            >
-              Divercity Park
-            </span>
           </button>
 
           {/* Desktop Nav */}
-          <ul className="hidden md:flex items-center gap-6 lg:gap-8">
+          <ul className="hidden items-center gap-6 md:flex lg:gap-8">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <button
                   onClick={() => handleNavClick(item.href)}
-                  className={`font-body font-medium text-sm lg:text-base transition-colors hover:text-brand-cyan ${
+                  className={`font-body hover:text-brand-cyan text-sm font-medium transition-colors lg:text-base ${
                     scrolled ? 'text-gray-700' : 'text-white/90'
                   }`}
                 >
@@ -79,14 +70,14 @@ export default function Navbar() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleNavClick('#festas')}
-              className="hidden md:flex items-center px-5 py-2.5 rounded-full bg-brand-pink text-white font-body font-semibold text-sm shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors"
+              className="bg-brand-pink font-body hidden items-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600 md:flex"
             >
               Reservar Festa
             </motion.button>
 
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`md:hidden p-2 rounded-lg transition-colors ${
+              className={`rounded-lg p-2 transition-colors md:hidden ${
                 scrolled ? 'text-gray-700' : 'text-white'
               }`}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -105,14 +96,14 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 overflow-hidden"
+            className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur-md md:hidden"
           >
-            <ul className="px-4 py-4 flex flex-col gap-3">
+            <ul className="flex flex-col gap-3 px-4 py-4">
               {NAV_ITEMS.map((item) => (
                 <li key={item.href}>
                   <button
                     onClick={() => handleNavClick(item.href)}
-                    className="w-full text-left font-body font-medium text-gray-700 py-2 hover:text-brand-cyan transition-colors"
+                    className="font-body hover:text-brand-cyan w-full py-2 text-left font-medium text-gray-700 transition-colors"
                   >
                     {item.label}
                   </button>
@@ -121,7 +112,7 @@ export default function Navbar() {
               <li>
                 <button
                   onClick={() => handleNavClick('#festas')}
-                  className="w-full mt-2 px-5 py-3 rounded-full bg-brand-pink text-white font-body font-semibold text-sm hover:bg-pink-600 transition-colors"
+                  className="bg-brand-pink font-body mt-2 w-full rounded-full px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
                 >
                   Reservar Festa
                 </button>
