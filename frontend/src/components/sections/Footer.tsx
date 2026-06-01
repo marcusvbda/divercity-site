@@ -13,7 +13,7 @@ export default function Footer() {
           <div>
             <div className="mb-4 flex items-center gap-3">
               <Image
-                src="/logo-ball.png"
+                src="/logo-ball-fundo.png"
                 alt="Divercity Park"
                 width={64}
                 height={64}

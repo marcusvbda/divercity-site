@@ -106,7 +106,7 @@ export default function Hero() {
             alt="Divercity Park"
             width={200}
             height={200}
-            className="h-28 w-28 drop-shadow-2xl md:h-48 md:w-48"
+            className="h-48 w-48 drop-shadow-2xl md:h-48 md:w-48"
             priority
           />
         </motion.div>

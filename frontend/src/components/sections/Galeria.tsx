@@ -10,8 +10,13 @@ import type { InstagramPost } from '@/app/api/instagram/route'
 export default function Galeria() {
   const [posts, setPosts] = useState<InstagramPost[]>([])
 
+  // Duplica os slides para garantir que o loop não abra lacuna
+  const slides = posts.length > 0 && posts.length < 10
+    ? [...posts, ...posts]
+    : posts
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: 'start', dragFree: true },
+    { loop: true, align: 'start' },
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
   )
 
@@ -61,11 +66,11 @@ export default function Galeria() {
           className="relative"
         >
           <div ref={emblaRef} className="overflow-hidden">
-            <div className="flex gap-4 cursor-grab active:cursor-grabbing">
-              {posts.map((post) => {
+            <div className="flex cursor-grab active:cursor-grabbing">
+              {slides.map((post, i) => {
                 const src = post.media_type === 'VIDEO' ? post.thumbnail_url! : post.media_url
                 return (
-                  <div key={post.id} className="flex-none w-52 sm:w-64 md:w-72">
+                  <div key={`${post.id}-${i}`} className="flex-none w-52 sm:w-64 md:w-72 pl-4">
                     <motion.a
                       href={post.permalink}
                       target="_blank"
@@ -90,7 +95,7 @@ export default function Galeria() {
               {/* Skeleton enquanto carrega */}
               {posts.length === 0 &&
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex-none w-52 sm:w-64 md:w-72">
+                  <div key={i} className="flex-none w-52 sm:w-64 md:w-72 pl-4">
                     <div className="rounded-2xl bg-gray-200 animate-pulse aspect-square" />
                   </div>
                 ))}

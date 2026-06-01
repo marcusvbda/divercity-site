@@ -149,13 +149,17 @@ export default function Contato() {
               })}
             </div>
 
-            {/* Map placeholder */}
+            {/* Map */}
             <div className="rounded-2xl overflow-hidden shadow-md">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://placehold.co/600x250/e5e7eb/9ca3af?text=Mapa+-+Divercity+Park"
-                alt="Localização Divercity Park"
-                className="w-full h-52 object-cover"
+              <iframe
+                src="https://maps.google.com/maps?q=Av.+Tuiuti+710+Gleba+Patrimônio+Maringa+Maringá+PR+Brasil&output=embed&z=16"
+                width="100%"
+                height="208"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Localização Divercity Park"
               />
             </div>
           </motion.div>

@@ -43,7 +43,7 @@ export default function Navbar() {
               alt="Divercity Park"
               width={100}
               height={100}
-              className="relative top-2 h-30 w-40 object-contain md:h-30 md:w-44 lg:h-30"
+              className="relative top-3 h-30 w-40 object-contain md:h-30 md:w-44 lg:h-30"
               priority
             />
           </button>
