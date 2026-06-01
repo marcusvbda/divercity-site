@@ -1,14 +1,15 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
-import { INSTAGRAM_POSTS } from '@/lib/data'
+import type { InstagramPost } from '@/app/api/instagram/route'
 
 export default function Galeria() {
+  const [posts, setPosts] = useState<InstagramPost[]>([])
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: 'start', dragFree: true },
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
@@ -16,6 +17,13 @@ export default function Galeria() {
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
+
+  useEffect(() => {
+    fetch('/api/instagram')
+      .then((r) => r.json())
+      .then(setPosts)
+      .catch(console.error)
+  }, [])
 
   return (
     <section className="section-padding bg-white overflow-hidden">
@@ -28,13 +36,13 @@ export default function Galeria() {
           className="text-center mb-10"
         >
           <a
-            href="https://instagram.com/divercitypark"
+            href="https://www.instagram.com/divercity.park"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-linear-to-r from-pink-100 to-purple-100 text-brand-purple font-body font-semibold text-sm mb-3 hover:opacity-80 transition-opacity"
           >
             <Camera size={14} />
-            @divercitypark
+            @divercity.park
           </a>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             Siga nosso Instagram
@@ -54,25 +62,38 @@ export default function Galeria() {
         >
           <div ref={emblaRef} className="overflow-hidden">
             <div className="flex gap-4 cursor-grab active:cursor-grabbing">
-              {INSTAGRAM_POSTS.map((src, i) => (
-                <div key={i} className="flex-none w-52 sm:w-64 md:w-72">
-                  <motion.div
-                    whileHover={{ scale: 1.04 }}
-                    className="relative rounded-2xl overflow-hidden shadow-md aspect-square"
-                  >
-                    <Image
-                      src={src}
-                      alt={`Post Instagram ${i + 1}`}
-                      fill
-                      sizes="300px"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-4">
-                      <Camera size={20} className="text-white" />
-                    </div>
-                  </motion.div>
-                </div>
-              ))}
+              {posts.map((post) => {
+                const src = post.media_type === 'VIDEO' ? post.thumbnail_url! : post.media_url
+                return (
+                  <div key={post.id} className="flex-none w-52 sm:w-64 md:w-72">
+                    <motion.a
+                      href={post.permalink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.04 }}
+                      className="relative rounded-2xl overflow-hidden shadow-md aspect-square block"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt="Post Instagram Divercity Park"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-4">
+                        <Camera size={20} className="text-white" />
+                      </div>
+                    </motion.a>
+                  </div>
+                )
+              })}
+
+              {/* Skeleton enquanto carrega */}
+              {posts.length === 0 &&
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex-none w-52 sm:w-64 md:w-72">
+                    <div className="rounded-2xl bg-gray-200 animate-pulse aspect-square" />
+                  </div>
+                ))}
             </div>
           </div>
 
