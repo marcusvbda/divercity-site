@@ -1,7 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { CheckCircle2 } from 'lucide-react'
 
@@ -22,9 +21,6 @@ const PARTY_IMAGES = [
 ]
 
 export default function Festas() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-
   return (
     <section
       id="festas"
@@ -42,11 +38,12 @@ export default function Festas() {
       />
 
       <div className="container-max relative z-10">
-        <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-pink/10 text-brand-pink font-body font-semibold text-sm mb-4">
@@ -97,7 +94,8 @@ export default function Festas() {
           {/* Right: Image grid */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
             className="grid grid-cols-2 gap-3"
           >

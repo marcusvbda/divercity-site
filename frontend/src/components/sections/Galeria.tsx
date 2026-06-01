@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useCallback } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useCallback } from 'react'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
@@ -9,9 +9,6 @@ import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import { INSTAGRAM_POSTS } from '@/lib/data'
 
 export default function Galeria() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: 'start', dragFree: true },
     [Autoplay({ delay: 3000, stopOnInteraction: true })]
@@ -24,9 +21,9 @@ export default function Galeria() {
     <section className="section-padding bg-white overflow-hidden">
       <div className="container-max">
         <motion.div
-          ref={ref}
           initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
@@ -50,7 +47,8 @@ export default function Galeria() {
         {/* Carousel */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="relative"
         >

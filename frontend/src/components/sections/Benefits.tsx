@@ -1,7 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { PartyPopper, Layers, Users } from 'lucide-react'
 
 const BENEFITS = [
@@ -45,17 +44,14 @@ const itemVariants = {
 }
 
 export default function Benefits() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
-
   return (
     <section className="py-16 md:py-20 px-4 md:px-8 lg:px-16 bg-white">
       <div className="container-max">
         <motion.div
-          ref={ref}
           variants={containerVariants}
           initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {BENEFITS.map((b) => {

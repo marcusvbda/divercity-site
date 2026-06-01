@@ -5,11 +5,46 @@ import Image from 'next/image'
 
 const FLOATING_ELEMENTS = [
   { color: '#12C7C8', size: 80, left: '8%', top: '20%', delay: 0, duration: 3 },
-  { color: '#8E4CCF', size: 60, left: '88%', top: '15%', delay: 0.5, duration: 4 },
-  { color: '#FF4F8A', size: 100, left: '5%', top: '70%', delay: 1, duration: 3.5 },
-  { color: '#9AD94B', size: 50, left: '92%', top: '65%', delay: 0.8, duration: 2.8 },
-  { color: '#FFD23F', size: 70, left: '80%', top: '45%', delay: 0.3, duration: 4.2 },
-  { color: '#12C7C8', size: 40, left: '15%', top: '50%', delay: 1.2, duration: 3.2 },
+  {
+    color: '#8E4CCF',
+    size: 60,
+    left: '88%',
+    top: '15%',
+    delay: 0.5,
+    duration: 4,
+  },
+  {
+    color: '#FF4F8A',
+    size: 100,
+    left: '5%',
+    top: '70%',
+    delay: 1,
+    duration: 3.5,
+  },
+  {
+    color: '#9AD94B',
+    size: 50,
+    left: '92%',
+    top: '65%',
+    delay: 0.8,
+    duration: 2.8,
+  },
+  {
+    color: '#FFD23F',
+    size: 70,
+    left: '80%',
+    top: '45%',
+    delay: 0.3,
+    duration: 4.2,
+  },
+  {
+    color: '#12C7C8',
+    size: 40,
+    left: '15%',
+    top: '50%',
+    delay: 1.2,
+    duration: 3.2,
+  },
 ]
 
 export default function Hero() {
@@ -19,18 +54,18 @@ export default function Hero() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden"
     >
       {/* Background image */}
       <div className="absolute inset-0 z-0">
-        <Image
+        {/* <Image
           src="https://placehold.co/1920x1080/1a1a2e/12C7C8?text=Divercity+Park"
           alt="Divercity Park - Parque Indoor"
           fill
           priority
           sizes="100vw"
           className="object-cover"
-        />
+        /> */}
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/75" />
       </div>
@@ -39,7 +74,7 @@ export default function Hero() {
       {FLOATING_ELEMENTS.map((el, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full opacity-25 blur-sm pointer-events-none"
+          className="pointer-events-none absolute rounded-full opacity-25 blur-sm"
           style={{
             backgroundColor: el.color,
             width: el.size,
@@ -58,20 +93,20 @@ export default function Hero() {
       ))}
 
       {/* Content */}
-      <div className="relative z-10 container-max px-4 md:px-8 text-center">
+      <div className="container-max relative z-10 px-4 text-center md:px-8">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="flex justify-center mb-8"
+          className="mb-8 flex justify-center"
         >
           <Image
             src="/logo-ball.png"
             alt="Divercity Park"
             width={160}
             height={160}
-            className="w-28 h-28 md:w-40 md:h-40 drop-shadow-2xl"
+            className="h-28 w-28 drop-shadow-2xl md:h-40 md:w-40"
             priority
           />
         </motion.div>
@@ -81,10 +116,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-          className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight"
+          className="font-heading mb-6 text-5xl leading-tight font-bold text-white md:text-7xl lg:text-8xl"
         >
-          Diversão para{' '}
-          <span className="text-brand-cyan">toda a família</span>
+          Diversão para <span className="text-brand-cyan">toda a família</span>
         </motion.h1>
 
         {/* Supporting text */}
@@ -92,10 +126,11 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
-          className="font-body text-lg md:text-xl text-white/85 max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="font-body mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl"
         >
-          Mais de 10 atrações incríveis, festas personalizadas inesquecíveis e um ambiente
-          seguro e acolhedor para toda a família criar memórias juntos.
+          Mais de 10 atrações incríveis, festas personalizadas inesquecíveis e
+          um ambiente seguro e acolhedor para toda a família criar memórias
+          juntos.
         </motion.p>
 
         {/* CTAs */}
@@ -103,13 +138,13 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => scrollTo('#festas')}
-            className="px-8 py-4 rounded-full bg-brand-pink text-white font-body font-bold text-lg shadow-lg shadow-pink-500/40 hover:bg-pink-600 transition-colors"
+            className="bg-brand-pink font-body rounded-full px-8 py-4 text-lg font-bold text-white shadow-lg shadow-pink-500/40 transition-colors hover:bg-pink-600"
           >
             Reservar Festa
           </motion.button>
@@ -118,7 +153,7 @@ export default function Hero() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => scrollTo('#atracoes')}
-            className="px-8 py-4 rounded-full border-2 border-white text-white font-body font-bold text-lg hover:bg-white hover:text-brand-purple transition-all"
+            className="font-body hover:text-brand-purple rounded-full border-2 border-white px-8 py-4 text-lg font-bold text-white transition-all hover:bg-white"
           >
             Ver Atrações
           </motion.button>
@@ -129,10 +164,10 @@ export default function Hero() {
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
       >
-        <div className="w-6 h-10 rounded-full border-2 border-white/60 flex items-start justify-center pt-1.5">
-          <div className="w-1.5 h-3 rounded-full bg-white/80" />
+        <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-white/60 pt-1.5">
+          <div className="h-3 w-1.5 rounded-full bg-white/80" />
         </div>
       </motion.div>
     </section>
