@@ -7,7 +7,12 @@ const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN ?? ''
 export interface StrapiResponse<T> {
   data: T
   meta?: {
-    pagination?: { page: number; pageSize: number; pageCount: number; total: number }
+    pagination?: {
+      page: number
+      pageSize: number
+      pageCount: number
+      total: number
+    }
   }
 }
 
@@ -43,7 +48,7 @@ export async function fetchCMS<T>(
 
 export async function getCMSConfig() {
   return fetchCMS<CMSConfiguracaoSite>(
-    '/configuracao-site?populate[festas_features]=true&populate[festas_imagens]=true&populate[beneficios_destaque]=true'
+    '/configuracao-site?populate[festas_features]=true&populate[festas_imagens]=true&populate[beneficios_destaque]=true&populate[navbar_logo]=true&populate[hero_bg]=true&populate[hero_image]=true'
   )
 }
 
@@ -112,7 +117,16 @@ export interface CMSConfiguracaoSite {
   hero_titulo: string
   hero_subtitulo: string
   festas_features: CMSFeatureItem[]
-  festas_imagens: Array<{ id: number; url: string; width?: number; height?: number; alternativeText?: string | null }>
+  navbar_logo?: { url: string; width: number; height: number } | null
+  hero_bg?: { url: string; width: number; height: number } | null
+  hero_image?: { url: string; width: number; height: number } | null
+  festas_imagens: Array<{
+    id: number
+    url: string
+    width?: number
+    height?: number
+    alternativeText?: string | null
+  }>
   hero_cta_primario?: string
   hero_cta_secundario?: string
   atracoes_badge?: string

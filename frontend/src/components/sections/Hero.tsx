@@ -52,9 +52,18 @@ interface Props {
   subtitulo: string
   ctaPrimario?: string
   ctaSecundario?: string
+  bgImage?: string
+  image?: string
 }
 
-export default function Hero({ titulo, subtitulo, ctaPrimario, ctaSecundario }: Props) {
+export default function Hero({
+  titulo,
+  subtitulo,
+  ctaPrimario,
+  ctaSecundario,
+  bgImage,
+  image,
+}: Props) {
   const scrollTo = (href: string) =>
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
 
@@ -65,14 +74,16 @@ export default function Hero({ titulo, subtitulo, ctaPrimario, ctaSecundario }: 
     >
       {/* Background image */}
       <div className="absolute inset-0 z-0">
-        <Image
-          src="/hero.png"
-          alt="Divercity Park - Parque Indoor"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
+        {}
+
+        <div className="relative h-screen">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={bgImage}
+            alt="Divercity Park - Parque Indoor"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </div>
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/75" />
       </div>

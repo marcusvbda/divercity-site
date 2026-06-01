@@ -10,11 +10,12 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {},
   "attributes": {
     "whatsapp_number": {
       "type": "string",
-      "required": true,
-      "default": "5514997569008"
+      "default": "5514997569008",
+      "required": true
     },
     "instagram_url": {
       "type": "string",
@@ -47,6 +48,16 @@
     "waze_url": {
       "type": "string"
     },
+    "navbar_logo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
     "hero_titulo": {
       "type": "string"
     },
@@ -55,42 +66,110 @@
     },
     "festas_features": {
       "type": "component",
-      "repeatable": true,
-      "component": "geral.feature-item"
+      "component": "geral.feature-item",
+      "repeatable": true
     },
     "festas_imagens": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
-    "hero_cta_primario": { "type": "string" },
-    "hero_cta_secundario": { "type": "string" },
-    "atracoes_badge": { "type": "string" },
-    "atracoes_titulo": { "type": "string" },
-    "atracoes_subtitulo": { "type": "text" },
+    "hero_cta_primario": {
+      "type": "string"
+    },
+    "hero_cta_secundario": {
+      "type": "string"
+    },
+    "hero_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "hero_bg": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "atracoes_badge": {
+      "type": "string"
+    },
+    "atracoes_titulo": {
+      "type": "string"
+    },
+    "atracoes_subtitulo": {
+      "type": "text"
+    },
     "beneficios_destaque": {
       "type": "component",
-      "repeatable": true,
-      "component": "secao.beneficio-destaque"
+      "component": "secao.beneficio-destaque",
+      "repeatable": true
     },
-    "festas_badge": { "type": "string" },
-    "festas_titulo": { "type": "string" },
-    "festas_titulo_destaque": { "type": "string" },
-    "festas_descricao": { "type": "text" },
-    "festas_cta_orcamento": { "type": "string" },
-    "festas_cta_precos": { "type": "string" },
-    "precos_badge": { "type": "string" },
-    "precos_titulo": { "type": "string" },
-    "precos_subtitulo": { "type": "text" },
-    "contato_badge": { "type": "string" },
-    "contato_titulo": { "type": "string" },
-    "contato_subtitulo": { "type": "text" },
-    "contato_cta": { "type": "string" },
-    "por_que_badge": { "type": "string" },
-    "por_que_titulo": { "type": "string" },
-    "por_que_titulo_destaque": { "type": "string" },
-    "por_que_subtitulo": { "type": "text" },
-    "footer_copyright": { "type": "string" }
+    "festas_badge": {
+      "type": "string"
+    },
+    "festas_titulo": {
+      "type": "string"
+    },
+    "festas_titulo_destaque": {
+      "type": "string"
+    },
+    "festas_descricao": {
+      "type": "text"
+    },
+    "festas_cta_orcamento": {
+      "type": "string"
+    },
+    "festas_cta_precos": {
+      "type": "string"
+    },
+    "precos_badge": {
+      "type": "string"
+    },
+    "precos_titulo": {
+      "type": "string"
+    },
+    "precos_subtitulo": {
+      "type": "text"
+    },
+    "contato_badge": {
+      "type": "string"
+    },
+    "contato_titulo": {
+      "type": "string"
+    },
+    "contato_subtitulo": {
+      "type": "text"
+    },
+    "contato_cta": {
+      "type": "string"
+    },
+    "por_que_badge": {
+      "type": "string"
+    },
+    "por_que_titulo": {
+      "type": "string"
+    },
+    "por_que_titulo_destaque": {
+      "type": "string"
+    },
+    "por_que_subtitulo": {
+      "type": "text"
+    },
+    "footer_copyright": {
+      "type": "string"
+    }
   }
 }

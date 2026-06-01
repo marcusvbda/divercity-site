@@ -45,7 +45,27 @@ export default async function Home() {
       : null,
   }))
 
-  console.log(atracoes, atracoesNormalized)
+  const configNormalized = {
+    ...config,
+    navbar_logo: config.navbar_logo
+      ? {
+          ...config.navbar_logo,
+          url: absoluteUrl(config.navbar_logo.url) ?? '',
+        }
+      : null,
+    hero_bg: config.hero_bg
+      ? {
+          ...config.hero_bg,
+          url: absoluteUrl(config.hero_bg.url) ?? '',
+        }
+      : null,
+    hero_image: config.hero_image
+      ? {
+          ...config.hero_image,
+          url: absoluteUrl(config.hero_image.url) ?? '',
+        }
+      : null,
+  }
 
   // Normaliza URLs das imagens das festas — filtra itens sem URL válida
   const festasImagens = (config.festas_imagens ?? [])
@@ -54,56 +74,74 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar />
+      <Navbar
+        logo={
+          configNormalized?.navbar_logo?.url ??
+          'https://placehold.co/600x400/1a1a2e/ffffff?text=logo'
+        }
+      />
       <main>
         <Hero
-          titulo={config.hero_titulo}
-          subtitulo={config.hero_subtitulo}
-          ctaPrimario={config.hero_cta_primario ?? 'Reservar Festa'}
-          ctaSecundario={config.hero_cta_secundario ?? 'Ver Atrações'}
+          titulo={configNormalized.hero_titulo}
+          subtitulo={configNormalized.hero_subtitulo}
+          ctaPrimario={configNormalized.hero_cta_primario ?? 'Reservar Festa'}
+          ctaSecundario={configNormalized.hero_cta_secundario ?? 'Ver Atrações'}
+          bgImage={
+            configNormalized?.hero_bg?.url ??
+            'https://placehold.co/600x400/1a1a2e/ffffff?text=hero-bg'
+          }
+          image={
+            configNormalized?.hero_image?.url ??
+            'https://placehold.co/600x400/1a1a2e/ffffff?text=hero-image'
+          }
         />
-        <Benefits beneficiosDestaque={config.beneficios_destaque ?? []} />
+        <Benefits
+          beneficiosDestaque={configNormalized.beneficios_destaque ?? []}
+        />
         <Atracoes
           atracoes={atracoesNormalized}
-          badge={config.atracoes_badge}
-          titulo={config.atracoes_titulo}
-          subtitulo={config.atracoes_subtitulo}
+          badge={configNormalized.atracoes_badge}
+          titulo={configNormalized.atracoes_titulo}
+          subtitulo={configNormalized.atracoes_subtitulo}
         />
         <PorQueEscolher
           beneficios={beneficios}
-          badge={config.por_que_badge}
-          titulo={config.por_que_titulo}
-          tituloDestaque={config.por_que_titulo_destaque}
-          subtitulo={config.por_que_subtitulo}
+          badge={configNormalized.por_que_badge}
+          titulo={configNormalized.por_que_titulo}
+          tituloDestaque={configNormalized.por_que_titulo_destaque}
+          subtitulo={configNormalized.por_que_subtitulo}
         />
         <Festas
-          features={config.festas_features}
+          features={configNormalized.festas_features}
           imagens={festasImagens}
-          badge={config.festas_badge}
-          titulo={config.festas_titulo}
-          tituloDestaque={config.festas_titulo_destaque}
-          descricao={config.festas_descricao}
-          ctaOrcamento={config.festas_cta_orcamento}
-          ctaPrecos={config.festas_cta_precos}
+          badge={configNormalized.festas_badge}
+          titulo={configNormalized.festas_titulo}
+          tituloDestaque={configNormalized.festas_titulo_destaque}
+          descricao={configNormalized.festas_descricao}
+          ctaOrcamento={configNormalized.festas_cta_orcamento}
+          ctaPrecos={configNormalized.festas_cta_precos}
         />
         <Precos
           precos={precos}
           disclaimers={disclaimers}
-          badge={config.precos_badge}
-          titulo={config.precos_titulo}
-          subtitulo={config.precos_subtitulo}
+          badge={configNormalized.precos_badge}
+          titulo={configNormalized.precos_titulo}
+          subtitulo={configNormalized.precos_subtitulo}
         />
         <Galeria />
         <Depoimentos />
         <Contato
-          config={config}
-          badge={config.contato_badge}
-          titulo={config.contato_titulo}
-          subtitulo={config.contato_subtitulo}
-          ctaLabel={config.contato_cta}
+          config={configNormalized}
+          badge={configNormalized.contato_badge}
+          titulo={configNormalized.contato_titulo}
+          subtitulo={configNormalized.contato_subtitulo}
+          ctaLabel={configNormalized.contato_cta}
         />
       </main>
-      <Footer config={config} copyright={config.footer_copyright} />
+      <Footer
+        config={configNormalized}
+        copyright={configNormalized.footer_copyright}
+      />
     </>
   )
 }

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { NAV_ITEMS } from '@/lib/data'
 
-export default function Navbar() {
+export default function Navbar({ logo }: { logo: string }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -38,13 +38,11 @@ export default function Navbar() {
             className="flex flex-shrink-0 items-center gap-2"
             aria-label="Ir para o início"
           >
-            <Image
-              src="/logo-name.png"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logo}
               alt="Divercity Park"
-              width={100}
-              height={100}
               className="relative top-3 h-30 w-40 object-contain md:h-30 md:w-44 lg:h-30"
-              priority
             />
           </button>
 
