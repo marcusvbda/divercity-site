@@ -11,51 +11,58 @@ export const NAV_ITEMS: NavItem[] = [
 export const ATRACOES: Atracao[] = [
   {
     id: 1,
-    nome: 'Arco do Totem Elétrico',
-    descricao: 'Diversão elétrica com jogos interativos e muita adrenalina para toda a família.',
-    imagem: 'https://placehold.co/600x400/12C7C8/ffffff?text=Arco+do+Totem+Elétrico',
+    nome: 'Arena de Camas Elásticas',
+    descricao:
+      'Nossa arena de camas elásticas é o lugar perfeito para pular e se divertir! Com trampolins interconectados, as crianças podem pular livremente, realizar acrobacias e liberar toda a energia.',
+    imagem: '/cama-elastica.png',
     cor: '#12C7C8',
   },
   {
     id: 2,
     nome: 'Guerreiro Ninja',
-    descricao: 'Supere obstáculos ninjas e mostre suas habilidades neste percurso radical.',
-    imagem: 'https://placehold.co/600x400/8E4CCF/ffffff?text=Guerreiro+Ninja',
+    descricao:
+      'Desafie suas habilidades na nossa pista de obstáculos Guerreiro Ninja! Projetada para testar força, agilidade e coordenação, essa atração oferece diferentes níveis de dificuldade para crianças de todas as idades.',
+    imagem: '/guerreiro-ninja.png',
     cor: '#8E4CCF',
   },
   {
     id: 3,
     nome: 'Parede de Escalada',
-    descricao: 'Escale paredes desafiadoras com segurança e equipamentos profissionais.',
-    imagem: 'https://placehold.co/600x400/FF4F8A/ffffff?text=Parede+de+Escalada',
+    descricao:
+      'Nossa parede de escalar é ideal para pequenos alpinistas. Com vários percursos e níveis de dificuldade, as crianças podem desenvolver suas habilidades em um ambiente seguro, sempre supervisionado por nossos monitores.',
+    imagem: '/guerreiro-ninja.png',
     cor: '#FF4F8A',
   },
   {
     id: 4,
-    nome: 'Escalada Radical',
-    descricao: 'Para os mais corajosos: escalada em altura com vista panorâmica do parque.',
-    imagem: 'https://placehold.co/600x400/9AD94B/ffffff?text=Escalada+Radical',
-    cor: '#9AD94B',
-  },
-  {
-    id: 5,
-    nome: 'Sala de Festas',
-    descricao: 'Espaço exclusivo e decorado para tornar seu aniversário inesquecível.',
-    imagem: 'https://placehold.co/600x400/FFD23F/333333?text=Sala+de+Festas',
+    nome: 'Salão de Festas',
+    descricao:
+      'Venha celebrar o aniversário do seu filho com a diversão do Divercity Park! Nosso salão oferece conforto, segurança e acesso a todas as atrações. Adultos não pagam entrada para acompanhar a festa!',
+    imagem: '/salao-de-festas.png',
     cor: '#FFD23F',
   },
   {
+    id: 5,
+    nome: 'Desafio Radical',
+    descricao:
+      'Prepare-se para enfrentar o Desafio Radical, nosso circuito de obstáculos emocionante! Com desafios que testam agilidade, força e coragem, os pequenos poderão escalar, pular, rastejar e se equilibrar.',
+    imagem: '/desafio-radical.png',
+    cor: '#9AD94B',
+  },
+  {
     id: 6,
-    nome: 'Pule Aqui!',
-    descricao: 'Camas elásticas e trampolins para pular, girar e se divertir sem parar.',
-    imagem: 'https://placehold.co/600x400/12C7C8/ffffff?text=Pule+Aqui',
+    nome: 'Pula-Pulas',
+    descricao:
+      'Nosso espaço de Pula-Pula é perfeito para crianças de todas as idades! Com várias áreas de pula-pula infláveis, as crianças podem gastar energia enquanto se divertem em segurança.',
+    imagem: '/pula-pulas.png',
     cor: '#12C7C8',
   },
   {
     id: 7,
-    nome: 'Bar e Petisqueria',
-    descricao: 'Lanches, sucos e refeições gostosas para repor as energias durante a diversão.',
-    imagem: 'https://placehold.co/600x400/8E4CCF/ffffff?text=Bar+e+Petisqueria',
+    nome: 'Bar e Petiscaria',
+    descricao:
+      'Enquanto as crianças brincam, os pais podem relaxar no nosso bar. Com ambiente aconchegante, oferecemos cafés, chás, sucos e coquetéis. O lugar perfeito para descontrair enquanto os pequenos se divertem.',
+    imagem: '/bar.png',
     cor: '#8E4CCF',
   },
 ]

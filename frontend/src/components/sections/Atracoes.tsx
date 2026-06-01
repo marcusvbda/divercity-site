@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { ATRACOES } from '@/lib/data'
 
@@ -54,13 +53,15 @@ export default function Atracoes() {
               whileHover={{ y: -8 }}
               className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
             >
-              <div className="relative h-52 w-full">
-                <Image
+              <div className="relative h-52 w-full bg-gray-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={atracao.imagem}
                   alt={atracao.nome}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(atracao.nome)}`
+                  }}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
               </div>
