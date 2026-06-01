@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_precos_linhas",
+  "info": {
+    "displayName": "Linha",
+    "icon": "list"
+  },
+  "options": {},
+  "attributes": {
+    "texto": {
+      "type": "text",
+      "required": true
+    }
+  }
+}

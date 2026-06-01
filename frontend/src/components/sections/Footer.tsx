@@ -1,10 +1,13 @@
 import Image from 'next/image'
 import { Camera, MessageCircle, MapPin, Clock } from 'lucide-react'
+import type { CMSConfiguracaoSite } from '@/lib/cms'
 
-const GOOGLE_MAPS_URL =
-  'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá'
+interface FooterProps {
+  config: CMSConfiguracaoSite
+  copyright?: string
+}
 
-export default function Footer() {
+export default function Footer({ config, copyright }: FooterProps) {
   return (
     <footer style={{ backgroundColor: '#212121' }} className="text-white">
       <div className="container-max px-4 py-16 md:px-8 lg:px-16">
@@ -40,18 +43,8 @@ export default function Footer() {
                 Funcionamento
               </h4>
               <div className="font-body space-y-1 text-sm">
-                <p>
-                  <span className="font-semibold text-white">
-                    Segunda a Sábado:
-                  </span>{' '}
-                  <span className="text-brand-cyan">das 10h às 22h</span>
-                </p>
-                <p>
-                  <span className="font-semibold text-white">
-                    Domingos e feriados:
-                  </span>{' '}
-                  <span className="text-brand-cyan">das 12h às 20h</span>
-                </p>
+                <p className="text-brand-cyan">{config.horario_semana}</p>
+                <p className="text-brand-cyan">{config.horario_feriado}</p>
               </div>
             </div>
 
@@ -62,12 +55,12 @@ export default function Footer() {
               </h4>
               <div className="font-body space-y-1 text-sm">
                 <a
-                  href={GOOGLE_MAPS_URL}
+                  href={config.google_maps_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand-cyan block underline underline-offset-2 transition-colors hover:text-white"
                 >
-                  Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720
+                  {config.endereco}
                 </a>
               </div>
             </div>
@@ -80,7 +73,7 @@ export default function Footer() {
             </h4>
             <div className="flex gap-3">
               <a
-                href="https://www.instagram.com/divercity.park"
+                href={config.instagram_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -89,7 +82,7 @@ export default function Footer() {
                 <Camera size={18} style={{ color: '#FF4F8A' }} />
               </a>
               <a
-                href="https://api.whatsapp.com/send/?phone=5514997569008&text&type=phone_number&app_absent=0"
+                href={`https://api.whatsapp.com/send/?phone=${config.whatsapp_number}&text&type=phone_number&app_absent=0`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
@@ -104,7 +97,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/15 pt-8 sm:flex-row">
           <p className="font-body text-sm text-white/50">
-            © 2024 Divercity Park. Todos os direitos reservados.
+            {copyright ?? '© 2024 Divercity Park. Todos os direitos reservados.'}
           </p>
           <p className="font-body text-xs text-white/40">
             Diversão para toda a família

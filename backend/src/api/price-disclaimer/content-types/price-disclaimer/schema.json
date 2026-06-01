@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "price_disclaimers",
+  "info": {
+    "singularName": "price-disclaimer",
+    "pluralName": "price-disclaimers",
+    "displayName": "Price Disclaimer",
+    "description": "Disclaimers sobre preços, acompanhantes e descontos"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "emoji": {
+      "type": "string",
+      "required": true
+    },
+    "titulo": {
+      "type": "string",
+      "required": true
+    },
+    "ordem": {
+      "type": "integer"
+    },
+    "linhas": {
+      "type": "component",
+      "repeatable": true,
+      "component": "precos.linha"
+    }
+  }
+}

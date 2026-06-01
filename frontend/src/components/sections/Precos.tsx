@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
-import { PRECOS, PRICE_DISCLAIMERS } from '@/lib/data'
+import type { CMSPreco, CMSPriceDisclaimer } from '@/lib/cms'
 
 const containerVariants = {
   hidden: {},
@@ -14,7 +14,15 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
 }
 
-export default function Precos() {
+interface Props {
+  precos: CMSPreco[]
+  disclaimers: CMSPriceDisclaimer[]
+  badge?: string
+  titulo?: string
+  subtitulo?: string
+}
+
+export default function Precos({ precos, disclaimers, badge, titulo, subtitulo }: Props) {
   return (
     <section id="precos" className="section-padding bg-gray-50">
       <div className="container-max">
@@ -27,13 +35,13 @@ export default function Precos() {
           className="text-center mb-14"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-yellow/20 text-yellow-700 font-body font-semibold text-sm mb-3">
-            Passaportes
+            {badge ?? 'Passaportes'}
           </span>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Preços
+            {titulo ?? 'Preços'}
           </h2>
           <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            Escolha o passaporte ideal para o seu dia de diversão.
+            {subtitulo ?? 'Escolha o passaporte ideal para o seu dia de diversão.'}
           </p>
         </motion.div>
 
@@ -45,7 +53,7 @@ export default function Precos() {
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-8"
         >
-          {PRECOS.map((group) => (
+          {precos.map((group) => (
             <motion.div
               key={group.titulo}
               variants={itemVariants}
@@ -120,7 +128,7 @@ export default function Precos() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {PRICE_DISCLAIMERS.map((d) => (
+          {disclaimers.map((d) => (
             <div
               key={d.titulo}
               className="bg-white rounded-2xl p-7 shadow-sm border border-gray-100"
@@ -132,7 +140,7 @@ export default function Precos() {
               <ul className="space-y-3">
                 {d.linhas.map((linha, i) => (
                   <li key={i} className="font-body text-gray-600 text-sm leading-relaxed">
-                    {linha}
+                    {linha.texto}
                   </li>
                 ))}
               </ul>

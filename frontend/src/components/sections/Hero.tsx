@@ -47,7 +47,14 @@ const FLOATING_ELEMENTS = [
   },
 ]
 
-export default function Hero() {
+interface Props {
+  titulo: string
+  subtitulo: string
+  ctaPrimario?: string
+  ctaSecundario?: string
+}
+
+export default function Hero({ titulo, subtitulo, ctaPrimario, ctaSecundario }: Props) {
   const scrollTo = (href: string) =>
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
 
@@ -118,7 +125,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
           className="font-heading mb-6 text-5xl leading-tight font-bold text-white md:text-7xl lg:text-8xl"
         >
-          Diversão para <span className="text-brand-cyan">toda a família</span>
+          {titulo}
         </motion.h1>
 
         {/* Supporting text */}
@@ -128,9 +135,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
           className="font-body mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/85 md:text-xl"
         >
-          Mais de 10 atrações incríveis, festas personalizadas inesquecíveis e
-          um ambiente seguro e acolhedor para toda a família criar memórias
-          juntos.
+          {subtitulo}
         </motion.p>
 
         {/* CTAs */}
@@ -146,7 +151,7 @@ export default function Hero() {
             onClick={() => scrollTo('#festas')}
             className="bg-brand-pink font-body rounded-full px-8 py-4 text-lg font-bold text-white shadow-lg shadow-pink-500/40 transition-colors hover:bg-pink-600"
           >
-            Reservar Festa
+            {ctaPrimario ?? 'Reservar Festa'}
           </motion.button>
 
           <motion.button
@@ -155,7 +160,7 @@ export default function Hero() {
             onClick={() => scrollTo('#atracoes')}
             className="font-body hover:text-brand-purple rounded-full border-2 border-white px-8 py-4 text-lg font-bold text-white transition-all hover:bg-white"
           >
-            Ver Atrações
+            {ctaSecundario ?? 'Ver Atrações'}
           </motion.button>
         </motion.div>
       </div>

@@ -3,48 +3,52 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
+import type { CMSConfiguracaoSite } from '@/lib/cms'
 
-// Substituir via CMS no futuro
-const WHATSAPP_NUMBER = '5514997569008'
-const GOOGLE_MAPS_URL =
-  'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá'
+interface ContatoProps {
+  config: CMSConfiguracaoSite
+  badge?: string
+  titulo?: string
+  subtitulo?: string
+  ctaLabel?: string
+}
 
-const BUSINESS_INFO = [
-  {
-    icon: MapPin,
-    label: 'Endereço',
-    value: 'Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720\nShopping Cidade Maringá',
-    href: GOOGLE_MAPS_URL,
-    color: '#FF4F8A',
-  },
-  {
-    icon: Clock,
-    label: 'Horário de Funcionamento',
-    value: 'Segunda a Sábado: das 10h às 22h\nDomingos e feriados: das 12h às 20h',
-    href: null,
-    color: '#8E4CCF',
-  },
-]
-
-const SOCIAL_LINKS = [
-  {
-    icon: Camera,
-    label: 'Instagram',
-    href: 'https://www.instagram.com/divercity.park',
-    color: '#FF4F8A',
-  },
-  {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    href: `https://api.whatsapp.com/send/?phone=${WHATSAPP_NUMBER}&text&type=phone_number&app_absent=0`,
-    color: '#9AD94B',
-  },
-]
-
-export default function Contato() {
+export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: ContatoProps) {
   const [nome, setNome] = useState('')
   const [mensagem, setMensagem] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; mensagem?: string }>({})
+
+  const businessInfo = [
+    {
+      icon: MapPin,
+      label: 'Endereço',
+      value: config.endereco,
+      href: config.google_maps_url,
+      color: '#FF4F8A',
+    },
+    {
+      icon: Clock,
+      label: 'Horário de Funcionamento',
+      value: `${config.horario_semana}\n${config.horario_feriado}`,
+      href: null,
+      color: '#8E4CCF',
+    },
+  ]
+
+  const socialLinks = [
+    {
+      icon: Camera,
+      label: 'Instagram',
+      href: config.instagram_url,
+      color: '#FF4F8A',
+    },
+    {
+      icon: MessageCircle,
+      label: 'WhatsApp',
+      href: `https://api.whatsapp.com/send/?phone=${config.whatsapp_number}&text&type=phone_number&app_absent=0`,
+      color: '#9AD94B',
+    },
+  ]
 
   const validate = () => {
     const e: { nome?: string; mensagem?: string } = {}
@@ -58,7 +62,7 @@ export default function Contato() {
     e.preventDefault()
     if (!validate()) return
     const texto = `Olá! Meu nome é ${nome.trim()}. ${mensagem.trim()}`
-    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(texto)}`
+    const url = `https://api.whatsapp.com/send?phone=${config.whatsapp_number}&text=${encodeURIComponent(texto)}`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
@@ -73,13 +77,13 @@ export default function Contato() {
           className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-cyan/10 text-brand-cyan font-body font-semibold text-sm mb-3">
-            Fale Conosco
+            {badge ?? 'Fale Conosco'}
           </span>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Nos manda uma mensagem!
+            {titulo ?? 'Nos manda uma mensagem!'}
           </h2>
           <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa perfeita.
+            {subtitulo ?? 'Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa perfeita.'}
           </p>
         </motion.div>
 
@@ -92,7 +96,7 @@ export default function Contato() {
             transition={{ duration: 0.7 }}
           >
             <div className="space-y-6 mb-8">
-              {BUSINESS_INFO.map((info) => {
+              {businessInfo.map((info) => {
                 const Icon = info.icon
                 return (
                   <div key={info.label} className="flex items-start gap-4">
@@ -112,13 +116,13 @@ export default function Contato() {
                           className="font-body text-sm mt-0.5 hover:underline"
                           style={{ color: info.color }}
                         >
-                          {info.value.split('\n').map((line, i) => (
+                          {info.value.split('\n').map((line: string, i: number) => (
                             <span key={i} className="block">{line}</span>
                           ))}
                         </a>
                       ) : (
                         <div className="font-body text-gray-500 text-sm mt-0.5">
-                          {info.value.split('\n').map((line, i) => (
+                          {info.value.split('\n').map((line: string, i: number) => (
                             <span key={i} className="block">{line}</span>
                           ))}
                         </div>
@@ -131,7 +135,7 @@ export default function Contato() {
 
             {/* Social */}
             <div className="flex gap-3 mb-8">
-              {SOCIAL_LINKS.map((s) => {
+              {socialLinks.map((s) => {
                 const Icon = s.icon
                 return (
                   <a
@@ -219,7 +223,7 @@ export default function Contato() {
                 className="w-full py-4 rounded-2xl bg-brand-pink text-white font-body font-bold text-base shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors flex items-center justify-center gap-2"
               >
                 <MessageCircle size={18} />
-                Enviar pelo WhatsApp
+                {ctaLabel ?? 'Enviar pelo WhatsApp'}
               </motion.button>
             </form>
           </motion.div>

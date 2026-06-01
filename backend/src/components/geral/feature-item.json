@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_geral_feature_items",
+  "info": {
+    "displayName": "Feature Item",
+    "icon": "check"
+  },
+  "options": {},
+  "attributes": {
+    "texto": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

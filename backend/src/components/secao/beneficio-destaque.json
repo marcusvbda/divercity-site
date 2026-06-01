@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_secao_beneficio_destaque",
+  "info": {
+    "displayName": "Beneficio Destaque",
+    "icon": "star"
+  },
+  "options": {},
+  "attributes": {
+    "iconeName": { "type": "string", "required": true },
+    "titulo": { "type": "string", "required": true },
+    "descricao": { "type": "text", "required": true },
+    "cor": { "type": "string", "required": true }
+  }
+}

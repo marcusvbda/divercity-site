@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { ATRACOES } from '@/lib/data'
 import ImageModal from '@/components/ui/ImageModal'
-import type { Atracao } from '@/types'
+import type { CMSAtracao } from '@/lib/cms'
 
 const containerVariants = {
   hidden: {},
@@ -17,8 +16,15 @@ const itemVariants = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: 'easeOut' as const } },
 }
 
-export default function Atracoes() {
-  const [selected, setSelected] = useState<Atracao | null>(null)
+interface Props {
+  atracoes: CMSAtracao[]
+  badge?: string
+  titulo?: string
+  subtitulo?: string
+}
+
+export default function Atracoes({ atracoes, badge, titulo, subtitulo }: Props) {
+  const [selected, setSelected] = useState<CMSAtracao | null>(null)
 
   return (
     <>
@@ -33,14 +39,13 @@ export default function Atracoes() {
           className="text-center mb-12"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-cyan/10 text-brand-cyan font-body font-semibold text-sm mb-3">
-            Explore o Parque
+            {badge ?? 'Explore o Parque'}
           </span>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Nossas Atrações
+            {titulo ?? 'Nossas Atrações'}
           </h2>
           <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            Mais de 10 atrações para crianças de todas as idades. Aventura, diversão e segurança
-            em um só lugar.
+            {subtitulo ?? 'Mais de 10 atrações para crianças de todas as idades. Aventura, diversão e segurança em um só lugar.'}
           </p>
         </motion.div>
 
@@ -52,7 +57,7 @@ export default function Atracoes() {
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
         >
-          {ATRACOES.map((atracao) => (
+          {atracoes.map((atracao) => (
             <motion.div
               key={atracao.id}
               variants={itemVariants}
@@ -63,7 +68,7 @@ export default function Atracoes() {
               <div className="relative h-52 w-full bg-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={atracao.imagem}
+                  src={atracao.imagem?.url ?? `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(atracao.nome)}`}
                   alt={atracao.nome}
                   onError={(e) => {
                     e.currentTarget.src = `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(atracao.nome)}`
@@ -108,7 +113,7 @@ export default function Atracoes() {
 
     {selected !== null && (
       <ImageModal
-        src={selected.imagem}
+        src={selected.imagem?.url ?? `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(selected.nome)}`}
         alt={selected.nome}
         titulo={selected.nome}
         descricao={selected.descricao}

@@ -2,29 +2,36 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import { CheckCircle2 } from 'lucide-react'
 import ImageModal from '@/components/ui/ImageModal'
+import type { CMSFeatureItem } from '@/lib/cms'
 
-const PARTY_FEATURES = [
-  'Acesso a todas as atrações: Arena de Camas Elásticas, Guerreiro Ninja, Parede de Escalar, Pula-Pula e muito mais!',
-  'Estrutura completa com mesas, cadeiras e cilindros para decoração.',
-  'Espaço exclusivo para até 50 participantes com pulseiras de identificação e monitores.',
-  'Cozinha de apoio com geladeira expositora e réchaud para alimentos quentes.',
-  'Utilização do salão por até 5 horas (até 21h30 em dias normais; 19h30 em domingos e feriados).',
-  'Pode trazer suas próprias bebidas (já geladas) ou optar pelas do parque.',
-  'Decoração, garçons e buffet por conta do cliente — indicamos fornecedores parceiros.',
-  'Pagamento facilitado no Pix ou Cartão.',
+interface FestasImagem {
+  id: number
+  url: string
+  alternativeText?: string | null
+}
+
+interface Props {
+  features: CMSFeatureItem[]
+  imagens: FestasImagem[]
+  badge?: string
+  titulo?: string
+  tituloDestaque?: string
+  descricao?: string
+  ctaOrcamento?: string
+  ctaPrecos?: string
+}
+
+const FALLBACK_IMAGES: FestasImagem[] = [
+  { id: 0, url: '/salao-de-festas.png' },
+  { id: 1, url: '/dbz.png' },
+  { id: 2, url: '/f1.png' },
+  { id: 3, url: '/futebol.png' },
 ]
 
-const PARTY_IMAGES = [
-  '/salao-de-festas.png',
-  '/dbz.png',
-  '/f1.png',
-  '/futebol.png',
-]
-
-export default function Festas() {
+export default function Festas({ features, imagens, badge, titulo, tituloDestaque, descricao, ctaOrcamento, ctaPrecos }: Props) {
+  const partyImages = imagens.length > 0 ? imagens : FALLBACK_IMAGES
   const [selectedImg, setSelectedImg] = useState<string | null>(null)
 
   return (
@@ -54,25 +61,25 @@ export default function Festas() {
               transition={{ duration: 0.7, ease: 'easeOut' }}
             >
               <span className="bg-brand-pink/10 text-brand-pink font-body mb-4 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
-                🎂 Celebrações Especiais
+                {badge ?? '🎂 Celebrações Especiais'}
               </span>
               <h2 className="font-heading mb-5 text-4xl leading-tight font-bold text-gray-800 md:text-5xl">
-                Festas e Aniversários{' '}
-                <span className="text-brand-pink">Inesquecíveis!</span>
+                {titulo ?? 'Festas e Aniversários'}{' '}
+                <span className="text-brand-pink">{tituloDestaque ?? 'Inesquecíveis!'}</span>
               </h2>
               <p className="font-body mb-2 text-lg leading-relaxed text-gray-600">
-                Nossos pacotes completos incluem:
+                {descricao ?? 'Nossos pacotes completos incluem:'}
               </p>
 
               <ul className="mb-8 space-y-3">
-                {PARTY_FEATURES.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3">
+                {features.map((f) => (
+                  <li key={f.id} className="flex items-center gap-3">
                     <CheckCircle2
                       size={20}
                       className="text-brand-lime flex-shrink-0"
                     />
                     <span className="font-body text-sm text-gray-700">
-                      {feature}
+                      {f.texto}
                     </span>
                   </li>
                 ))}
@@ -95,7 +102,19 @@ export default function Festas() {
                   }
                   className="bg-brand-pink font-body rounded-full px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600"
                 >
-                  Faça já o seu orçamento
+                  {ctaOrcamento ?? 'Faça já o seu orçamento'}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() =>
+                    document
+                      .querySelector('#precos')
+                      ?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className="font-body rounded-full border-2 border-gray-300 px-8 py-4 text-base font-bold text-gray-700 transition-all hover:border-brand-pink hover:text-brand-pink"
+                >
+                  {ctaPrecos ?? 'Ver Preços'}
                 </motion.button>
               </div>
             </motion.div>
@@ -109,33 +128,35 @@ export default function Festas() {
               className="grid grid-cols-2 gap-3"
             >
               {/* First image spans full width */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                onClick={() => setSelectedImg(PARTY_IMAGES[0])}
-                className="relative col-span-2 h-52 cursor-pointer overflow-hidden rounded-2xl shadow-md"
-              >
-                <Image
-                  src={PARTY_IMAGES[0]}
-                  alt="Decoração de festa"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              </motion.div>
-              {/* Remaining 3 images side by side */}
-              {PARTY_IMAGES.slice(1).map((src, i) => (
+              {partyImages[0] && (
                 <motion.div
-                  key={i}
-                  whileHover={{ scale: 1.03 }}
-                  onClick={() => setSelectedImg(src)}
-                  className="relative h-36 cursor-pointer overflow-hidden rounded-2xl shadow-md"
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => setSelectedImg(partyImages[0].url)}
+                  className="col-span-2 h-52 cursor-pointer overflow-hidden rounded-2xl shadow-md bg-gray-200"
                 >
-                  <Image
-                    src={src}
-                    alt={`Festa ${i + 2}`}
-                    fill
-                    sizes="(max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={partyImages[0].url}
+                    alt={partyImages[0].alternativeText ?? 'Decoração de festa'}
+                    onError={(e) => { e.currentTarget.src = '/salao-de-festas.png' }}
+                    className="w-full h-full object-cover"
+                  />
+                </motion.div>
+              )}
+              {/* Remaining images side by side */}
+              {partyImages.slice(1).map((img, i) => (
+                <motion.div
+                  key={img.id}
+                  whileHover={{ scale: 1.03 }}
+                  onClick={() => setSelectedImg(img.url)}
+                  className="h-36 cursor-pointer overflow-hidden rounded-2xl shadow-md bg-gray-200"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img.url}
+                    alt={img.alternativeText ?? `Festa ${i + 2}`}
+                    onError={(e) => { e.currentTarget.src = ['/dbz.png', '/f1.png', '/futebol.png'][i] ?? '/salao-de-festas.png' }}
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
               ))}
