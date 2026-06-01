@@ -14,10 +14,10 @@ const PARTY_FEATURES = [
 ]
 
 const PARTY_IMAGES = [
-  'https://placehold.co/600x350/FF4F8A/ffffff?text=Decoração+Festa',
-  'https://placehold.co/400x300/FFD23F/333333?text=Bolo+Aniversário',
-  'https://placehold.co/400x300/9AD94B/ffffff?text=Crianças+Brincando',
-  'https://placehold.co/400x300/8E4CCF/ffffff?text=Celebração',
+  '/salao-de-festas.png',
+  '/dbz.png',
+  '/f1.png',
+  '/futebol.png',
 ]
 
 export default function Festas() {
@@ -29,16 +29,16 @@ export default function Festas() {
     >
       {/* Decorative blobs */}
       <div
-        className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none"
+        className="pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full opacity-20 blur-3xl"
         style={{ backgroundColor: '#FFD23F' }}
       />
       <div
-        className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+        className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 rounded-full opacity-20 blur-3xl"
         style={{ backgroundColor: '#9AD94B' }}
       />
 
       <div className="container-max relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left: Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -46,35 +46,43 @@ export default function Festas() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-pink/10 text-brand-pink font-body font-semibold text-sm mb-4">
+            <span className="bg-brand-pink/10 text-brand-pink font-body mb-4 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
               🎂 Celebrações Especiais
             </span>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-5 leading-tight">
+            <h2 className="font-heading mb-5 text-4xl leading-tight font-bold text-gray-800 md:text-5xl">
               Festas e Aniversários{' '}
               <span className="text-brand-pink">Inesquecíveis!</span>
             </h2>
-            <p className="font-body text-gray-600 text-lg leading-relaxed mb-7">
-              Transformamos o aniversário do seu filho em um momento mágico. Cuidamos de cada
-              detalhe para que você e sua família só precisem curtir a festa.
+            <p className="font-body mb-7 text-lg leading-relaxed text-gray-600">
+              Transformamos o aniversário do seu filho em um momento mágico.
+              Cuidamos de cada detalhe para que você e sua família só precisem
+              curtir a festa.
             </p>
 
-            <ul className="space-y-3 mb-8">
+            <ul className="mb-8 space-y-3">
               {PARTY_FEATURES.map((feature) => (
                 <li key={feature} className="flex items-center gap-3">
-                  <CheckCircle2 size={20} className="text-brand-lime flex-shrink-0" />
-                  <span className="font-body text-gray-700 text-sm">{feature}</span>
+                  <CheckCircle2
+                    size={20}
+                    className="text-brand-lime flex-shrink-0"
+                  />
+                  <span className="font-body text-sm text-gray-700">
+                    {feature}
+                  </span>
                 </li>
               ))}
             </ul>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() =>
-                  document.querySelector('#contato')?.scrollIntoView({ behavior: 'smooth' })
+                  document
+                    .querySelector('#contato')
+                    ?.scrollIntoView({ behavior: 'smooth' })
                 }
-                className="px-8 py-4 rounded-full bg-brand-pink text-white font-body font-bold text-base shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors"
+                className="bg-brand-pink font-body rounded-full px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600"
               >
                 Solicitar Orçamento
               </motion.button>
@@ -82,9 +90,11 @@ export default function Festas() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() =>
-                  document.querySelector('#precos')?.scrollIntoView({ behavior: 'smooth' })
+                  document
+                    .querySelector('#precos')
+                    ?.scrollIntoView({ behavior: 'smooth' })
                 }
-                className="px-8 py-4 rounded-full border-2 border-gray-800 text-gray-800 font-body font-bold text-base hover:bg-gray-800 hover:text-white transition-all"
+                className="font-body rounded-full border-2 border-gray-800 px-8 py-4 text-base font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
               >
                 Ver Preços
               </motion.button>
@@ -102,7 +112,7 @@ export default function Festas() {
             {/* First image spans full width */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="relative col-span-2 h-52 rounded-2xl overflow-hidden shadow-md"
+              className="relative col-span-2 h-52 overflow-hidden rounded-2xl shadow-md"
             >
               <Image
                 src={PARTY_IMAGES[0]}
@@ -117,7 +127,7 @@ export default function Festas() {
               <motion.div
                 key={i}
                 whileHover={{ scale: 1.03 }}
-                className="relative h-36 rounded-2xl overflow-hidden shadow-md"
+                className="relative h-36 overflow-hidden rounded-2xl shadow-md"
               >
                 <Image
                   src={src}
