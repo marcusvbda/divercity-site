@@ -2,27 +2,10 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import {
-  MapPin,
-  Phone,
-  Clock,
-  Camera,
-  Globe,
-  MessageCircle,
-  Send,
-} from 'lucide-react'
+import { MapPin, Phone, Clock, Camera, Globe, MessageCircle } from 'lucide-react'
 
-const contatoSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Por favor, insira um e-mail válido'),
-  telefone: z.string().optional(),
-  mensagem: z.string().min(10, 'Mensagem deve ter pelo menos 10 caracteres'),
-})
-
-type ContatoFormData = z.infer<typeof contatoSchema>
+// Substituir via CMS no futuro
+const WHATSAPP_NUMBER = '5514997569008'
 
 const BUSINESS_INFO = [
   {
@@ -53,25 +36,28 @@ const SOCIAL_LINKS = [
     color: '#FF4F8A',
   },
   { icon: Globe, label: 'Facebook', href: '#', color: '#8E4CCF' },
-  { icon: MessageCircle, label: 'WhatsApp', href: '#', color: '#9AD94B' },
+  { icon: MessageCircle, label: 'WhatsApp', href: `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}`, color: '#9AD94B' },
 ]
 
 export default function Contato() {
-  const [submitted, setSubmitted] = useState(false)
+  const [nome, setNome] = useState('')
+  const [mensagem, setMensagem] = useState('')
+  const [errors, setErrors] = useState<{ nome?: string; mensagem?: string }>({})
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<ContatoFormData>({ resolver: zodResolver(contatoSchema) })
+  const validate = () => {
+    const e: { nome?: string; mensagem?: string } = {}
+    if (nome.trim().length < 2) e.nome = 'Nome deve ter pelo menos 2 caracteres'
+    if (mensagem.trim().length < 10) e.mensagem = 'Mensagem deve ter pelo menos 10 caracteres'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
 
-  const onSubmit = async (data: ContatoFormData) => {
-    await new Promise((r) => setTimeout(r, 800))
-    console.log('Form submitted:', data)
-    setSubmitted(true)
-    reset()
-    setTimeout(() => setSubmitted(false), 5000)
+  const handleSubmit = (e: React.SyntheticEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    const texto = `Olá! Meu nome é ${nome.trim()}. ${mensagem.trim()}`
+    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(texto)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -115,9 +101,7 @@ export default function Contato() {
                       <Icon size={22} style={{ color: info.color }} />
                     </div>
                     <div>
-                      <p className="font-body font-semibold text-gray-800 text-sm">
-                        {info.label}
-                      </p>
+                      <p className="font-body font-semibold text-gray-800 text-sm">{info.label}</p>
                       <p className="font-body text-gray-500 text-sm mt-0.5">{info.value}</p>
                     </div>
                   </div>
@@ -163,134 +147,57 @@ export default function Contato() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-            {submitted ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="h-full flex flex-col items-center justify-center text-center py-16"
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+              {/* Nome */}
+              <div>
+                <label htmlFor="nome" className="block font-body font-medium text-gray-700 text-sm mb-1.5">
+                  Nome *
+                </label>
+                <input
+                  id="nome"
+                  type="text"
+                  placeholder="Seu nome completo"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
+                    errors.nome ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+                  }`}
+                />
+                {errors.nome && (
+                  <p className="font-body text-red-500 text-xs mt-1">{errors.nome}</p>
+                )}
+              </div>
+
+              {/* Mensagem */}
+              <div>
+                <label htmlFor="mensagem" className="block font-body font-medium text-gray-700 text-sm mb-1.5">
+                  Mensagem *
+                </label>
+                <textarea
+                  id="mensagem"
+                  rows={5}
+                  placeholder="Olá! Gostaria de saber mais sobre as festas..."
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors resize-none focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
+                    errors.mensagem ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+                  }`}
+                />
+                {errors.mensagem && (
+                  <p className="font-body text-red-500 text-xs mt-1">{errors.mensagem}</p>
+                )}
+              </div>
+
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-4 rounded-2xl bg-brand-pink text-white font-body font-bold text-base shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors flex items-center justify-center gap-2"
               >
-                <div className="w-16 h-16 rounded-full bg-brand-lime/20 flex items-center justify-center mb-4">
-                  <Send size={28} className="text-brand-lime" />
-                </div>
-                <h3 className="font-heading text-2xl font-bold text-gray-800 mb-2">
-                  Mensagem enviada!
-                </h3>
-                <p className="font-body text-gray-500">
-                  Em breve entraremos em contato. Obrigado!
-                </p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-                {/* Nome */}
-                <div>
-                  <label
-                    htmlFor="nome"
-                    className="block font-body font-medium text-gray-700 text-sm mb-1.5"
-                  >
-                    Nome *
-                  </label>
-                  <input
-                    id="nome"
-                    type="text"
-                    placeholder="Seu nome completo"
-                    {...register('nome')}
-                    className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
-                      errors.nome ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
-                    }`}
-                  />
-                  {errors.nome && (
-                    <p className="font-body text-red-500 text-xs mt-1">{errors.nome.message}</p>
-                  )}
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block font-body font-medium text-gray-700 text-sm mb-1.5"
-                  >
-                    E-mail *
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    {...register('email')}
-                    className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
-                      errors.email ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
-                    }`}
-                  />
-                  {errors.email && (
-                    <p className="font-body text-red-500 text-xs mt-1">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Telefone */}
-                <div>
-                  <label
-                    htmlFor="telefone"
-                    className="block font-body font-medium text-gray-700 text-sm mb-1.5"
-                  >
-                    Telefone
-                  </label>
-                  <input
-                    id="telefone"
-                    type="tel"
-                    placeholder="(00) 00000-0000"
-                    {...register('telefone')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20"
-                  />
-                </div>
-
-                {/* Mensagem */}
-                <div>
-                  <label
-                    htmlFor="mensagem"
-                    className="block font-body font-medium text-gray-700 text-sm mb-1.5"
-                  >
-                    Mensagem *
-                  </label>
-                  <textarea
-                    id="mensagem"
-                    rows={4}
-                    placeholder="Olá! Gostaria de saber mais sobre as festas..."
-                    {...register('mensagem')}
-                    className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors resize-none focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
-                      errors.mensagem
-                        ? 'border-red-400 bg-red-50'
-                        : 'border-gray-200 bg-gray-50'
-                    }`}
-                  />
-                  {errors.mensagem && (
-                    <p className="font-body text-red-500 text-xs mt-1">
-                      {errors.mensagem.message}
-                    </p>
-                  )}
-                </div>
-
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 rounded-2xl bg-brand-pink text-white font-body font-bold text-base shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      <Send size={18} />
-                      Enviar Mensagem
-                    </>
-                  )}
-                </motion.button>
-              </form>
-            )}
+                <MessageCircle size={18} />
+                Enviar pelo WhatsApp
+              </motion.button>
+            </form>
           </motion.div>
         </div>
       </div>
