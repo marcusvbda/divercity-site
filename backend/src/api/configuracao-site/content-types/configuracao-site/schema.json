@@ -1,0 +1,45 @@
+{
+  "kind": "singleType",
+  "collectionName": "configuracao_sites",
+  "info": {
+    "singularName": "configuracao-site",
+    "pluralName": "configuracao-sites",
+    "displayName": "Configuracao do Site",
+    "description": "Configurações globais do site"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "whatsapp_number": {
+      "type": "string",
+      "required": true,
+      "default": "5514997569008"
+    },
+    "instagram_url": {
+      "type": "string",
+      "default": "https://www.instagram.com/divercity.park"
+    },
+    "instagram_access_token": {
+      "type": "string"
+    },
+    "google_places_api_key": {
+      "type": "string"
+    },
+    "google_place_id": {
+      "type": "string"
+    },
+    "endereco": {
+      "type": "string",
+      "default": "Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720"
+    },
+    "horario_semana": {
+      "type": "string",
+      "default": "das 10h às 22h"
+    },
+    "horario_feriado": {
+      "type": "string",
+      "default": "das 12h às 20h"
+    }
+  }
+}

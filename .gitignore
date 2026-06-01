@@ -1,3 +1,9 @@
 
 #claude docs
 /docs
+
+# Secrets — não versionar
+.mcp.json
+backend/.env
+frontend/.env.local
+.mcp.json

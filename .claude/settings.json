@@ -36,7 +36,24 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=$(jq -r '.tool_input.command // \"\"' 2>/dev/null); if echo \"$cmd\" | grep -qE '^git (commit|push|reset|rebase)'; then echo '{\"decision\":\"block\",\"reason\":\"🚫 Regra do projeto: nunca commito sem você pedir explicitamente. Peça para eu fazer o commit quando quiser.\"}'; fi",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"' 2>/dev/null); if echo \"$cmd\" | grep -qE '^git (commit|push|reset|rebase)'; then echo '{\"decision\":\"block\",\"reason\":\"🚫 Regra do projeto: nunca commito sem você pedir explicitamente.\"}'; fi",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"' 2>/dev/null); if echo \"$cmd\" | grep -qE '^git add'; then sensitive=$(echo \"$cmd\" | grep -oE '\\.env[^ ]*|\\.mcp\\.json|.*\\.pem|.*\\.key|.*id_rsa' | head -1); if [ -n \"$sensitive\" ]; then echo \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"🔐 SEGURANÇA: tentativa de versionar arquivo sensível: $sensitive. Esse arquivo contém credenciais e está no .gitignore.\\\"}\"; fi; fi",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "fp=$(jq -r '.tool_input.file_path // \"\"' 2>/dev/null); content=$(jq -r '.tool_input.new_string // .tool_input.content // \"\"' 2>/dev/null); if echo \"$content\" | grep -qE '[A-Za-z0-9_]{40,}|sk-[A-Za-z0-9]{20,}|eyJ[A-Za-z0-9]'; then if ! echo \"$fp\" | grep -qE '\\.env|\\.example|\\.md$|CLAUDE\\.md'; then echo \"{\\\"systemMessage\\\":\\\"⚠️ AVISO DE SEGURANÇA: o arquivo $fp pode conter um token ou credencial hardcoded. Verifique se isso deve estar em .env/.env.local em vez do código.\\\"}\" ; fi; fi",
             "timeout": 5
           }
         ]

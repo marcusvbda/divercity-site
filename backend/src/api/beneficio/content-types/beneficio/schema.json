@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "beneficios",
+  "info": {
+    "singularName": "beneficio",
+    "pluralName": "beneficios",
+    "displayName": "Beneficio",
+    "description": "Cards de benefícios (Por que escolher)"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string",
+      "required": true
+    },
+    "descricao": {
+      "type": "text",
+      "required": true
+    },
+    "iconeName": {
+      "type": "string",
+      "required": true
+    },
+    "gradiente": {
+      "type": "string",
+      "required": true
+    },
+    "ordem": {
+      "type": "integer"
+    }
+  }
+}

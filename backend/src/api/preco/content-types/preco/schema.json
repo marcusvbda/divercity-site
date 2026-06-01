@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "precos",
+  "info": {
+    "singularName": "preco",
+    "pluralName": "precos",
+    "displayName": "Preco",
+    "description": "Grupos de preços/passaportes"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string",
+      "required": true
+    },
+    "subtitulo": {
+      "type": "string"
+    },
+    "cor": {
+      "type": "string",
+      "required": true
+    },
+    "ordem": {
+      "type": "integer"
+    },
+    "tiers": {
+      "type": "component",
+      "repeatable": true,
+      "component": "precos.tier"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_precos_tiers",
+  "info": {
+    "displayName": "Tier",
+    "icon": "money-bill"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "valor": {
+      "type": "integer",
+      "required": true
+    },
+    "acompanhante": {
+      "type": "integer",
+      "required": true
+    }
+  }
+}

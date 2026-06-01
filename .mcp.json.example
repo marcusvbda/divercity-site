@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "strapi": {
+      "command": "strapi-mcp",
+      "args": [],
+      "env": {
+        "STRAPI_URL": "http://localhost:1337",
+        "STRAPI_API_TOKEN": "cole_aqui_o_token_gerado_em_strapi_admin_settings_api_tokens"
+      }
+    }
+  }
+}
