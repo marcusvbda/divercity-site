@@ -1,32 +1,29 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { PartyPopper, Layers, Users } from 'lucide-react'
+import { UserCheck, Timer, PartyPopper } from 'lucide-react'
 
 const BENEFITS = [
   {
-    icon: PartyPopper,
-    titulo: 'Festas Incríveis',
-    descricao:
-      'Festas de aniversário personalizadas com toda a decoração e estrutura para um dia inesquecível.',
+    icon: UserCheck,
+    titulo: 'Individual ou acompanhado',
+    descricao: 'Seu filho sempre terá a instrução de profissionais treinados.',
     cor: '#FF4F8A',
     bg: 'bg-pink-50',
     border: 'border-pink-100',
   },
   {
-    icon: Layers,
-    titulo: 'Mais de 10 Atrações',
-    descricao:
-      'Diversão garantida para crianças de todas as idades com atrações variadas e seguras.',
+    icon: Timer,
+    titulo: 'Diversão sob medida',
+    descricao: 'Agora você escolhe: 30 min, 1, 2 ou 3 horas de muita alegria.',
     cor: '#12C7C8',
     bg: 'bg-cyan-50',
     border: 'border-cyan-100',
   },
   {
-    icon: Users,
-    titulo: 'Área para Pais',
-    descricao:
-      'Espaço confortável e acolhedor para os pais relaxarem enquanto as crianças se divertem.',
+    icon: PartyPopper,
+    titulo: 'Festas em nosso salão',
+    descricao: 'Traga sua festa para nosso salão e seus convidados terão um momento inesquecível.',
     cor: '#8E4CCF',
     bg: 'bg-purple-50',
     border: 'border-purple-100',
