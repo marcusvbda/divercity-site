@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(npx shadcn *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(cp *)",
+      "Bash(mkdir *)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git rev-parse *)",
+      "Bash(git branch *)",
+      "Bash(git show *)",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Bash(git checkout *)",
+      "Bash(git rebase *)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // \"\"' 2>/dev/null); if echo \"$cmd\" | grep -qE '^git (commit|push|reset|rebase)'; then echo '{\"decision\":\"block\",\"reason\":\"🚫 Regra do projeto: nunca commito sem você pedir explicitamente. Peça para eu fazer o commit quando quiser.\"}'; fi",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
