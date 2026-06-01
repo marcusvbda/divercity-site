@@ -33,7 +33,7 @@ export async function fetchCMS<T>(
       Authorization: `Bearer ${STRAPI_TOKEN}`,
       ...(options?.headers ?? {}),
     },
-    // next: options?.next ?? { revalidate: 3600 },
+    next: options?.next ?? { revalidate: 3600 },
   })
 
   if (!res.ok) {
