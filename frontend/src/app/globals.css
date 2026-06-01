@@ -9,7 +9,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  /* Brand colors */
+  --color-brand-cyan: #12C7C8;
+  --color-brand-purple: #8E4CCF;
+  --color-brand-pink: #FF4F8A;
+  --color-brand-lime: #9AD94B;
+  --color-brand-yellow: #FFD23F;
+  /* Brand fonts - these CSS vars will be set by next/font in layout.tsx */
+  --font-heading: var(--font-fredoka);
+  --font-body: var(--font-poppins);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -120,11 +128,28 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+    @apply font-sans;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-poppins), sans-serif;
+    overflow-x: hidden;
   }
-  html {
-    @apply font-sans;
+  h1, h2, h3, h4 {
+    font-family: var(--font-fredoka), sans-serif;
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  .section-padding {
+    @apply py-16 px-4 md:py-24 md:px-8 lg:px-16;
+  }
+  .container-max {
+    @apply max-w-7xl mx-auto;
   }
 }
