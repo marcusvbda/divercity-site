@@ -1,4 +1,10 @@
-import type { Atracao, BeneficioCard, PriceGroup, Depoimento, NavItem } from '@/types'
+import type {
+  Atracao,
+  BeneficioCard,
+  PriceGroup,
+  Depoimento,
+  NavItem,
+} from '@/types'
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Início', href: '#inicio' },
@@ -30,7 +36,7 @@ export const ATRACOES: Atracao[] = [
     nome: 'Parede de Escalada',
     descricao:
       'Nossa parede de escalar é ideal para pequenos alpinistas. Com vários percursos e níveis de dificuldade, as crianças podem desenvolver suas habilidades em um ambiente seguro, sempre supervisionado por nossos monitores.',
-    imagem: '/parede-escalada.png',
+    imagem: '/guerreiro-ninja.png',
     cor: '#FF4F8A',
   },
   {
@@ -91,7 +97,8 @@ export const BENEFICIOS_CARDS: BeneficioCard[] = [
   },
   {
     titulo: 'Localização Conveniente',
-    descricao: 'Fácil acesso, estacionamento gratuito e localização central para toda a família.',
+    descricao:
+      'Fácil acesso, estacionamento gratuito e localização central para toda a família.',
     iconeName: 'MapPin',
     gradiente: 'from-brand-yellow to-brand-lime',
   },

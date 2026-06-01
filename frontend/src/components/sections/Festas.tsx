@@ -1,16 +1,20 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { CheckCircle2 } from 'lucide-react'
+import ImageModal from '@/components/ui/ImageModal'
 
 const PARTY_FEATURES = [
-  'Decoração temática personalizada',
-  'Buffet completo para crianças e adultos',
-  'Animadores e recreadores especializados',
-  'Acesso exclusivo às atrações do parque',
-  'Sala de festas climatizada e moderna',
-  'Cardápio especial de aniversário',
+  'Acesso a todas as atrações: Arena de Camas Elásticas, Guerreiro Ninja, Parede de Escalar, Pula-Pula e muito mais!',
+  'Estrutura completa com mesas, cadeiras e cilindros para decoração.',
+  'Espaço exclusivo para até 50 participantes com pulseiras de identificação e monitores.',
+  'Cozinha de apoio com geladeira expositora e réchaud para alimentos quentes.',
+  'Utilização do salão por até 5 horas (até 21h30 em dias normais; 19h30 em domingos e feriados).',
+  'Pode trazer suas próprias bebidas (já geladas) ou optar pelas do parque.',
+  'Decoração, garçons e buffet por conta do cliente — indicamos fornecedores parceiros.',
+  'Pagamento facilitado no Pix ou Cartão.',
 ]
 
 const PARTY_IMAGES = [
@@ -21,7 +25,10 @@ const PARTY_IMAGES = [
 ]
 
 export default function Festas() {
+  const [selectedImg, setSelectedImg] = useState<string | null>(null)
+
   return (
+    <>
     <section
       id="festas"
       className="section-padding relative overflow-hidden"
@@ -53,10 +60,8 @@ export default function Festas() {
               Festas e Aniversários{' '}
               <span className="text-brand-pink">Inesquecíveis!</span>
             </h2>
-            <p className="font-body mb-7 text-lg leading-relaxed text-gray-600">
-              Transformamos o aniversário do seu filho em um momento mágico.
-              Cuidamos de cada detalhe para que você e sua família só precisem
-              curtir a festa.
+            <p className="font-body mb-2 text-lg leading-relaxed text-gray-600">
+              Nossos pacotes completos incluem:
             </p>
 
             <ul className="mb-8 space-y-3">
@@ -73,6 +78,10 @@ export default function Festas() {
               ))}
             </ul>
 
+            <p className="font-body mb-6 text-sm leading-relaxed text-gray-500 italic">
+              💳 Pagamento facilitado no Pix ou Cartão. Viva momentos inesquecíveis com nossas atrações, salão exclusivo e espaço acolhedor para os pais!
+            </p>
+
             <div className="flex flex-col gap-4 sm:flex-row">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -84,7 +93,7 @@ export default function Festas() {
                 }
                 className="bg-brand-pink font-body rounded-full px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600"
               >
-                Solicitar Orçamento
+                Faça já o seu orçamento
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -112,7 +121,8 @@ export default function Festas() {
             {/* First image spans full width */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="relative col-span-2 h-52 overflow-hidden rounded-2xl shadow-md"
+              onClick={() => setSelectedImg(PARTY_IMAGES[0])}
+              className="relative col-span-2 h-52 overflow-hidden rounded-2xl shadow-md cursor-pointer"
             >
               <Image
                 src={PARTY_IMAGES[0]}
@@ -127,7 +137,8 @@ export default function Festas() {
               <motion.div
                 key={i}
                 whileHover={{ scale: 1.03 }}
-                className="relative h-36 overflow-hidden rounded-2xl shadow-md"
+                onClick={() => setSelectedImg(src)}
+                className="relative h-36 overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <Image
                   src={src}
@@ -142,5 +153,14 @@ export default function Festas() {
         </div>
       </div>
     </section>
+
+    {selectedImg !== null && (
+      <ImageModal
+        src={selectedImg}
+        alt="Foto da festa"
+        onClose={() => setSelectedImg(null)}
+      />
+    )}
+    </>
   )
 }

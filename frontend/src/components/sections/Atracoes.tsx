@@ -1,8 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { ATRACOES } from '@/lib/data'
+import ImageModal from '@/components/ui/ImageModal'
+import type { Atracao } from '@/types'
 
 const containerVariants = {
   hidden: {},
@@ -15,7 +18,10 @@ const itemVariants = {
 }
 
 export default function Atracoes() {
+  const [selected, setSelected] = useState<Atracao | null>(null)
+
   return (
+    <>
     <section id="atracoes" className="section-padding bg-gray-50">
       <div className="container-max">
         {/* Header */}
@@ -51,6 +57,7 @@ export default function Atracoes() {
               key={atracao.id}
               variants={itemVariants}
               whileHover={{ y: -8 }}
+              onClick={() => setSelected(atracao)}
               className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
             >
               <div className="relative h-52 w-full bg-gray-200">
@@ -98,5 +105,16 @@ export default function Atracoes() {
         </motion.div>
       </div>
     </section>
+
+    {selected !== null && (
+      <ImageModal
+        src={selected.imagem}
+        alt={selected.nome}
+        titulo={selected.nome}
+        descricao={selected.descricao}
+        onClose={() => setSelected(null)}
+      />
+    )}
+    </>
   )
 }
