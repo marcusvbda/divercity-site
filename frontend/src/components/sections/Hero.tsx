@@ -119,13 +119,11 @@ export default function Hero({
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="mb-8 flex justify-center"
         >
-          <Image
-            src="/logo-ball.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image}
             alt="Divercity Park"
-            width={200}
-            height={200}
             className="h-48 w-48 drop-shadow-2xl md:h-48 md:w-48"
-            priority
           />
         </motion.div>
 
