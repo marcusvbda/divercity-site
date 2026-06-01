@@ -40,7 +40,7 @@ export default function Galeria() {
             @divercitypark
           </a>
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            Siga nosso Camera
+            Siga nosso Instagram
           </h2>
           <p className="font-body text-gray-500 text-lg">
             Fique por dentro de tudo que acontece no Divercity Park!
@@ -64,7 +64,7 @@ export default function Galeria() {
                   >
                     <Image
                       src={src}
-                      alt={`Post Camera ${i + 1}`}
+                      alt={`Post Instagram ${i + 1}`}
                       fill
                       sizes="300px"
                       className="object-cover"
