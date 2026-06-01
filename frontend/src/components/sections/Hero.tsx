@@ -58,14 +58,14 @@ export default function Hero() {
     >
       {/* Background image */}
       <div className="absolute inset-0 z-0">
-        {/* <Image
+        <Image
           src="https://placehold.co/1920x1080/1a1a2e/12C7C8?text=Divercity+Park"
           alt="Divercity Park - Parque Indoor"
           fill
           priority
           sizes="100vw"
           className="object-cover"
-        /> */}
+        />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/75" />
       </div>
