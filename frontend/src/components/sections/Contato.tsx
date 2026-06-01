@@ -2,28 +2,26 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Phone, Clock, Camera, Globe, MessageCircle } from 'lucide-react'
+import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
 
 // Substituir via CMS no futuro
 const WHATSAPP_NUMBER = '5514997569008'
+const GOOGLE_MAPS_URL =
+  'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá'
 
 const BUSINESS_INFO = [
   {
     icon: MapPin,
     label: 'Endereço',
-    value: 'Divercity Park — consulte o endereço no Google Maps',
+    value: 'Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720\nShopping Cidade Maringá',
+    href: GOOGLE_MAPS_URL,
     color: '#FF4F8A',
-  },
-  {
-    icon: Phone,
-    label: 'Telefone / WhatsApp',
-    value: 'Consulte nosso número no Instagram @divercitypark',
-    color: '#12C7C8',
   },
   {
     icon: Clock,
     label: 'Horário de Funcionamento',
-    value: 'Seg–Sex: 14h às 20h | Sáb–Dom e Feriados: 10h às 20h',
+    value: 'Segunda a Sábado: das 10h às 22h\nDomingos e feriados: das 12h às 20h',
+    href: null,
     color: '#8E4CCF',
   },
 ]
@@ -32,11 +30,15 @@ const SOCIAL_LINKS = [
   {
     icon: Camera,
     label: 'Instagram',
-    href: 'https://instagram.com/divercitypark',
+    href: 'https://www.instagram.com/divercity.park',
     color: '#FF4F8A',
   },
-  { icon: Globe, label: 'Facebook', href: '#', color: '#8E4CCF' },
-  { icon: MessageCircle, label: 'WhatsApp', href: `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}`, color: '#9AD94B' },
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp',
+    href: `https://api.whatsapp.com/send/?phone=${WHATSAPP_NUMBER}&text&type=phone_number&app_absent=0`,
+    color: '#9AD94B',
+  },
 ]
 
 export default function Contato() {
@@ -102,7 +104,25 @@ export default function Contato() {
                     </div>
                     <div>
                       <p className="font-body font-semibold text-gray-800 text-sm">{info.label}</p>
-                      <p className="font-body text-gray-500 text-sm mt-0.5">{info.value}</p>
+                      {info.href ? (
+                        <a
+                          href={info.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-body text-sm mt-0.5 hover:underline"
+                          style={{ color: info.color }}
+                        >
+                          {info.value.split('\n').map((line, i) => (
+                            <span key={i} className="block">{line}</span>
+                          ))}
+                        </a>
+                      ) : (
+                        <div className="font-body text-gray-500 text-sm mt-0.5">
+                          {info.value.split('\n').map((line, i) => (
+                            <span key={i} className="block">{line}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
