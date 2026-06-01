@@ -16,6 +16,7 @@ export interface BeneficioCard {
 export interface PriceTier {
   label: string
   valor: number
+  acompanhante: number
 }
 
 export interface PriceGroup {
@@ -23,6 +24,12 @@ export interface PriceGroup {
   subtitulo: string
   cor: string
   tiers: PriceTier[]
+}
+
+export interface PriceDisclaimer {
+  emoji: string
+  titulo: string
+  linhas: string[]
 }
 
 export interface Depoimento {

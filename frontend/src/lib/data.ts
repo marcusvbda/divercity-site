@@ -2,6 +2,7 @@ import type {
   Atracao,
   BeneficioCard,
   PriceGroup,
+  PriceDisclaimer,
   Depoimento,
   NavItem,
 } from '@/types'
@@ -118,34 +119,50 @@ export const BENEFICIOS_CARDS: BeneficioCard[] = [
   },
 ]
 
+// Preços — substituir via CMS no futuro
 export const PRECOS: PriceGroup[] = [
   {
-    titulo: 'Segunda a Sexta',
-    subtitulo: 'Agendamento Feria',
+    titulo: 'Segunda a Quinta-feira',
+    subtitulo: 'exceto feriados',
     cor: '#12C7C8',
     tiers: [
-      { label: 'Até 5 anos', valor: 45 },
-      { label: 'A partir de 5 anos', valor: 55 },
+      { label: '30min', valor: 45, acompanhante: 10 },
+      { label: '1 Hora', valor: 55, acompanhante: 15 },
+      { label: '2 Horas', valor: 70, acompanhante: 20 },
+      { label: '3 Horas', valor: 80, acompanhante: 30 },
     ],
   },
   {
-    titulo: 'Sábado',
-    subtitulo: 'Fim de Semana',
+    titulo: 'Sexta a Sábado, Domingo e feriados',
+    subtitulo: '',
     cor: '#8E4CCF',
     tiers: [
-      { label: 'Até 5 anos', valor: 60 },
-      { label: 'A partir de 5 anos', valor: 70 },
+      { label: '30min', valor: 50, acompanhante: 10 },
+      { label: '1 Hora', valor: 65, acompanhante: 15 },
+      { label: '2 Horas', valor: 80, acompanhante: 20 },
+      { label: '3 Horas', valor: 100, acompanhante: 30 },
+    ],
+  },
+]
+
+// Disclaimers de preços — substituir via CMS no futuro
+export const PRICE_DISCLAIMERS: PriceDisclaimer[] = [
+  {
+    emoji: '👨‍👧',
+    titulo: 'Sobre Acompanhantes',
+    linhas: [
+      '🧒 Crianças de 1 a 4 anos — Recomenda-se estar acompanhadas de um responsável legal (maior de 18 anos). O acompanhante não paga. (Limite de 1 por criança.)',
+      '♿ Pessoas com Necessidades Especiais (PNE) — Recomenda-se acompanhante maior de idade. O acompanhante é isento de pagamento. (Limite de 1 por pessoa.)',
+      '👦 Crianças a partir de 5 anos — Acompanhante é opcional. Caso entre na área de brinquedos, será cobrada a taxa de acompanhante correspondente ao tempo escolhido.',
     ],
   },
   {
-    titulo: 'Domingo e Feriado',
-    subtitulo: 'Domingo e Feriado',
-    cor: '#FF4F8A',
-    tiers: [
-      { label: 'Até 5 anos', valor: 75 },
-      { label: 'A partir de 5 anos', valor: 85 },
-      { label: 'Até 5 anos (pacote)', valor: 90 },
-      { label: 'A partir de 5 anos (pacote)', valor: 100 },
+    emoji: '💰',
+    titulo: 'Sobre Valores e Descontos',
+    linhas: [
+      '👶 Crianças de 0 a 1 ano — Caso utilizem os brinquedos (inclusive área baby): ✨ 50% de desconto sobre o valor do passaporte escolhido.',
+      '♿ Pessoas com Necessidades Especiais (PNE) — ✨ 50% de desconto sobre o valor do passaporte escolhido.',
+      '🧒 Crianças a partir de 1 ano — Pagam o valor integral do passaporte escolhido.',
     ],
   },
 ]
