@@ -30,7 +30,7 @@ export const ATRACOES: Atracao[] = [
     nome: 'Parede de Escalada',
     descricao:
       'Nossa parede de escalar é ideal para pequenos alpinistas. Com vários percursos e níveis de dificuldade, as crianças podem desenvolver suas habilidades em um ambiente seguro, sempre supervisionado por nossos monitores.',
-    imagem: '/guerreiro-ninja.png',
+    imagem: '/frente.png',
     cor: '#FF4F8A',
   },
   {
