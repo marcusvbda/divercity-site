@@ -10,7 +10,6 @@ import {
   HeartHandshake,
   Star,
 } from 'lucide-react'
-import type { CMSBeneficio } from '@/lib/cms'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Shield,
@@ -22,11 +21,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
 }
 
 const BRAND_COLORS: Record<string, string> = {
-  'brand-cyan':    '#12C7C8',
-  'brand-purple':  '#8E4CCF',
-  'brand-pink':    '#FF4F8A',
-  'brand-lime':    '#9AD94B',
-  'brand-yellow':  '#FFD23F',
+  'brand-cyan': '#12C7C8',
+  'brand-purple': '#8E4CCF',
+  'brand-pink': '#FF4F8A',
+  'brand-lime': '#9AD94B',
+  'brand-yellow': '#FFD23F',
 }
 
 /** Converte "from-brand-cyan to-brand-purple" → CSS gradient real.
@@ -37,7 +36,7 @@ function resolveGradient(g: string): string {
   const m = g.match(/from-(\S+)\s+to-(\S+)/)
   if (m) {
     const from = BRAND_COLORS[m[1]] ?? '#12C7C8'
-    const to   = BRAND_COLORS[m[2]] ?? '#8E4CCF'
+    const to = BRAND_COLORS[m[2]] ?? '#8E4CCF'
     return `linear-gradient(135deg, ${from}, ${to})`
   }
   return 'linear-gradient(135deg, #12C7C8, #8E4CCF)'
@@ -50,18 +49,28 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' as const },
+  },
 }
 
 interface Props {
-  beneficios: CMSBeneficio[]
+  beneficios: any[]
   badge?: string
   titulo?: string
   tituloDestaque?: string
   subtitulo?: string
 }
 
-export default function PorQueEscolher({ beneficios, badge, titulo, tituloDestaque, subtitulo }: Props) {
+export default function PorQueEscolher({
+  beneficios,
+  badge,
+  titulo,
+  tituloDestaque,
+  subtitulo,
+}: Props) {
   return (
     <section className="section-padding bg-white">
       <div className="container-max">
@@ -70,17 +79,20 @@ export default function PorQueEscolher({ beneficios, badge, titulo, tituloDestaq
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="mb-12 text-center"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-purple/10 text-brand-purple font-body font-semibold text-sm mb-3">
+          <span className="bg-brand-purple/10 text-brand-purple font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
             {badge ?? 'Nossos Diferenciais'}
           </span>
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
             {titulo ?? 'Por que as famílias escolhem o'}{' '}
-            <span className="text-brand-purple">{tituloDestaque ?? 'Divercity Park?'}</span>
+            <span className="text-brand-purple">
+              {tituloDestaque ?? 'Divercity Park?'}
+            </span>
           </h2>
-          <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            {subtitulo ?? 'Mais do que um parque — somos uma experiência completa para toda a família.'}
+          <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
+            {subtitulo ??
+              'Mais do que um parque — somos uma experiência completa para toda a família.'}
           </p>
         </motion.div>
 
@@ -89,7 +101,7 @@ export default function PorQueEscolher({ beneficios, badge, titulo, tituloDestaq
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           {beneficios.map((b) => {
             const Icon = ICON_MAP[b.iconeName]
@@ -97,19 +109,28 @@ export default function PorQueEscolher({ beneficios, badge, titulo, tituloDestaq
               <motion.div
                 key={b.titulo}
                 variants={itemVariants}
-                whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}
-                className="bg-white rounded-3xl p-7 border border-gray-100 shadow-sm"
+                whileHover={{
+                  y: -6,
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
+                }}
+                className="rounded-3xl border border-gray-100 bg-white p-7 shadow-sm"
               >
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-md"
+                  className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl shadow-md"
                   style={{ background: resolveGradient(b.gradiente) }}
                 >
-                  {Icon ? <Icon size={28} className="text-white" /> : <Star size={28} className="text-white" />}
+                  {Icon ? (
+                    <Icon size={28} className="text-white" />
+                  ) : (
+                    <Star size={28} className="text-white" />
+                  )}
                 </div>
-                <h3 className="font-heading text-xl font-semibold text-gray-800 mb-2">
+                <h3 className="font-heading mb-2 text-xl font-semibold text-gray-800">
                   {b.titulo}
                 </h3>
-                <p className="font-body text-gray-500 text-sm leading-relaxed">{b.descricao}</p>
+                <p className="font-body text-sm leading-relaxed text-gray-500">
+                  {b.descricao}
+                </p>
               </motion.div>
             )
           })}

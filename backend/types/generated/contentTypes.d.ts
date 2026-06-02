@@ -547,14 +547,7 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     google_maps_url: Schema.Attribute.String;
     google_place_id: Schema.Attribute.String;
     google_places_api_key: Schema.Attribute.String;
-    hero_bg: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    hero_cta_primario: Schema.Attribute.String;
-    hero_cta_secundario: Schema.Attribute.String;
-    hero_image: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios'
-    >;
-    hero_subtitulo: Schema.Attribute.Text;
-    hero_titulo: Schema.Attribute.String;
+    hero: Schema.Attribute.Component<'geral.hero', false>;
     horario_feriado: Schema.Attribute.String &
       Schema.Attribute.DefaultTo<'das 12h \u00E0s 20h'>;
     horario_semana: Schema.Attribute.String &
@@ -568,9 +561,7 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
       'api::configuracao-site.configuracao-site'
     > &
       Schema.Attribute.Private;
-    navbar_logo: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios'
-    >;
+    navbar: Schema.Attribute.Component<'geral.navbar', false>;
     por_que_badge: Schema.Attribute.String;
     por_que_subtitulo: Schema.Attribute.Text;
     por_que_titulo: Schema.Attribute.String;

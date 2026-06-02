@@ -12,6 +12,11 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "navbar": {
+      "type": "component",
+      "component": "geral.navbar",
+      "repeatable": false
+    },
     "whatsapp_number": {
       "type": "string",
       "default": "5514997569008",
@@ -48,22 +53,6 @@
     "waze_url": {
       "type": "string"
     },
-    "navbar_logo": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
-    },
-    "hero_titulo": {
-      "type": "string"
-    },
-    "hero_subtitulo": {
-      "type": "text"
-    },
     "festas_features": {
       "type": "component",
       "component": "geral.feature-item",
@@ -75,32 +64,6 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ]
-    },
-    "hero_cta_primario": {
-      "type": "string"
-    },
-    "hero_cta_secundario": {
-      "type": "string"
-    },
-    "hero_image": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
-    },
-    "hero_bg": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
       ]
     },
     "atracoes_badge": {
@@ -170,6 +133,11 @@
     },
     "footer_copyright": {
       "type": "string"
+    },
+    "hero": {
+      "type": "component",
+      "component": "geral.hero",
+      "repeatable": false
     }
   }
 }

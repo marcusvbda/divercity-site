@@ -1,0 +1,31 @@
+{
+  "collectionName": "components_geral_navbars",
+  "info": {
+    "displayName": "Navbar",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "menus": {
+      "type": "component",
+      "component": "geral.link",
+      "repeatable": true
+    },
+    "cta": {
+      "type": "component",
+      "component": "geral.cta",
+      "repeatable": false
+    }
+  },
+  "config": {}
+}

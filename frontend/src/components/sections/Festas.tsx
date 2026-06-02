@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import ImageModal from '@/components/ui/ImageModal'
-import type { CMSFeatureItem } from '@/lib/cms'
 
 interface FestasImagem {
   id: number
@@ -13,7 +12,7 @@ interface FestasImagem {
 }
 
 interface Props {
-  features: CMSFeatureItem[]
+  features: any[]
   imagens: FestasImagem[]
   badge?: string
   titulo?: string
@@ -30,7 +29,16 @@ const FALLBACK_IMAGES: FestasImagem[] = [
   { id: 3, url: '/futebol.png' },
 ]
 
-export default function Festas({ features, imagens, badge, titulo, tituloDestaque, descricao, ctaOrcamento, ctaPrecos }: Props) {
+export default function Festas({
+  features,
+  imagens,
+  badge,
+  titulo,
+  tituloDestaque,
+  descricao,
+  ctaOrcamento,
+  ctaPrecos,
+}: Props) {
   const partyImages = imagens.length > 0 ? imagens : FALLBACK_IMAGES
   const [selectedImg, setSelectedImg] = useState<string | null>(null)
 
@@ -65,14 +73,16 @@ export default function Festas({ features, imagens, badge, titulo, tituloDestaqu
               </span>
               <h2 className="font-heading mb-5 text-4xl leading-tight font-bold text-gray-800 md:text-5xl">
                 {titulo ?? 'Festas e Aniversários'}{' '}
-                <span className="text-brand-pink">{tituloDestaque ?? 'Inesquecíveis!'}</span>
+                <span className="text-brand-pink">
+                  {tituloDestaque ?? 'Inesquecíveis!'}
+                </span>
               </h2>
               <p className="font-body mb-2 text-lg leading-relaxed text-gray-600">
                 {descricao ?? 'Nossos pacotes completos incluem:'}
               </p>
 
               <ul className="mb-8 space-y-3">
-                {features.map((f) => (
+                {(features ?? []).map((f) => (
                   <li key={f.id} className="flex items-center gap-3">
                     <CheckCircle2
                       size={20}
@@ -112,7 +122,7 @@ export default function Festas({ features, imagens, badge, titulo, tituloDestaqu
                       .querySelector('#precos')
                       ?.scrollIntoView({ behavior: 'smooth' })
                   }
-                  className="font-body rounded-full border-2 border-gray-300 px-8 py-4 text-base font-bold text-gray-700 transition-all hover:border-brand-pink hover:text-brand-pink"
+                  className="font-body hover:border-brand-pink hover:text-brand-pink rounded-full border-2 border-gray-300 px-8 py-4 text-base font-bold text-gray-700 transition-all"
                 >
                   {ctaPrecos ?? 'Ver Preços'}
                 </motion.button>
@@ -132,14 +142,16 @@ export default function Festas({ features, imagens, badge, titulo, tituloDestaqu
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   onClick={() => setSelectedImg(partyImages[0].url)}
-                  className="col-span-2 h-52 cursor-pointer overflow-hidden rounded-2xl shadow-md bg-gray-200"
+                  className="col-span-2 h-52 cursor-pointer overflow-hidden rounded-2xl bg-gray-200 shadow-md"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={partyImages[0].url}
                     alt={partyImages[0].alternativeText ?? 'Decoração de festa'}
-                    onError={(e) => { e.currentTarget.src = '/salao-de-festas.png' }}
-                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = '/salao-de-festas.png'
+                    }}
+                    className="h-full w-full object-cover"
                   />
                 </motion.div>
               )}
@@ -149,14 +161,18 @@ export default function Festas({ features, imagens, badge, titulo, tituloDestaqu
                   key={img.id}
                   whileHover={{ scale: 1.03 }}
                   onClick={() => setSelectedImg(img.url)}
-                  className="h-36 cursor-pointer overflow-hidden rounded-2xl shadow-md bg-gray-200"
+                  className="h-36 cursor-pointer overflow-hidden rounded-2xl bg-gray-200 shadow-md"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.url}
                     alt={img.alternativeText ?? `Festa ${i + 2}`}
-                    onError={(e) => { e.currentTarget.src = ['/dbz.png', '/f1.png', '/futebol.png'][i] ?? '/salao-de-festas.png' }}
-                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        ['/dbz.png', '/f1.png', '/futebol.png'][i] ??
+                        '/salao-de-festas.png'
+                    }}
+                    className="h-full w-full object-cover"
                   />
                 </motion.div>
               ))}

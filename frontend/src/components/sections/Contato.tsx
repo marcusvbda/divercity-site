@@ -3,17 +3,22 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
-import type { CMSConfiguracaoSite } from '@/lib/cms'
 
 interface ContatoProps {
-  config: CMSConfiguracaoSite
+  config: any
   badge?: string
   titulo?: string
   subtitulo?: string
   ctaLabel?: string
 }
 
-export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: ContatoProps) {
+export default function Contato({
+  config,
+  badge,
+  titulo,
+  subtitulo,
+  ctaLabel,
+}: ContatoProps) {
   const [nome, setNome] = useState('')
   const [mensagem, setMensagem] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; mensagem?: string }>({})
@@ -53,7 +58,8 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
   const validate = () => {
     const e: { nome?: string; mensagem?: string } = {}
     if (nome.trim().length < 2) e.nome = 'Nome deve ter pelo menos 2 caracteres'
-    if (mensagem.trim().length < 10) e.mensagem = 'Mensagem deve ter pelo menos 10 caracteres'
+    if (mensagem.trim().length < 10)
+      e.mensagem = 'Mensagem deve ter pelo menos 10 caracteres'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -74,20 +80,21 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="mb-12 text-center"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-cyan/10 text-brand-cyan font-body font-semibold text-sm mb-3">
+          <span className="bg-brand-cyan/10 text-brand-cyan font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
             {badge ?? 'Fale Conosco'}
           </span>
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
             {titulo ?? 'Nos manda uma mensagem!'}
           </h2>
-          <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            {subtitulo ?? 'Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa perfeita.'}
+          <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
+            {subtitulo ??
+              'Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa perfeita.'}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left: Business info */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -95,36 +102,46 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7 }}
           >
-            <div className="space-y-6 mb-8">
+            <div className="mb-8 space-y-6">
               {businessInfo.map((info) => {
                 const Icon = info.icon
                 return (
                   <div key={info.label} className="flex items-start gap-4">
                     <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
                       style={{ backgroundColor: info.color + '18' }}
                     >
                       <Icon size={22} style={{ color: info.color }} />
                     </div>
                     <div>
-                      <p className="font-body font-semibold text-gray-800 text-sm">{info.label}</p>
+                      <p className="font-body text-sm font-semibold text-gray-800">
+                        {info.label}
+                      </p>
                       {info.href ? (
                         <a
                           href={info.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-body text-sm mt-0.5 hover:underline"
+                          className="font-body mt-0.5 text-sm hover:underline"
                           style={{ color: info.color }}
                         >
-                          {info.value.split('\n').map((line: string, i: number) => (
-                            <span key={i} className="block">{line}</span>
-                          ))}
+                          {info.value
+                            .split('\n')
+                            .map((line: string, i: number) => (
+                              <span key={i} className="block">
+                                {line}
+                              </span>
+                            ))}
                         </a>
                       ) : (
-                        <div className="font-body text-gray-500 text-sm mt-0.5">
-                          {info.value.split('\n').map((line: string, i: number) => (
-                            <span key={i} className="block">{line}</span>
-                          ))}
+                        <div className="font-body mt-0.5 text-sm text-gray-500">
+                          {info.value
+                            .split('\n')
+                            .map((line: string, i: number) => (
+                              <span key={i} className="block">
+                                {line}
+                              </span>
+                            ))}
                         </div>
                       )}
                     </div>
@@ -134,7 +151,7 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
             </div>
 
             {/* Social */}
-            <div className="flex gap-3 mb-8">
+            <div className="mb-8 flex gap-3">
               {socialLinks.map((s) => {
                 const Icon = s.icon
                 return (
@@ -144,7 +161,7 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 transition-transform"
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform hover:scale-110"
                     style={{ backgroundColor: s.color + '18' }}
                   >
                     <Icon size={22} style={{ color: s.color }} />
@@ -154,7 +171,7 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
             </div>
 
             {/* Map */}
-            <div className="rounded-2xl overflow-hidden shadow-md">
+            <div className="overflow-hidden rounded-2xl shadow-md">
               <iframe
                 src="https://maps.google.com/maps?q=Av.+Tuiuti+710+Gleba+Patrimônio+Maringa+Maringá+PR+Brasil&output=embed&z=16"
                 width="100%"
@@ -178,7 +195,10 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Nome */}
               <div>
-                <label htmlFor="nome" className="block font-body font-medium text-gray-700 text-sm mb-1.5">
+                <label
+                  htmlFor="nome"
+                  className="font-body mb-1.5 block text-sm font-medium text-gray-700"
+                >
                   Nome *
                 </label>
                 <input
@@ -187,18 +207,25 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
                   placeholder="Seu nome completo"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
-                    errors.nome ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+                  className={`font-body focus:border-brand-cyan focus:ring-brand-cyan/20 w-full rounded-xl border px-4 py-3 text-sm text-gray-700 placeholder-gray-400 transition-colors outline-none focus:ring-2 ${
+                    errors.nome
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-gray-200 bg-gray-50'
                   }`}
                 />
                 {errors.nome && (
-                  <p className="font-body text-red-500 text-xs mt-1">{errors.nome}</p>
+                  <p className="font-body mt-1 text-xs text-red-500">
+                    {errors.nome}
+                  </p>
                 )}
               </div>
 
               {/* Mensagem */}
               <div>
-                <label htmlFor="mensagem" className="block font-body font-medium text-gray-700 text-sm mb-1.5">
+                <label
+                  htmlFor="mensagem"
+                  className="font-body mb-1.5 block text-sm font-medium text-gray-700"
+                >
                   Mensagem *
                 </label>
                 <textarea
@@ -207,12 +234,16 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
                   placeholder="Olá! Gostaria de saber mais sobre as festas..."
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
-                  className={`w-full px-4 py-3 rounded-xl border font-body text-sm text-gray-700 placeholder-gray-400 outline-none transition-colors resize-none focus:border-brand-cyan focus:ring-2 focus:ring-brand-cyan/20 ${
-                    errors.mensagem ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
+                  className={`font-body focus:border-brand-cyan focus:ring-brand-cyan/20 w-full resize-none rounded-xl border px-4 py-3 text-sm text-gray-700 placeholder-gray-400 transition-colors outline-none focus:ring-2 ${
+                    errors.mensagem
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-gray-200 bg-gray-50'
                   }`}
                 />
                 {errors.mensagem && (
-                  <p className="font-body text-red-500 text-xs mt-1">{errors.mensagem}</p>
+                  <p className="font-body mt-1 text-xs text-red-500">
+                    {errors.mensagem}
+                  </p>
                 )}
               </div>
 
@@ -220,7 +251,7 @@ export default function Contato({ config, badge, titulo, subtitulo, ctaLabel }: 
                 type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-4 rounded-2xl bg-brand-pink text-white font-body font-bold text-base shadow-lg shadow-pink-500/30 hover:bg-pink-600 transition-colors flex items-center justify-center gap-2"
+                className="bg-brand-pink font-body flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600"
               >
                 <MessageCircle size={18} />
                 {ctaLabel ?? 'Enviar pelo WhatsApp'}

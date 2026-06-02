@@ -34,14 +34,20 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: meta.titulo,
       description: meta.descricao,
-      keywords: meta.keywords?.split(',').map((k) => k.trim()),
+      keywords: meta.keywords?.split(',').map((k: any) => k.trim()),
       icons: FAVICON_ICONS,
       openGraph: {
         title: meta.og_titulo ?? meta.titulo,
         description: meta.og_descricao ?? meta.descricao,
         type: 'website',
         images: meta.og_imagem
-          ? [{ url: meta.og_imagem.url, width: meta.og_imagem.width ?? 512, height: meta.og_imagem.height ?? 512 }]
+          ? [
+              {
+                url: meta.og_imagem.url,
+                width: meta.og_imagem.width ?? 512,
+                height: meta.og_imagem.height ?? 512,
+              },
+            ]
           : [{ url: '/logo-ball.png', width: 512, height: 512 }],
       },
     }
