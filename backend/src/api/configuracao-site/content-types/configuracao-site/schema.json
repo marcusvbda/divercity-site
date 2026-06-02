@@ -58,11 +58,6 @@
     "waze_url": {
       "type": "string"
     },
-    "festas_features": {
-      "type": "component",
-      "component": "geral.feature-item",
-      "repeatable": true
-    },
     "festas_imagens": {
       "type": "media",
       "multiple": true,
@@ -147,6 +142,11 @@
     "benefitSection": {
       "type": "component",
       "component": "geral.attraction-section",
+      "repeatable": false
+    },
+    "partySection": {
+      "type": "component",
+      "component": "geral.party-section",
       "repeatable": false
     }
   }

@@ -547,7 +547,6 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     festas_cta_orcamento: Schema.Attribute.String;
     festas_cta_precos: Schema.Attribute.String;
     festas_descricao: Schema.Attribute.Text;
-    festas_features: Schema.Attribute.Component<'geral.feature-item', true>;
     festas_imagens: Schema.Attribute.Media<'images', true>;
     festas_titulo: Schema.Attribute.String;
     festas_titulo_destaque: Schema.Attribute.String;
@@ -570,6 +569,7 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     > &
       Schema.Attribute.Private;
     navbar: Schema.Attribute.Component<'geral.navbar', false>;
+    partySection: Schema.Attribute.Component<'geral.party-section', false>;
     por_que_badge: Schema.Attribute.String;
     por_que_subtitulo: Schema.Attribute.Text;
     por_que_titulo: Schema.Attribute.String;

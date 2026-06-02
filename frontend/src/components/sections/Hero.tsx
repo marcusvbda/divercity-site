@@ -156,12 +156,7 @@ export default function Hero({ hero }: any) {
           {primaryCta?.id && (
             <CtaButton
               onClick={() => scrollTo(primaryCta?.href)}
-              bgColor={primaryCta?.bgColor}
-              color={primaryCta?.color}
-              border={primaryCta?.border}
-              hoverBorder={primaryCta?.hoverBorder}
-              hoverColor={primaryCta?.hoverColor}
-              hoverBgColor={primaryCta?.hoverBgColor}
+              cta={primaryCta}
               className="px-8! py-4! text-lg!"
             >
               {primaryCta?.label}
@@ -171,12 +166,7 @@ export default function Hero({ hero }: any) {
           {secondaryCta?.id && (
             <CtaButton
               onClick={() => scrollTo(secondaryCta?.href)}
-              bgColor={secondaryCta?.bgColor}
-              color={secondaryCta?.color}
-              border={secondaryCta?.border}
-              hoverBorder={secondaryCta?.hoverBorder}
-              hoverColor={secondaryCta?.hoverColor}
-              hoverBgColor={secondaryCta?.hoverBgColor}
+              cta={secondaryCta}
               className="px-8! py-4! text-lg!"
             >
               {secondaryCta?.label}

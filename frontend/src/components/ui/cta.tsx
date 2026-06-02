@@ -2,17 +2,7 @@
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
-export default function CtaButton({
-  className,
-  onClick,
-  bgColor,
-  color,
-  border,
-  hoverBorder,
-  hoverColor,
-  hoverBgColor,
-  children,
-}: any) {
+export default function CtaButton({ className, onClick, cta, children }: any) {
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
@@ -24,12 +14,12 @@ export default function CtaButton({
       )}
       style={
         {
-          backgroundColor: bgColor,
-          color,
-          border: border ?? 'none',
-          '--hover-border': hoverBorder ?? border ?? 'none',
-          '--hover-color': hoverColor ?? color,
-          '--hover-bg-color': hoverBgColor ?? bgColor,
+          backgroundColor: cta?.bgColor,
+          color: cta?.color,
+          border: cta?.border ?? 'none',
+          '--hover-border': cta?.hoverBorder ?? cta?.border ?? 'none',
+          '--hover-color': cta?.hoverColor ?? cta?.color,
+          '--hover-bg-color': cta?.hoverBgColor ?? cta?.bgColor,
         } as any
       }
     >

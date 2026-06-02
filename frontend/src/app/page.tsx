@@ -28,7 +28,7 @@ export default async function Home() {
     ]
   )
 
-  console.log(config)
+  console.log(config.partySection)
 
   // // Normaliza URLs das imagens das festas — filtra itens sem URL válida
   // const festasImagens = (config.festas_imagens ?? [])
@@ -48,17 +48,8 @@ export default async function Home() {
           beneficios={beneficios}
           benefitSection={config?.benefitSection ?? {}}
         />
-        {/*   <Festas
-          features={config.festas_features}
-          imagens={festasImagens}
-          badge={config.festas_badge}
-          titulo={config.festas_titulo}
-          tituloDestaque={config.festas_titulo_destaque}
-          descricao={config.festas_descricao}
-          ctaOrcamento={config.festas_cta_orcamento}
-          ctaPrecos={config.festas_cta_precos}
-        />
-        <Precos
+        <Festas partySection={config?.partySection ?? {}} />
+        {/*   <Precos
           precos={precos}
           disclaimers={disclaimers}
           badge={config.precos_badge}

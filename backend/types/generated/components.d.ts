@@ -92,6 +92,26 @@ export interface GeralNavbar extends Struct.ComponentSchema {
   };
 }
 
+export interface GeralPartySection extends Struct.ComponentSchema {
+  collectionName: 'components_geral_party_sections';
+  info: {
+    displayName: 'partySection';
+    icon: 'bulletList';
+  };
+  attributes: {
+    badge: Schema.Attribute.String;
+    ctaOrcamento: Schema.Attribute.Component<'geral.cta', false>;
+    ctaPrices: Schema.Attribute.Component<'geral.cta', false>;
+    decorations: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    description: Schema.Attribute.String;
+    features: Schema.Attribute.Component<'geral.feature-item', true>;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface PrecosLinha extends Struct.ComponentSchema {
   collectionName: 'components_precos_linhas';
   info: {
@@ -140,6 +160,7 @@ declare module '@strapi/strapi' {
       'geral.link': GeralLink;
       'geral.menu': GeralMenu;
       'geral.navbar': GeralNavbar;
+      'geral.party-section': GeralPartySection;
       'precos.linha': PrecosLinha;
       'precos.tier': PrecosTier;
       'secao.beneficio-destaque': SecaoBeneficioDestaque;

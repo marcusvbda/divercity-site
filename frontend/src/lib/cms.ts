@@ -48,7 +48,7 @@ export async function fetchCMS<T>(
 
 export async function getCMSConfig() {
   return fetchCMS<any>(
-    '/configuracao-site?populate[navbar][populate]=*&populate[hero][populate]=*&populate[attractionSection][populate]=*&populate[benefitSection][populate]=*'
+    '/configuracao-site?populate[navbar][populate]=*&populate[hero][populate]=*&populate[attractionSection][populate]=*&populate[benefitSection][populate]=*&populate[partySection][populate]=*'
   )
 }
 

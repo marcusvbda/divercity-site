@@ -75,12 +75,7 @@ export default function Navbar({ navbar }: any) {
             {cta?.id && (
               <CtaButton
                 onClick={() => scrollTo(cta?.href)}
-                bgColor={cta?.bgColor}
-                color={cta?.color}
-                border={cta?.border}
-                hoverBorder={cta?.hoverBorder}
-                hoverColor={cta?.hoverColor}
-                hoverBgColor={cta?.hoverBgColor}
+                cta={cta}
                 className="px-5! py-2.5! text-sm!"
               >
                 {cta?.label}
@@ -124,12 +119,7 @@ export default function Navbar({ navbar }: any) {
                 <li>
                   <CtaButton
                     onClick={() => handleNavClick(cta?.href)}
-                    bgColor={cta?.bgColor}
-                    color={cta?.color}
-                    border={cta?.border}
-                    hoverBorder={cta?.hoverBorder}
-                    hoverColor={cta?.hoverColor}
-                    hoverBgColor={cta?.hoverBgColor}
+                    cta={cta}
                     className="w-full! px-5! py-3!"
                   >
                     {cta?.label}
