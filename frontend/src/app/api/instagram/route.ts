@@ -11,14 +11,21 @@ export interface InstagramPost {
 
 export const revalidate = 3600
 
-const FALLBACK_POSTS: any = []
+const FALLBACK_POSTS = [
+  'https://placehold.co/600x600/8E4CCF/ffffff?text=Diversão+em+família',
+  'https://placehold.co/600x600/FF6B9D/ffffff?text=Aniversário+incrível',
+  'https://placehold.co/600x600/00C2CB/ffffff?text=Atrações+radicais',
+  'https://placehold.co/600x600/FFD93D/333333?text=Crianças+felizes',
+  'https://placehold.co/600x600/8E4CCF/ffffff?text=Festa+dos+sonhos',
+  'https://placehold.co/600x600/FF6B9D/ffffff?text=Parque+indoor',
+]
 
 function makeFallback(instagramUrl: string): InstagramPost[] {
-  return FALLBACK_POSTS.map((url: any, i: any) => ({
+  return FALLBACK_POSTS.map((url, i) => ({
     id: String(i),
     media_url: url,
     permalink: instagramUrl,
-    media_type: 'IMAGE',
+    media_type: 'IMAGE' as const,
   }))
 }
 

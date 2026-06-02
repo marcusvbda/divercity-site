@@ -44,8 +44,18 @@ export default function Footer({ config }: FooterProps) {
                 Funcionamento
               </h4>
               <div className="font-body space-y-1 text-sm">
-                <p className="text-brand-cyan">{config.horario_semana}</p>
-                <p className="text-brand-cyan">{config.horario_feriado}</p>
+                <p>
+                  Segunda a Sábado :
+                  <span className="text-brand-cyan ml-2">
+                    {config.horario_semana}
+                  </span>
+                </p>
+                <p>
+                  Domingos e feriados :
+                  <span className="text-brand-cyan ml-2">
+                    {config.horario_feriado}
+                  </span>
+                </p>
               </div>
             </div>
 
@@ -97,7 +107,10 @@ export default function Footer({ config }: FooterProps) {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/15 pt-8 sm:flex-row">
-          <p className="font-body text-sm text-white/50" suppressHydrationWarning>
+          <p
+            className="font-body text-sm text-white/50"
+            suppressHydrationWarning
+          >
             © {currentYear} Divercity Park. Todos os direitos reservados.
           </p>
           <p className="font-body text-xs text-white/40">
