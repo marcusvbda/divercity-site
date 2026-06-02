@@ -130,16 +130,22 @@
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
+
   html {
     scroll-behavior: smooth;
     @apply font-sans;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-poppins), sans-serif;
     overflow-x: hidden;
   }
-  h1, h2, h3, h4 {
+
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-fredoka), sans-serif;
     font-weight: 600;
   }
@@ -149,7 +155,12 @@
   .section-padding {
     @apply py-16 px-4 md:py-24 md:px-8 lg:px-16;
   }
+
   .container-max {
     @apply max-w-7xl mx-auto;
   }
+}
+
+html {
+  overflow-x: hidden;
 }
