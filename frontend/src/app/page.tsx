@@ -14,26 +14,15 @@ import {
   getCMSAtracoes,
   getCMSBeneficios,
   getCMSPrecos,
-  getCMSPriceDisclaimers,
 } from '@/lib/cms'
 
 export default async function Home() {
-  const [config, atracoes, beneficios, precos, disclaimers] = await Promise.all(
-    [
-      getCMSConfig(),
-      getCMSAtracoes(),
-      getCMSBeneficios(),
-      getCMSPrecos(),
-      getCMSPriceDisclaimers(),
-    ]
-  )
-
-  console.log(config.partySection)
-
-  // // Normaliza URLs das imagens das festas — filtra itens sem URL válida
-  // const festasImagens = (config.festas_imagens ?? [])
-  //   .map((img: any) => ({ ...img, url: absoluteUrl(img.url) ?? '' }))
-  //   .filter((img: any) => img.url.length > 0)
+  const [config, atracoes, beneficios, precos] = await Promise.all([
+    getCMSConfig(),
+    getCMSAtracoes(),
+    getCMSBeneficios(),
+    getCMSPrecos(),
+  ])
 
   return (
     <>
@@ -49,24 +38,15 @@ export default async function Home() {
           benefitSection={config?.benefitSection ?? {}}
         />
         <Festas partySection={config?.partySection ?? {}} />
-        {/*   <Precos
-          precos={precos}
-          disclaimers={disclaimers}
-          badge={config.precos_badge}
-          titulo={config.precos_titulo}
-          subtitulo={config.precos_subtitulo}
-        />
+        <Precos precos={precos} priceSection={config?.priceSection} />
         <Galeria />
         <Depoimentos />
         <Contato
           config={config}
-          badge={config.contato_badge}
-          titulo={config.contato_titulo}
-          subtitulo={config.contato_subtitulo}
-          ctaLabel={config.contato_cta}
-        /> */}
+          contactSection={config?.contactSection ?? {}}
+        />
       </main>
-      <Footer config={config} copyright={config.footer_copyright} />
+      <Footer config={config} />
     </>
   )
 }

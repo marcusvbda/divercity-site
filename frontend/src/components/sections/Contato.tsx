@@ -4,21 +4,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
 
-interface ContatoProps {
-  config: any
-  badge?: string
-  titulo?: string
-  subtitulo?: string
-  ctaLabel?: string
-}
-
-export default function Contato({
-  config,
-  badge,
-  titulo,
-  subtitulo,
-  ctaLabel,
-}: ContatoProps) {
+export default function Contato({ config, contactSection }: any) {
+  const badge = contactSection?.badge ?? ''
+  const title = contactSection?.title ?? ''
+  const subtitle = contactSection?.subtitle ?? ''
+  const formBtnLabel = contactSection?.formBtnLabel ?? 'Enviar'
   const [nome, setNome] = useState('')
   const [mensagem, setMensagem] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; mensagem?: string }>({})
@@ -83,14 +73,13 @@ export default function Contato({
           className="mb-12 text-center"
         >
           <span className="bg-brand-cyan/10 text-brand-cyan font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
-            {badge ?? 'Fale Conosco'}
+            {badge}
           </span>
           <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
-            {titulo ?? 'Nos manda uma mensagem!'}
+            {title}
           </h2>
           <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
-            {subtitulo ??
-              'Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa perfeita.'}
+            {subtitle}
           </p>
         </motion.div>
 
@@ -173,7 +162,7 @@ export default function Contato({
             {/* Map */}
             <div className="overflow-hidden rounded-2xl shadow-md">
               <iframe
-                src="https://maps.google.com/maps?q=Av.+Tuiuti+710+Gleba+Patrimônio+Maringa+Maringá+PR+Brasil&output=embed&z=16"
+                src={config?.googleMapsUrlIframe}
                 width="100%"
                 height="208"
                 style={{ border: 0 }}
@@ -254,7 +243,7 @@ export default function Contato({
                 className="bg-brand-pink font-body flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-pink-500/30 transition-colors hover:bg-pink-600"
               >
                 <MessageCircle size={18} />
-                {ctaLabel ?? 'Enviar pelo WhatsApp'}
+                {formBtnLabel}
               </motion.button>
             </form>
           </motion.div>

@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_geral_rich_texts",
+  "info": {
+    "displayName": "richText",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "value": {
+      "type": "richtext"
+    }
+  },
+  "config": {}
+}

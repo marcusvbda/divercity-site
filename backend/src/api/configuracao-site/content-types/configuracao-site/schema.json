@@ -131,9 +131,6 @@
     "por_que_subtitulo": {
       "type": "text"
     },
-    "footer_copyright": {
-      "type": "string"
-    },
     "hero": {
       "type": "component",
       "component": "geral.hero",
@@ -148,6 +145,19 @@
       "type": "component",
       "component": "geral.party-section",
       "repeatable": false
+    },
+    "priceSection": {
+      "type": "component",
+      "component": "geral.price-section",
+      "repeatable": false
+    },
+    "contactSection": {
+      "type": "component",
+      "component": "geral.contact-section",
+      "repeatable": false
+    },
+    "googleMapsUrlIframe": {
+      "type": "string"
     }
   }
 }

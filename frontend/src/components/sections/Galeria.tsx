@@ -11,9 +11,8 @@ export default function Galeria() {
   const [posts, setPosts] = useState<InstagramPost[]>([])
 
   // Duplica os slides para garantir que o loop não abra lacuna
-  const slides = posts.length > 0 && posts.length < 10
-    ? [...posts, ...posts]
-    : posts
+  const slides =
+    posts.length > 0 && posts.length < 10 ? [...posts, ...posts] : posts
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: 'start' },
@@ -31,93 +30,103 @@ export default function Galeria() {
   }, [])
 
   return (
-    <section className="section-padding bg-white overflow-hidden">
+    <section className="section-padding overflow-hidden bg-white">
       <div className="container-max">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="mb-10 text-center"
         >
           <a
             href="https://www.instagram.com/divercity.park"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-linear-to-r from-pink-100 to-purple-100 text-brand-purple font-body font-semibold text-sm mb-3 hover:opacity-80 transition-opacity"
+            className="text-brand-purple font-body mb-3 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-pink-100 to-purple-100 px-4 py-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
           >
             <Camera size={14} />
             @divercity.park
           </a>
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
             Siga nosso Instagram
           </h2>
-          <p className="font-body text-gray-500 text-lg">
+          <p className="font-body text-lg text-gray-500">
             Fique por dentro de tudo que acontece no Divercity Park!
           </p>
         </motion.div>
 
-        {/* Carousel */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative"
-        >
-          <div ref={emblaRef} className="overflow-hidden">
-            <div className="flex cursor-grab active:cursor-grabbing">
-              {slides.map((post, i) => {
-                const src = post.media_type === 'VIDEO' ? post.thumbnail_url! : post.media_url
-                return (
-                  <div key={`${post.id}-${i}`} className="flex-none w-52 sm:w-64 md:w-72 pl-4">
-                    <motion.a
-                      href={post.permalink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.04 }}
-                      className="relative rounded-2xl overflow-hidden shadow-md aspect-square block"
+        {Boolean(posts && posts.length) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
+          >
+            <div ref={emblaRef} className="overflow-hidden">
+              <div className="flex cursor-grab active:cursor-grabbing">
+                {slides.map((post, i) => {
+                  const src =
+                    post.media_type === 'VIDEO'
+                      ? post.thumbnail_url!
+                      : post.media_url
+                  return (
+                    <div
+                      key={`${post.id}-${i}`}
+                      className="w-52 flex-none pl-4 sm:w-64 md:w-72"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={src}
-                        alt="Post Instagram Divercity Park"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-4">
-                        <Camera size={20} className="text-white" />
-                      </div>
-                    </motion.a>
-                  </div>
-                )
-              })}
+                      <motion.a
+                        href={post.permalink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.04 }}
+                        className="relative block aspect-square overflow-hidden rounded-2xl shadow-md"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt="Post Instagram Divercity Park"
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-end bg-linear-to-t from-black/50 to-transparent p-4 opacity-0 transition-opacity hover:opacity-100">
+                          <Camera size={20} className="text-white" />
+                        </div>
+                      </motion.a>
+                    </div>
+                  )
+                })}
 
-              {/* Skeleton enquanto carrega */}
-              {posts.length === 0 &&
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex-none w-52 sm:w-64 md:w-72 pl-4">
-                    <div className="rounded-2xl bg-gray-200 animate-pulse aspect-square" />
-                  </div>
-                ))}
+                {/* Skeleton enquanto carrega */}
+                {posts.length === 0 &&
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-52 flex-none pl-4 sm:w-64 md:w-72"
+                    >
+                      <div className="aspect-square animate-pulse rounded-2xl bg-gray-200" />
+                    </div>
+                  ))}
+              </div>
             </div>
-          </div>
 
-          {/* Navigation */}
-          <button
-            onClick={scrollPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white transition-colors z-10"
-            aria-label="Post anterior"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={scrollNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-brand-cyan hover:text-white transition-colors z-10"
-            aria-label="Próximo post"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </motion.div>
+            {/* Navigation */}
+            <button
+              onClick={scrollPrev}
+              className="hover:bg-brand-cyan absolute top-1/2 left-0 z-10 flex h-10 w-10 -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-colors hover:text-white"
+              aria-label="Post anterior"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={scrollNext}
+              className="hover:bg-brand-cyan absolute top-1/2 right-0 z-10 flex h-10 w-10 translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-colors hover:text-white"
+              aria-label="Próximo post"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </motion.div>
+        )}
       </div>
     </section>
   )

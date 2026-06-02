@@ -3,10 +3,11 @@ import { Camera, MessageCircle, MapPin, Clock } from 'lucide-react'
 
 interface FooterProps {
   config: any
-  copyright?: string
 }
 
-export default function Footer({ config, copyright }: FooterProps) {
+export default function Footer({ config }: FooterProps) {
+  const currentYear = new Date().getFullYear()
+
   return (
     <footer style={{ backgroundColor: '#212121' }} className="text-white">
       <div className="container-max px-4 py-16 md:px-8 lg:px-16">
@@ -96,8 +97,7 @@ export default function Footer({ config, copyright }: FooterProps) {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/15 pt-8 sm:flex-row">
           <p className="font-body text-sm text-white/50">
-            {copyright ??
-              '© 2024 Divercity Park. Todos os direitos reservados.'}
+            © {currentYear} Divercity Park. Todos os direitos reservados.
           </p>
           <p className="font-body text-xs text-white/40">
             Diversão para toda a família

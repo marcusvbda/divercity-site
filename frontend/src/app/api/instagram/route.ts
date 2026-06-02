@@ -11,19 +11,10 @@ export interface InstagramPost {
 
 export const revalidate = 3600
 
-const FALLBACK_POSTS = [
-  'https://placehold.co/400x400/12C7C8/ffffff?text=Post+1',
-  'https://placehold.co/400x400/8E4CCF/ffffff?text=Post+2',
-  'https://placehold.co/400x400/FF4F8A/ffffff?text=Post+3',
-  'https://placehold.co/400x400/9AD94B/ffffff?text=Post+4',
-  'https://placehold.co/400x400/FFD23F/333333?text=Post+5',
-  'https://placehold.co/400x400/12C7C8/ffffff?text=Post+6',
-  'https://placehold.co/400x400/8E4CCF/ffffff?text=Post+7',
-  'https://placehold.co/400x400/FF4F8A/ffffff?text=Post+8',
-]
+const FALLBACK_POSTS: any = []
 
 function makeFallback(instagramUrl: string): InstagramPost[] {
-  return FALLBACK_POSTS.map((url, i) => ({
+  return FALLBACK_POSTS.map((url: any, i: any) => ({
     id: String(i),
     media_url: url,
     permalink: instagramUrl,
@@ -35,7 +26,8 @@ export async function GET() {
   // Token do Instagram vem do CMS, não do .env
   const config = await getCMSConfig()
   const token = config.instagram_access_token
-  const instagramUrl = config.instagram_url ?? 'https://www.instagram.com/divercity.park'
+  const instagramUrl =
+    config.instagram_url ?? 'https://www.instagram.com/divercity.park'
 
   if (!token) {
     return NextResponse.json(makeFallback(instagramUrl))
@@ -50,10 +42,15 @@ export async function GET() {
 
     const data = await res.json()
     const posts: InstagramPost[] = (data.data as InstagramPost[]).filter(
-      (p) => p.media_type === 'IMAGE' || p.media_type === 'CAROUSEL_ALBUM' || p.thumbnail_url
+      (p) =>
+        p.media_type === 'IMAGE' ||
+        p.media_type === 'CAROUSEL_ALBUM' ||
+        p.thumbnail_url
     )
 
-    return NextResponse.json(posts.length > 0 ? posts : makeFallback(instagramUrl))
+    return NextResponse.json(
+      posts.length > 0 ? posts : makeFallback(instagramUrl)
+    )
   } catch (err) {
     console.error('Erro ao buscar posts do Instagram:', err)
     return NextResponse.json(makeFallback(instagramUrl))

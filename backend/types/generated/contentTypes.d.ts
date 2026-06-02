@@ -534,6 +534,7 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
       'geral.attraction-section',
       false
     >;
+    contactSection: Schema.Attribute.Component<'geral.contact-section', false>;
     contato_badge: Schema.Attribute.String;
     contato_cta: Schema.Attribute.String;
     contato_subtitulo: Schema.Attribute.Text;
@@ -550,10 +551,10 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     festas_imagens: Schema.Attribute.Media<'images', true>;
     festas_titulo: Schema.Attribute.String;
     festas_titulo_destaque: Schema.Attribute.String;
-    footer_copyright: Schema.Attribute.String;
     google_maps_url: Schema.Attribute.String;
     google_place_id: Schema.Attribute.String;
     google_places_api_key: Schema.Attribute.String;
+    googleMapsUrlIframe: Schema.Attribute.String;
     hero: Schema.Attribute.Component<'geral.hero', false>;
     horario_feriado: Schema.Attribute.String &
       Schema.Attribute.DefaultTo<'das 12h \u00E0s 20h'>;
@@ -577,6 +578,7 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     precos_badge: Schema.Attribute.String;
     precos_subtitulo: Schema.Attribute.Text;
     precos_titulo: Schema.Attribute.String;
+    priceSection: Schema.Attribute.Component<'geral.price-section', false>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

@@ -48,7 +48,7 @@ export async function fetchCMS<T>(
 
 export async function getCMSConfig() {
   return fetchCMS<any>(
-    '/configuracao-site?populate[navbar][populate]=*&populate[hero][populate]=*&populate[attractionSection][populate]=*&populate[benefitSection][populate]=*&populate[partySection][populate]=*'
+    '/configuracao-site?populate[navbar][populate]=*&populate[hero][populate]=*&populate[attractionSection][populate]=*&populate[benefitSection][populate]=*&populate[partySection][populate]=*&populate[priceSection][populate]=*&populate[contactSection]=*'
   )
 }
 
@@ -71,12 +71,6 @@ export async function getCMSBeneficios() {
 export async function getCMSPrecos() {
   return fetchCMS<any[]>(
     '/precos?sort=ordem:asc&populate[tiers]=true&filters[publishedAt][$notNull]=true&pagination[pageSize]=20'
-  )
-}
-
-export async function getCMSPriceDisclaimers() {
-  return fetchCMS<any[]>(
-    '/price-disclaimers?sort=ordem:asc&populate[linhas]=true&filters[publishedAt][$notNull]=true&pagination[pageSize]=20'
   )
 }
 

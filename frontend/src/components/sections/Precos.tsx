@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 
 const containerVariants = {
   hidden: {},
@@ -17,21 +18,15 @@ const itemVariants = {
   },
 }
 
-interface Props {
-  precos: any[]
-  disclaimers: any[]
-  badge?: string
-  titulo?: string
-  subtitulo?: string
-}
-
-export default function Precos({
-  precos,
-  disclaimers,
-  badge,
-  titulo,
-  subtitulo,
-}: Props) {
+export default function Precos({ precos, priceSection }: any) {
+  const badge = priceSection?.badge ?? ''
+  const title = priceSection?.title ?? ''
+  const subtitle = priceSection?.subtitle ?? ''
+  const disclaimers: any = priceSection?.disclaimers ?? []
+  console.log(disclaimers)
+  //  badge={config.precos_badge}
+  //         titulo={config.precos_titulo}
+  //         subtitulo={config.precos_subtitulo}
   return (
     <section id="precos" className="section-padding bg-gray-50">
       <div className="container-max">
@@ -47,11 +42,10 @@ export default function Precos({
             {badge ?? 'Passaportes'}
           </span>
           <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
-            {titulo ?? 'Preços'}
+            {title}
           </h2>
           <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
-            {subtitulo ??
-              'Escolha o passaporte ideal para o seu dia de diversão.'}
+            {subtitle}
           </p>
         </motion.div>
 
@@ -63,7 +57,7 @@ export default function Precos({
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 gap-8 lg:grid-cols-2"
         >
-          {precos.map((group) => (
+          {precos.map((group: any) => (
             <motion.div
               key={group.titulo}
               variants={itemVariants}
@@ -149,25 +143,12 @@ export default function Precos({
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2"
         >
-          {disclaimers.map((d) => (
+          {disclaimers.map((d: any) => (
             <div
-              key={d.titulo}
+              key={`disclaimers-${d.id}`}
               className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm"
             >
-              <h4 className="font-heading mb-5 flex items-center gap-2 text-lg font-semibold text-gray-800">
-                <span>{d.emoji}</span>
-                {d.titulo}
-              </h4>
-              <ul className="space-y-3">
-                {d.linhas.map((linha: any, i: any) => (
-                  <li
-                    key={i}
-                    className="font-body text-sm leading-relaxed text-gray-600"
-                  >
-                    {linha.texto}
-                  </li>
-                ))}
-              </ul>
+              <ReactMarkdown>{d?.value ?? ''}</ReactMarkdown>
             </div>
           ))}
         </motion.div>

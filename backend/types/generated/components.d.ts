@@ -13,6 +13,20 @@ export interface GeralAttractionSection extends Struct.ComponentSchema {
   };
 }
 
+export interface GeralContactSection extends Struct.ComponentSchema {
+  collectionName: 'components_geral_contact_sections';
+  info: {
+    displayName: 'contactSection';
+    icon: 'bulletList';
+  };
+  attributes: {
+    badge: Schema.Attribute.String;
+    formBtnLabel: Schema.Attribute.String;
+    subtitle: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface GeralCta extends Struct.ComponentSchema {
   collectionName: 'components_geral_ctas';
   info: {
@@ -112,6 +126,31 @@ export interface GeralPartySection extends Struct.ComponentSchema {
   };
 }
 
+export interface GeralPriceSection extends Struct.ComponentSchema {
+  collectionName: 'components_geral_price_sections';
+  info: {
+    displayName: 'priceSection';
+    icon: 'bulletList';
+  };
+  attributes: {
+    badge: Schema.Attribute.String;
+    disclaimers: Schema.Attribute.Component<'geral.rich-text', true>;
+    subtitle: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+  };
+}
+
+export interface GeralRichText extends Struct.ComponentSchema {
+  collectionName: 'components_geral_rich_texts';
+  info: {
+    displayName: 'richText';
+    icon: 'bulletList';
+  };
+  attributes: {
+    value: Schema.Attribute.RichText;
+  };
+}
+
 export interface PrecosLinha extends Struct.ComponentSchema {
   collectionName: 'components_precos_linhas';
   info: {
@@ -154,6 +193,7 @@ declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
       'geral.attraction-section': GeralAttractionSection;
+      'geral.contact-section': GeralContactSection;
       'geral.cta': GeralCta;
       'geral.feature-item': GeralFeatureItem;
       'geral.hero': GeralHero;
@@ -161,6 +201,8 @@ declare module '@strapi/strapi' {
       'geral.menu': GeralMenu;
       'geral.navbar': GeralNavbar;
       'geral.party-section': GeralPartySection;
+      'geral.price-section': GeralPriceSection;
+      'geral.rich-text': GeralRichText;
       'precos.linha': PrecosLinha;
       'precos.tier': PrecosTier;
       'secao.beneficio-destaque': SecaoBeneficioDestaque;
