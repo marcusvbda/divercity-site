@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import ImageModal from '@/components/ui/ImageModal'
+import { absoluteUrl } from '@/lib/helpers'
 
 const containerVariants = {
   hidden: {},
@@ -19,20 +20,12 @@ const itemVariants = {
   },
 }
 
-interface Props {
-  atracoes: any[]
-  badge?: string
-  titulo?: string
-  subtitulo?: string
-}
-
-export default function Atracoes({
-  atracoes,
-  badge,
-  titulo,
-  subtitulo,
-}: Props) {
+export default function Atracoes({ attractionSection, atracoes }: any) {
   const [selected, setSelected] = useState<any>(null)
+
+  const badge = attractionSection?.badge ?? ''
+  const title = attractionSection?.title ?? ''
+  const subtitle = attractionSection?.subtitle ?? ''
 
   return (
     <>
@@ -47,14 +40,13 @@ export default function Atracoes({
             className="mb-12 text-center"
           >
             <span className="bg-brand-cyan/10 text-brand-cyan font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
-              {badge ?? 'Explore o Parque'}
+              {badge}
             </span>
             <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
-              {titulo ?? 'Nossas Atrações'}
+              {title}
             </h2>
             <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
-              {subtitulo ??
-                'Mais de 10 atrações para crianças de todas as idades. Aventura, diversão e segurança em um só lugar.'}
+              {subtitle}
             </p>
           </motion.div>
 
@@ -66,7 +58,7 @@ export default function Atracoes({
             viewport={{ once: true, margin: '-80px' }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
-            {atracoes.map((atracao) => (
+            {atracoes.map((atracao: any) => (
               <motion.div
                 key={atracao.id}
                 variants={itemVariants}
@@ -77,14 +69,8 @@ export default function Atracoes({
                 <div className="relative h-52 w-full bg-gray-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={
-                      atracao.imagem?.url ??
-                      `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(atracao.nome)}`
-                    }
+                    src={absoluteUrl(atracao?.imagem?.url) as string}
                     alt={atracao.nome}
-                    onError={(e) => {
-                      e.currentTarget.src = `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(atracao.nome)}`
-                    }}
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
@@ -131,10 +117,7 @@ export default function Atracoes({
 
       {selected !== null && (
         <ImageModal
-          src={
-            selected.imagem?.url ??
-            `https://placehold.co/600x400/1a1a2e/ffffff?text=${encodeURIComponent(selected.nome)}`
-          }
+          src={absoluteUrl(selected.imagem?.url) as string}
           alt={selected.nome}
           titulo={selected.nome}
           descricao={selected.descricao}

@@ -17,6 +17,11 @@
       "component": "geral.navbar",
       "repeatable": false
     },
+    "attractionSection": {
+      "type": "component",
+      "component": "geral.attraction-section",
+      "repeatable": false
+    },
     "whatsapp_number": {
       "type": "string",
       "default": "5514997569008",
@@ -137,6 +142,11 @@
     "hero": {
       "type": "component",
       "component": "geral.hero",
+      "repeatable": false
+    },
+    "benefitSection": {
+      "type": "component",
+      "component": "geral.attraction-section",
       "repeatable": false
     }
   }

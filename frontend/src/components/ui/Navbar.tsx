@@ -29,7 +29,6 @@ export default function Navbar({ navbar }: any) {
 
   const cta = navbar?.cta ?? {}
 
-  console.log(cta)
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}

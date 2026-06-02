@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_geral_attraction_sections",
+  "info": {
+    "displayName": "section",
+    "icon": "dashboard"
+  },
+  "options": {},
+  "attributes": {
+    "badge": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

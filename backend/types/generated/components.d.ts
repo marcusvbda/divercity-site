@@ -1,5 +1,18 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface GeralAttractionSection extends Struct.ComponentSchema {
+  collectionName: 'components_geral_attraction_sections';
+  info: {
+    displayName: 'section';
+    icon: 'dashboard';
+  };
+  attributes: {
+    badge: Schema.Attribute.String;
+    subtitle: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+  };
+}
+
 export interface GeralCta extends Struct.ComponentSchema {
   collectionName: 'components_geral_ctas';
   info: {
@@ -120,6 +133,7 @@ export interface SecaoBeneficioDestaque extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'geral.attraction-section': GeralAttractionSection;
       'geral.cta': GeralCta;
       'geral.feature-item': GeralFeatureItem;
       'geral.hero': GeralHero;

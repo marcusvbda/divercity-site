@@ -56,21 +56,7 @@ const itemVariants = {
   },
 }
 
-interface Props {
-  beneficios: any[]
-  badge?: string
-  titulo?: string
-  tituloDestaque?: string
-  subtitulo?: string
-}
-
-export default function PorQueEscolher({
-  beneficios,
-  badge,
-  titulo,
-  tituloDestaque,
-  subtitulo,
-}: Props) {
+export default function PorQueEscolher({ beneficios, benefitSection }: any) {
   return (
     <section className="section-padding bg-white">
       <div className="container-max">
@@ -82,17 +68,13 @@ export default function PorQueEscolher({
           className="mb-12 text-center"
         >
           <span className="bg-brand-purple/10 text-brand-purple font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
-            {badge ?? 'Nossos Diferenciais'}
+            {benefitSection?.badge}
           </span>
           <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
-            {titulo ?? 'Por que as famílias escolhem o'}{' '}
-            <span className="text-brand-purple">
-              {tituloDestaque ?? 'Divercity Park?'}
-            </span>
+            {benefitSection?.title}
           </h2>
           <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
-            {subtitulo ??
-              'Mais do que um parque — somos uma experiência completa para toda a família.'}
+            {benefitSection?.subtitle}
           </p>
         </motion.div>
 
@@ -103,7 +85,7 @@ export default function PorQueEscolher({
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {beneficios.map((b) => {
+          {beneficios.map((b: any) => {
             const Icon = ICON_MAP[b.iconeName]
             return (
               <motion.div

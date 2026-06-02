@@ -522,9 +522,17 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     atracoes_badge: Schema.Attribute.String;
     atracoes_subtitulo: Schema.Attribute.Text;
     atracoes_titulo: Schema.Attribute.String;
+    attractionSection: Schema.Attribute.Component<
+      'geral.attraction-section',
+      false
+    >;
     beneficios_destaque: Schema.Attribute.Component<
       'secao.beneficio-destaque',
       true
+    >;
+    benefitSection: Schema.Attribute.Component<
+      'geral.attraction-section',
+      false
     >;
     contato_badge: Schema.Attribute.String;
     contato_cta: Schema.Attribute.String;
