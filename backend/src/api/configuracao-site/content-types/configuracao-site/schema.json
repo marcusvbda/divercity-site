@@ -55,82 +55,6 @@
     "google_maps_url": {
       "type": "string"
     },
-    "waze_url": {
-      "type": "string"
-    },
-    "festas_imagens": {
-      "type": "media",
-      "multiple": true,
-      "required": false,
-      "allowedTypes": [
-        "images"
-      ]
-    },
-    "atracoes_badge": {
-      "type": "string"
-    },
-    "atracoes_titulo": {
-      "type": "string"
-    },
-    "atracoes_subtitulo": {
-      "type": "text"
-    },
-    "beneficios_destaque": {
-      "type": "component",
-      "component": "secao.beneficio-destaque",
-      "repeatable": true
-    },
-    "festas_badge": {
-      "type": "string"
-    },
-    "festas_titulo": {
-      "type": "string"
-    },
-    "festas_titulo_destaque": {
-      "type": "string"
-    },
-    "festas_descricao": {
-      "type": "text"
-    },
-    "festas_cta_orcamento": {
-      "type": "string"
-    },
-    "festas_cta_precos": {
-      "type": "string"
-    },
-    "precos_badge": {
-      "type": "string"
-    },
-    "precos_titulo": {
-      "type": "string"
-    },
-    "precos_subtitulo": {
-      "type": "text"
-    },
-    "contato_badge": {
-      "type": "string"
-    },
-    "contato_titulo": {
-      "type": "string"
-    },
-    "contato_subtitulo": {
-      "type": "text"
-    },
-    "contato_cta": {
-      "type": "string"
-    },
-    "por_que_badge": {
-      "type": "string"
-    },
-    "por_que_titulo": {
-      "type": "string"
-    },
-    "por_que_titulo_destaque": {
-      "type": "string"
-    },
-    "por_que_subtitulo": {
-      "type": "text"
-    },
     "hero": {
       "type": "component",
       "component": "geral.hero",
@@ -158,6 +82,16 @@
     },
     "googleMapsUrlIframe": {
       "type": "string"
+    },
+    "logoFooter": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

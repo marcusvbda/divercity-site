@@ -84,15 +84,6 @@ export interface GeralLink extends Struct.ComponentSchema {
   };
 }
 
-export interface GeralMenu extends Struct.ComponentSchema {
-  collectionName: 'components_geral_menus';
-  info: {
-    displayName: 'Menu';
-    icon: 'pin';
-  };
-  attributes: {};
-}
-
 export interface GeralNavbar extends Struct.ComponentSchema {
   collectionName: 'components_geral_navbars';
   info: {
@@ -151,17 +142,6 @@ export interface GeralRichText extends Struct.ComponentSchema {
   };
 }
 
-export interface PrecosLinha extends Struct.ComponentSchema {
-  collectionName: 'components_precos_linhas';
-  info: {
-    displayName: 'Linha';
-    icon: 'list';
-  };
-  attributes: {
-    texto: Schema.Attribute.Text & Schema.Attribute.Required;
-  };
-}
-
 export interface PrecosTier extends Struct.ComponentSchema {
   collectionName: 'components_precos_tiers';
   info: {
@@ -175,20 +155,6 @@ export interface PrecosTier extends Struct.ComponentSchema {
   };
 }
 
-export interface SecaoBeneficioDestaque extends Struct.ComponentSchema {
-  collectionName: 'components_secao_beneficio_destaque';
-  info: {
-    displayName: 'Beneficio Destaque';
-    icon: 'star';
-  };
-  attributes: {
-    cor: Schema.Attribute.String & Schema.Attribute.Required;
-    descricao: Schema.Attribute.Text & Schema.Attribute.Required;
-    iconeName: Schema.Attribute.String & Schema.Attribute.Required;
-    titulo: Schema.Attribute.String & Schema.Attribute.Required;
-  };
-}
-
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
@@ -198,14 +164,11 @@ declare module '@strapi/strapi' {
       'geral.feature-item': GeralFeatureItem;
       'geral.hero': GeralHero;
       'geral.link': GeralLink;
-      'geral.menu': GeralMenu;
       'geral.navbar': GeralNavbar;
       'geral.party-section': GeralPartySection;
       'geral.price-section': GeralPriceSection;
       'geral.rich-text': GeralRichText;
-      'precos.linha': PrecosLinha;
       'precos.tier': PrecosTier;
-      'secao.beneficio-destaque': SecaoBeneficioDestaque;
     }
   }
 }

@@ -1,5 +1,7 @@
-import Image from 'next/image'
+'use client'
+
 import { Camera, MessageCircle, MapPin, Clock } from 'lucide-react'
+import { absoluteUrl } from '@/lib/helpers'
 
 interface FooterProps {
   config: any
@@ -15,11 +17,10 @@ export default function Footer({ config }: FooterProps) {
           {/* Brand */}
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <Image
-                src="/logo-ball-fundo.png"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={absoluteUrl(config?.logoFooter?.url) as string}
                 alt="Divercity Park"
-                width={64}
-                height={64}
                 className="h-16 w-16"
               />
               <div>

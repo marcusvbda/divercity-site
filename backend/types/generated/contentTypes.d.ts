@@ -519,38 +519,20 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
     draftAndPublish: false;
   };
   attributes: {
-    atracoes_badge: Schema.Attribute.String;
-    atracoes_subtitulo: Schema.Attribute.Text;
-    atracoes_titulo: Schema.Attribute.String;
     attractionSection: Schema.Attribute.Component<
       'geral.attraction-section',
       false
-    >;
-    beneficios_destaque: Schema.Attribute.Component<
-      'secao.beneficio-destaque',
-      true
     >;
     benefitSection: Schema.Attribute.Component<
       'geral.attraction-section',
       false
     >;
     contactSection: Schema.Attribute.Component<'geral.contact-section', false>;
-    contato_badge: Schema.Attribute.String;
-    contato_cta: Schema.Attribute.String;
-    contato_subtitulo: Schema.Attribute.Text;
-    contato_titulo: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     endereco: Schema.Attribute.String &
       Schema.Attribute.DefaultTo<'Av. Tuiuti, 710 \u2013 Gleba Patrim\u00F4nio Maringa, Maring\u00E1 87043-720'>;
-    festas_badge: Schema.Attribute.String;
-    festas_cta_orcamento: Schema.Attribute.String;
-    festas_cta_precos: Schema.Attribute.String;
-    festas_descricao: Schema.Attribute.Text;
-    festas_imagens: Schema.Attribute.Media<'images', true>;
-    festas_titulo: Schema.Attribute.String;
-    festas_titulo_destaque: Schema.Attribute.String;
     google_maps_url: Schema.Attribute.String;
     google_place_id: Schema.Attribute.String;
     google_places_api_key: Schema.Attribute.String;
@@ -569,64 +551,19 @@ export interface ApiConfiguracaoSiteConfiguracaoSite
       'api::configuracao-site.configuracao-site'
     > &
       Schema.Attribute.Private;
+    logoFooter: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
     navbar: Schema.Attribute.Component<'geral.navbar', false>;
     partySection: Schema.Attribute.Component<'geral.party-section', false>;
-    por_que_badge: Schema.Attribute.String;
-    por_que_subtitulo: Schema.Attribute.Text;
-    por_que_titulo: Schema.Attribute.String;
-    por_que_titulo_destaque: Schema.Attribute.String;
-    precos_badge: Schema.Attribute.String;
-    precos_subtitulo: Schema.Attribute.Text;
-    precos_titulo: Schema.Attribute.String;
     priceSection: Schema.Attribute.Component<'geral.price-section', false>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    waze_url: Schema.Attribute.String;
     whatsapp_number: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'5514997569008'>;
-  };
-}
-
-export interface ApiDepoimentoDepoimento extends Struct.CollectionTypeSchema {
-  collectionName: 'depoimentos';
-  info: {
-    description: 'Depoimentos de clientes';
-    displayName: 'Depoimento';
-    pluralName: 'depoimentos';
-    singularName: 'depoimento';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    avatar: Schema.Attribute.Media<'images'>;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    estrelas: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetMinMax<
-        {
-          max: 5;
-          min: 1;
-        },
-        number
-      >;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::depoimento.depoimento'
-    > &
-      Schema.Attribute.Private;
-    nome: Schema.Attribute.String & Schema.Attribute.Required;
-    publishedAt: Schema.Attribute.DateTime;
-    texto: Schema.Attribute.Text & Schema.Attribute.Required;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
   };
 }
 
@@ -653,39 +590,6 @@ export interface ApiPrecoPreco extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     subtitulo: Schema.Attribute.String;
     tiers: Schema.Attribute.Component<'precos.tier', true>;
-    titulo: Schema.Attribute.String & Schema.Attribute.Required;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-  };
-}
-
-export interface ApiPriceDisclaimerPriceDisclaimer
-  extends Struct.CollectionTypeSchema {
-  collectionName: 'price_disclaimers';
-  info: {
-    description: 'Disclaimers sobre pre\u00E7os, acompanhantes e descontos';
-    displayName: 'Price Disclaimer';
-    pluralName: 'price-disclaimers';
-    singularName: 'price-disclaimer';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    emoji: Schema.Attribute.String & Schema.Attribute.Required;
-    linhas: Schema.Attribute.Component<'precos.linha', true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::price-disclaimer.price-disclaimer'
-    > &
-      Schema.Attribute.Private;
-    ordem: Schema.Attribute.Integer;
-    publishedAt: Schema.Attribute.DateTime;
     titulo: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1241,9 +1145,7 @@ declare module '@strapi/strapi' {
       'api::atracao.atracao': ApiAtracaoAtracao;
       'api::beneficio.beneficio': ApiBeneficioBeneficio;
       'api::configuracao-site.configuracao-site': ApiConfiguracaoSiteConfiguracaoSite;
-      'api::depoimento.depoimento': ApiDepoimentoDepoimento;
       'api::preco.preco': ApiPrecoPreco;
-      'api::price-disclaimer.price-disclaimer': ApiPriceDisclaimerPriceDisclaimer;
       'api::site-metadata.site-metadata': ApiSiteMetadataSiteMetadata;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

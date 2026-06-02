@@ -23,10 +23,7 @@ export default function Precos({ precos, priceSection }: any) {
   const title = priceSection?.title ?? ''
   const subtitle = priceSection?.subtitle ?? ''
   const disclaimers: any = priceSection?.disclaimers ?? []
-  console.log(disclaimers)
-  //  badge={config.precos_badge}
-  //         titulo={config.precos_titulo}
-  //         subtitulo={config.precos_subtitulo}
+
   return (
     <section id="precos" className="section-padding bg-gray-50">
       <div className="container-max">

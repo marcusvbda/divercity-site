@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { getCMSConfig, getCMSDepoimentos } from '@/lib/cms'
+import { getCMSConfig } from '@/lib/cms'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export interface GoogleReview {
   id: string
@@ -11,22 +11,6 @@ export interface GoogleReview {
   time: number
   profile_photo_url: string
   relative_time_description: string
-}
-
-/** Converte depoimentos do Strapi para o formato GoogleReview */
-async function getDepoimentosAsFallback(): Promise<GoogleReview[]> {
-  const depoimentos = await getCMSDepoimentos()
-  return depoimentos.map((d) => ({
-    id: String(d.id),
-    author_name: d.nome,
-    rating: d.estrelas,
-    text: d.texto,
-    time: Date.now() / 1000,
-    profile_photo_url:
-      d.avatar?.url ??
-      `https://placehold.co/80x80/8E4CCF/ffffff?text=${encodeURIComponent(d.nome[0])}`,
-    relative_time_description: '',
-  }))
 }
 
 async function findPlaceId(apiKey: string, configPlaceId?: string): Promise<string | null> {
@@ -40,23 +24,17 @@ async function findPlaceId(apiKey: string, configPlaceId?: string): Promise<stri
 }
 
 export async function GET() {
-  // Credenciais do Google vêm do CMS, não do .env
   const config = await getCMSConfig()
   const apiKey = config.google_places_api_key
   const configPlaceId = config.google_place_id
 
   if (!apiKey) {
-    // Sem token Google → usa depoimentos do CMS
-    const fallback = await getDepoimentosAsFallback()
-    return NextResponse.json(fallback)
+    return NextResponse.json([])
   }
 
   try {
     const placeId = await findPlaceId(apiKey, configPlaceId)
-    if (!placeId) {
-      const fallback = await getDepoimentosAsFallback()
-      return NextResponse.json(fallback)
-    }
+    if (!placeId) return NextResponse.json([])
 
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&language=pt-BR&reviews_sort=newest&key=${apiKey}`
     const res = await fetch(detailsUrl, { next: { revalidate: 3600 } })
@@ -64,7 +42,7 @@ export async function GET() {
     if (!res.ok) throw new Error(`Places API error: ${res.status}`)
 
     const data = await res.json()
-    const allReviews: GoogleReview[] = (data?.result?.reviews ?? []).map(
+    const reviews: GoogleReview[] = (data?.result?.reviews ?? []).map(
       (r: Record<string, unknown>, i: number) => ({
         id: String(i),
         author_name: r.author_name as string,
@@ -76,17 +54,9 @@ export async function GET() {
       })
     )
 
-    // Apenas reviews > 4 estrelas
-    const filtered = allReviews.filter((r) => r.rating > 4)
-
-    if (filtered.length > 0) return NextResponse.json(filtered)
-
-    // Google não retornou nada útil → fallback do CMS
-    const fallback = await getDepoimentosAsFallback()
-    return NextResponse.json(fallback)
+    return NextResponse.json(reviews.filter((r) => r.rating > 4))
   } catch (err) {
     console.error('Erro ao buscar reviews do Google:', err)
-    const fallback = await getDepoimentosAsFallback()
-    return NextResponse.json(fallback)
+    return NextResponse.json([])
   }
 }
