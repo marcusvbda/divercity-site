@@ -97,7 +97,7 @@ export default function Footer({ config }: FooterProps) {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/15 pt-8 sm:flex-row">
-          <p className="font-body text-sm text-white/50">
+          <p className="font-body text-sm text-white/50" suppressHydrationWarning>
             © {currentYear} Divercity Park. Todos os direitos reservados.
           </p>
           <p className="font-body text-xs text-white/40">
