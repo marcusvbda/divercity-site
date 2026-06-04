@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Fredoka, Poppins } from 'next/font/google'
 import './globals.css'
 import { getCMSSiteMetadata } from '@/lib/cms'
+import ReactQueryProvider from '@/providers/ReactQueryProvider'
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -76,7 +77,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${poppins.variable}`}>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased"><ReactQueryProvider>{children}</ReactQueryProvider></body>
     </html>
   )
 }
