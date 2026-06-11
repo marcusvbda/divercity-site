@@ -20,12 +20,18 @@ const itemVariants = {
   },
 }
 
-export default function Atracoes({ attractionSection, atracoes }: any) {
-  const [selected, setSelected] = useState<any>(null)
+type AttractionItem = {
+  id: number
+  value: { name: string; description: string; image: string; color: string; sort: string }
+}
 
-  const badge = attractionSection?.badge ?? ''
-  const title = attractionSection?.title ?? ''
-  const subtitle = attractionSection?.subtitle ?? ''
+export default function Atracoes({ attractions }: any) {
+  const [selected, setSelected] = useState<AttractionItem | null>(null)
+
+  const badge    = attractions?.Section?.badge?.value    ?? ''
+  const title    = attractions?.Section?.title?.value    ?? ''
+  const subtitle = attractions?.Section?.subtitle?.value ?? ''
+  const list: AttractionItem[] = attractions?.Content?.Attraction ?? []
 
   return (
     <>
@@ -58,33 +64,33 @@ export default function Atracoes({ attractionSection, atracoes }: any) {
             viewport={{ once: true, margin: '-80px' }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
-            {atracoes.map((atracao: any) => (
+            {list.map((item) => (
               <motion.div
-                key={atracao.id}
+                key={item.id}
                 variants={itemVariants}
                 whileHover={{ y: -8 }}
-                onClick={() => setSelected(atracao)}
+                onClick={() => setSelected(item)}
                 className="group relative cursor-pointer overflow-hidden rounded-2xl shadow-md transition-shadow hover:shadow-xl"
               >
                 <div className="relative h-52 w-full bg-gray-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={absoluteUrl(atracao?.imagem?.url) as string}
-                    alt={atracao.nome}
+                    src={absoluteUrl(item.value.image) as string}
+                    alt={item.value.name}
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                 </div>
                 <div
                   className="absolute top-0 right-0 left-0 h-1"
-                  style={{ backgroundColor: atracao.cor }}
+                  style={{ backgroundColor: item.value.color }}
                 />
                 <div className="absolute right-0 bottom-0 left-0 p-4">
                   <h3 className="font-heading text-lg leading-tight font-semibold text-white">
-                    {atracao.nome}
+                    {item.value.name}
                   </h3>
                   <p className="font-body mt-1 line-clamp-2 text-xs text-white/70">
-                    {atracao.descricao}
+                    {item.value.description}
                   </p>
                 </div>
               </motion.div>
@@ -95,9 +101,7 @@ export default function Atracoes({ attractionSection, atracoes }: any) {
               variants={itemVariants}
               whileHover={{ y: -8 }}
               onClick={() =>
-                document
-                  .querySelector('#contato')
-                  ?.scrollIntoView({ behavior: 'smooth' })
+                document.querySelector('#contato')?.scrollIntoView({ behavior: 'smooth' })
               }
               className="group from-brand-purple to-brand-pink relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br p-8 text-center shadow-md transition-shadow hover:shadow-xl"
             >
@@ -117,10 +121,10 @@ export default function Atracoes({ attractionSection, atracoes }: any) {
 
       {selected !== null && (
         <ImageModal
-          src={absoluteUrl(selected.imagem?.url) as string}
-          alt={selected.nome}
-          titulo={selected.nome}
-          descricao={selected.descricao}
+          src={absoluteUrl(selected.value.image) as string}
+          alt={selected.value.name}
+          titulo={selected.value.name}
+          descricao={selected.value.description}
           onClose={() => setSelected(null)}
         />
       )}

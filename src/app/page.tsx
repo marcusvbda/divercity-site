@@ -9,35 +9,21 @@ import Contato from '@/components/sections/Contato'
 import Atracoes from '@/components/sections/Atracoes'
 
 import Footer from '@/components/sections/Footer'
-import {
-  getCMSConfig,
-  getCMSAtracoes,
-  getCMSBeneficios,
-  getCMSPrecos,
-} from '@/lib/cms-old'
 import { getContentType } from '@/lib/cms'
 
 export default async function Home() {
-  const [
-    navBarContent,
-    // config, atracoes, beneficios, precos
-  ] = await Promise.all([
+  const [navBarContent, heroContent, attractionsContent] = await Promise.all([
     getContentType('NavBar'),
-    // getCMSConfig(),
-    // getCMSAtracoes(),
-    // getCMSBeneficios(),
-    // getCMSPrecos(),
+    getContentType('Hero'),
+    getContentType('Attractions'),
   ])
 
   return (
     <>
       <Navbar navbar={navBarContent} />
       <main>
-        {/* <Hero hero={config?.hero ?? {}} /> */}
-        {/* <Atracoes
-          attractionSection={config?.attractionSection ?? {}}
-          atracoes={atracoes}
-        /> */}
+        <Hero hero={heroContent} />
+        <Atracoes attractions={attractionsContent} />
         {/* <PorQueEscolher
           beneficios={beneficios}
           benefitSection={config?.benefitSection ?? {}}

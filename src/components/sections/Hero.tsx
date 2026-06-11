@@ -5,56 +5,21 @@ import { motion } from 'framer-motion'
 import CtaButton from '../ui/cta'
 
 const FLOATING_ELEMENTS = [
-  { color: '#12C7C8', size: 80, left: '8%', top: '20%', delay: 0, duration: 3 },
-  {
-    color: '#8E4CCF',
-    size: 60,
-    left: '88%',
-    top: '15%',
-    delay: 0.5,
-    duration: 4,
-  },
-  {
-    color: '#FF4F8A',
-    size: 100,
-    left: '5%',
-    top: '70%',
-    delay: 1,
-    duration: 3.5,
-  },
-  {
-    color: '#9AD94B',
-    size: 50,
-    left: '92%',
-    top: '65%',
-    delay: 0.8,
-    duration: 2.8,
-  },
-  {
-    color: '#FFD23F',
-    size: 70,
-    left: '80%',
-    top: '45%',
-    delay: 0.3,
-    duration: 4.2,
-  },
-  {
-    color: '#12C7C8',
-    size: 40,
-    left: '15%',
-    top: '50%',
-    delay: 1.2,
-    duration: 3.2,
-  },
+  { color: '#12C7C8', size: 80, left: '8%',  top: '20%', delay: 0,   duration: 3   },
+  { color: '#8E4CCF', size: 60, left: '88%', top: '15%', delay: 0.5, duration: 4   },
+  { color: '#FF4F8A', size: 100,left: '5%',  top: '70%', delay: 1,   duration: 3.5 },
+  { color: '#9AD94B', size: 50, left: '92%', top: '65%', delay: 0.8, duration: 2.8 },
+  { color: '#FFD23F', size: 70, left: '80%', top: '45%', delay: 0.3, duration: 4.2 },
+  { color: '#12C7C8', size: 40, left: '15%', top: '50%', delay: 1.2, duration: 3.2 },
 ]
 
 export default function Hero({ hero }: any) {
-  const title = hero?.title ?? ''
-  const subtitle = hero?.subtitle ?? ''
-  const primaryCta = hero?.primaryCta ?? {}
-  const secondaryCta = hero?.secondaryCta ?? {}
-  const bgImage = hero?.bgImage ?? {}
-  const image = hero?.image ?? {}
+  const title       = hero?.Content?.title?.value    ?? ''
+  const subtitle    = hero?.Content?.subtitle?.value ?? ''
+  const bgImage     = hero?.Media?.bgImage?.value    ?? null
+  const image       = hero?.Media?.image?.value      ?? null
+  const primaryCta  = hero?.Actions?.primaryCta?.value  ?? null
+  const secondaryCta = hero?.Actions?.secondaryCta?.value ?? null
 
   return (
     <section
@@ -67,12 +32,11 @@ export default function Hero({ hero }: any) {
           <div className="relative h-screen">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={absoluteUrl(bgImage?.url) as string}
+              src={absoluteUrl(bgImage) as string}
               alt="Divercity Park - Parque Indoor"
               className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/75" />
         </div>
       )}
@@ -101,7 +65,6 @@ export default function Hero({ hero }: any) {
 
       {/* Content */}
       <div className="container-max relative z-10 px-4 text-center md:px-8">
-        {/* Logo */}
         {image && (
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
@@ -111,14 +74,13 @@ export default function Hero({ hero }: any) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={absoluteUrl(image?.url) as string}
+              src={absoluteUrl(image) as string}
               alt="Divercity Park"
               className="h-48 w-48 drop-shadow-2xl md:h-48 md:w-48"
             />
           </motion.div>
         )}
 
-        {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -128,7 +90,6 @@ export default function Hero({ hero }: any) {
           {title}
         </motion.h1>
 
-        {/* Supporting text */}
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -138,38 +99,29 @@ export default function Hero({ hero }: any) {
           {subtitle}
         </motion.p>
 
-        {/* CTAs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}
           className="flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          {/* <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => scrollTo('#festas')}
-            className="bg-brand-pink font-body rounded-full px-8 py-4 text-lg font-bold text-white shadow-lg shadow-pink-500/40 transition-colors hover:bg-pink-600"
-          >
-            {ctaPrimario ?? 'Reservar Festa'}
-          </motion.button> */}
-          {primaryCta?.id && (
+          {primaryCta?.label && (
             <CtaButton
-              onClick={() => scrollTo(primaryCta?.href)}
+              onClick={() => scrollTo(primaryCta.href ?? '')}
               cta={primaryCta}
               className="px-8! py-4! text-lg!"
             >
-              {primaryCta?.label}
+              {primaryCta.label}
             </CtaButton>
           )}
 
-          {secondaryCta?.id && (
+          {secondaryCta?.label && (
             <CtaButton
-              onClick={() => scrollTo(secondaryCta?.href)}
+              onClick={() => scrollTo(secondaryCta.href ?? '')}
               cta={secondaryCta}
               className="px-8! py-4! text-lg!"
             >
-              {secondaryCta?.label}
+              {secondaryCta.label}
             </CtaButton>
           )}
         </motion.div>

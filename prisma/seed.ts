@@ -213,6 +213,27 @@ async function main() {
     'hoverBorder'
   )
 
+  // General/Attraction
+  const attractionTemplateComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Attraction', contentTypeId: generalType.id } },
+    update: {},
+    create: { name: 'Attraction', contentTypeId: generalType.id },
+  })
+
+  await seedFields(attractionTemplateComponent.id, [
+    { name: 'name',        value: '' },
+    { name: 'description', value: '' },
+    { name: 'image',       value: '' },
+    { name: 'color',       value: '' },
+    { name: 'sort',        value: '' },
+  ])
+
+  const attractionNameField        = await getField(attractionTemplateComponent.id, 'name')
+  const attractionDescriptionField = await getField(attractionTemplateComponent.id, 'description')
+  const attractionImageField       = await getField(attractionTemplateComponent.id, 'image')
+  const attractionColorField       = await getField(attractionTemplateComponent.id, 'color')
+  const attractionSortField        = await getField(attractionTemplateComponent.id, 'sort')
+
   // ── NavBar ────────────────────────────────────────────────────────────────
   const navbarType = await prisma.contentType.upsert({
     where: { name: 'NavBar' },
@@ -320,6 +341,126 @@ async function main() {
 
     await prisma.componentFieldValue.create({
       data: { componentFieldId: menuItemsField.id, instanceId: instance.id },
+    })
+  }
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  const heroType = await prisma.contentType.upsert({
+    where: { name: 'Hero' },
+    update: {},
+    create: { name: 'Hero' },
+  })
+
+  const heroContentComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Content', contentTypeId: heroType.id } },
+    update: {},
+    create: { name: 'Content', contentTypeId: heroType.id },
+  })
+
+  await seedFields(heroContentComponent.id, [
+    { name: 'title',    value: 'Diversão para toda a família' },
+    { name: 'subtitle', value: 'Mais de 10 atrações incríveis, festas personalizadas inesquecíveis e um espaço pensado para toda a família.' },
+  ])
+
+  const heroMediaComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Media', contentTypeId: heroType.id } },
+    update: {},
+    create: { name: 'Media', contentTypeId: heroType.id },
+  })
+
+  await seedFields(heroMediaComponent.id, [
+    { name: 'bgImage', value: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/hero.png' },
+    { name: 'image',   value: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/logo-ball.png' },
+  ])
+
+  const heroActionsComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Actions', contentTypeId: heroType.id } },
+    update: {},
+    create: { name: 'Actions', contentTypeId: heroType.id },
+  })
+
+  await seedInstanceField(heroActionsComponent.id, 'primaryCta', ctaTemplateComponent.id, [
+    { fieldId: ctaLabelField.id,        value: 'Reservar festa' },
+    { fieldId: ctaHrefField.id,         value: '#festas' },
+    { fieldId: ctaColorField.id,        value: '#fefefe' },
+    { fieldId: ctaBgColorField.id,      value: '#FF4F8A' },
+    { fieldId: ctaBorderField.id,       value: '' },
+    { fieldId: ctaHoverColorField.id,   value: '' },
+    { fieldId: ctaHoverBgColorField.id, value: '' },
+    { fieldId: ctaHoverBorderField.id,  value: '' },
+  ])
+
+  await seedInstanceField(heroActionsComponent.id, 'secondaryCta', ctaTemplateComponent.id, [
+    { fieldId: ctaLabelField.id,        value: 'Atrações' },
+    { fieldId: ctaHrefField.id,         value: '#atracoes' },
+    { fieldId: ctaColorField.id,        value: '#fefefe' },
+    { fieldId: ctaBgColorField.id,      value: 'transparent' },
+    { fieldId: ctaBorderField.id,       value: '1px solid #fefefe' },
+    { fieldId: ctaHoverColorField.id,   value: '' },
+    { fieldId: ctaHoverBgColorField.id, value: '' },
+    { fieldId: ctaHoverBorderField.id,  value: '' },
+  ])
+
+  // ── Attractions ───────────────────────────────────────────────────────────
+  const attractionsType = await prisma.contentType.upsert({
+    where: { name: 'Attractions' },
+    update: {},
+    create: { name: 'Attractions' },
+  })
+
+  const attractionsSectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: attractionsType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: attractionsType.id },
+  })
+
+  await seedFields(attractionsSectionComponent.id, [
+    { name: 'title',    value: 'Nossas Atrações' },
+    { name: 'badge',    value: 'Explore o Parque' },
+    { name: 'subtitle', value: 'Mais de 10 atrações para crianças de todas as idades. Aventura, diversão e segurança em um só lugar.' },
+  ])
+
+  const attractionsContentComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Content', contentTypeId: attractionsType.id } },
+    update: {},
+    create: { name: 'Content', contentTypeId: attractionsType.id },
+  })
+
+  const attractionListField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'Attraction', contentComponentId: attractionsContentComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'Attraction', type: 'multiple', contentComponentId: attractionsContentComponent.id },
+  })
+
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: attractionListField.id } })
+
+  const attractionData = [
+    { name: 'Arena de Camas Elásticas', description: 'Nossa arena de camas elásticas é o lugar perfeito para pular e se divertir! Com trampolins interconectados, as crianças podem pular livremente, realizar acrobacias e liberar toda a energia.', color: '#12C7C8', sort: '1', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/cama-elastica.png' },
+    { name: 'Guerreiro Ninja',          description: 'Desafie suas habilidades na nossa pista de obstáculos Guerreiro Ninja! Projetada para testar força, agilidade e coordenação, essa atração oferece diferentes níveis de dificuldade para crianças de todas as idades.', color: '#8E4CCF', sort: '2', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/guerreiro-ninja.png' },
+    { name: 'Parede de Escalada',       description: 'Nossa parede de escalar é ideal para pequenos alpinistas. Com vários percursos e níveis de dificuldade, as crianças podem desenvolver suas habilidades em um ambiente seguro, sempre supervisionado por nossos monitores.', color: '#FF4F8A', sort: '3', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/parede-escalada.png' },
+    { name: 'Salão de Festas',          description: 'Venha celebrar o aniversário do seu filho com a diversão do Divercity Park! Nosso salão oferece conforto, segurança e acesso a todas as atrações. Adultos não pagam entrada para acompanhar a festa!', color: '#FFD23F', sort: '4', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/salao-de-festas.png' },
+    { name: 'Desafio Radical',          description: 'Prepare-se para enfrentar o Desafio Radical, nosso circuito de obstáculos emocionante! Com desafios que testam agilidade, força e coragem, os pequenos poderão escalar, pular, rastejar e se equilibrar.', color: '#9AD94B', sort: '5', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/desafio-radical.png' },
+    { name: 'Pula-Pulas',               description: 'Nosso espaço de Pula-Pula é perfeito para crianças de todas as idades! Com várias áreas de pula-pula infláveis, as crianças podem gastar energia enquanto se divertem em segurança.', color: '#12C7C8', sort: '6', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/pula-pulas.png' },
+    { name: 'Bar e Petiscaria',         description: 'Enquanto as crianças brincam, os pais podem relaxar no nosso bar. Com ambiente aconchegante, oferecemos cafés, chás, sucos e coquetéis. O lugar perfeito para descontrair enquanto os pequenos se divertem.', color: '#8E4CCF', sort: '7', image: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/bar.png' },
+  ]
+
+  for (const item of attractionData) {
+    const instance = await prisma.componentInstance.create({
+      data: { templateComponentId: attractionTemplateComponent.id },
+    })
+
+    await prisma.componentInstanceFieldValue.createMany({
+      data: [
+        { instanceId: instance.id, fieldId: attractionNameField.id,        value: item.name },
+        { instanceId: instance.id, fieldId: attractionDescriptionField.id, value: item.description },
+        { instanceId: instance.id, fieldId: attractionImageField.id,       value: item.image },
+        { instanceId: instance.id, fieldId: attractionColorField.id,       value: item.color },
+        { instanceId: instance.id, fieldId: attractionSortField.id,        value: item.sort },
+      ],
+    })
+
+    await prisma.componentFieldValue.create({
+      data: { componentFieldId: attractionListField.id, instanceId: instance.id },
     })
   }
 
