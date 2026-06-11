@@ -4,5 +4,9 @@
       "Bash(claude mcp *)",
       "Bash(npx skills *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "enableAllProjectMcpServers": true
 }

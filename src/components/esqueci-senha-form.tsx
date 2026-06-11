@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { esqueciSenhaSchema, type EsqueciSenhaFormData } from "@/lib/schemas/auth";
+import { forgotPasswordSchema as esqueciSenhaSchema, type ForgotPasswordFormData as EsqueciSenhaFormData } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

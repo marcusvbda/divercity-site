@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { esqueciSenhaSchema, type EsqueciSenhaFormData } from "@/lib/schemas/auth";
+import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,32 +20,32 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export default function EsqueciSenhaForm({
+export default function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [enviado, setEnviado] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EsqueciSenhaFormData>({
-    resolver: zodResolver(esqueciSenhaSchema),
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
   });
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: async (data: EsqueciSenhaFormData) => {
+    mutationFn: async (data: ForgotPasswordFormData) => {
       const { error } = await supabaseBrowser.auth.resetPasswordForEmail(
         data.email,
         { redirectTo: `${window.location.origin}/admin/login/redefinir-senha` }
       );
       if (error) throw new Error("Não foi possível enviar o e-mail. Tente novamente.");
     },
-    onSuccess: () => setEnviado(true),
+    onSuccess: () => setSent(true),
   });
 
-  if (enviado) {
+  if (sent) {
     return (
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>

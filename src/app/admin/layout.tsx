@@ -1,3 +1,4 @@
+import { connection } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import NextAuthProvider from '@/providers/NextAuthProvider'
@@ -8,6 +9,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  await connection()
   const session = await getServerSession(authOptions)
 
   return (

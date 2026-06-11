@@ -5,11 +5,11 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Mínimo 6 caracteres"),
 });
 
-export const esqueciSenhaSchema = z.object({
+export const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Email obrigatório").email("Email inválido"),
 });
 
-export const redefinirSenhaSchema = z
+export const resetPasswordSchema = z
   .object({
     password: z
       .string()
@@ -24,5 +24,5 @@ export const redefinirSenhaSchema = z
   });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
-export type EsqueciSenhaFormData = z.infer<typeof esqueciSenhaSchema>;
-export type RedefinirSenhaFormData = z.infer<typeof redefinirSenhaSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

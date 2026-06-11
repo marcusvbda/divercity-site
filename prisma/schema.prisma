@@ -6,3 +6,43 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model ContentType {
+  id         Int                @id @default(autoincrement())
+  name       String             @unique
+  components ContentComponent[]
+
+  @@map("content_types")
+}
+
+model ContentComponent {
+  id            Int              @id @default(autoincrement())
+  name          String
+  type          String           @default("simple")
+  contentTypeId Int
+  contentType   ContentType      @relation(fields: [contentTypeId], references: [id])
+  fields        ComponentField[]
+
+  @@unique([name, contentTypeId])
+  @@map("content_components")
+}
+
+model ComponentField {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  contentComponentId Int
+  contentComponent   ContentComponent     @relation(fields: [contentComponentId], references: [id])
+  values             ComponentFieldValue[]
+
+  @@unique([name, contentComponentId])
+  @@map("component_fields")
+}
+
+model ComponentFieldValue {
+  id               Int            @id @default(autoincrement())
+  value            String?
+  componentFieldId Int
+  componentField   ComponentField @relation(fields: [componentFieldId], references: [id])
+
+  @@map("component_field_values")
+}

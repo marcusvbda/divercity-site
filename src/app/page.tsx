@@ -1,5 +1,3 @@
-export const revalidate = 60
-
 import Navbar from '@/components/ui/Navbar'
 import Hero from '@/components/sections/Hero'
 import PorQueEscolher from '@/components/sections/PorQueEscolher'
@@ -16,7 +14,7 @@ import {
   getCMSAtracoes,
   getCMSBeneficios,
   getCMSPrecos,
-} from '@/lib/cms'
+} from '@/lib/cms-old'
 
 export default async function Home() {
   const [config, atracoes, beneficios, precos] = await Promise.all([

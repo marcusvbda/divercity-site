@@ -57,7 +57,7 @@ divercity-site/
 
 | Tecnologia | Versão | Notas |
 |-----------|--------|-------|
-| Next.js | 16 App Router | React Compiler ativado |
+| Next.js | **16** App Router | React Compiler ativado, `cacheComponents: true` |
 | TypeScript | 5 | strict mode |
 | Tailwind CSS | **v4** | CSS-first config via `@theme` em globals.css |
 | Framer Motion | 12 | `whileInView` + `viewport` para scroll |
@@ -136,6 +136,19 @@ const data = await res.json()
 - `GET /api/depoimentos`
 - `GET /api/beneficios?sort=ordem`
 - `GET /api/configuracao-site`
+
+---
+
+## Next.js 16 + React Compiler — Regras
+
+- **React Compiler está ativado** — não adicionar `useMemo`, `useCallback` ou `memo()` manualmente; o compiler otimiza automaticamente.
+- **`cacheComponents: true` está ativo** — todo dado async em Server Components deve ser cacheado (`'use cache'`) ou estar dentro de `<Suspense>`.
+- **`'use cache'`** em funções async que consultam o banco ou APIs externas (ex: `getContentType` em `cms.ts`).
+- **Dados dinâmicos de request** (ex: `getServerSession`) devem ser precedidos de `await connection()` do `next/server` para não bloquear prerender.
+- **`force-dynamic` não é compatível com `cacheComponents`** — usar `connection()` + `<Suspense>` no lugar.
+- **Root layout** envolve `children` com `<Suspense>` para permitir que rotas dinâmicas (admin) façam Partial Prerender.
+- **`middleware.ts` foi renomeado para `proxy.ts`** — convenção do Next.js 16.
+- **`backend/` está excluído do `tsconfig.json`** — não incluir arquivos Strapi na compilação do frontend.
 
 ---
 

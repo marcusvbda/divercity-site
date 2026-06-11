@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { Fredoka, Poppins } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
-import { getCMSSiteMetadata } from '@/lib/cms'
 import ReactQueryProvider from '@/providers/ReactQueryProvider'
+import { getContentType } from '@/lib/cms'
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -28,45 +29,30 @@ const FAVICON_ICONS: Metadata['icons'] = {
   other: [{ rel: 'manifest', url: '/favicon/site.webmanifest' }],
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const meta = await getCMSSiteMetadata()
-    if (!meta) throw new Error('CMS metadata unavailable')
-    return {
-      title: meta.titulo,
-      description: meta.descricao,
-      keywords: meta.keywords?.split(',').map((k: any) => k.trim()),
-      icons: FAVICON_ICONS,
-      openGraph: {
-        title: meta.og_titulo ?? meta.titulo,
-        description: meta.og_descricao ?? meta.descricao,
-        type: 'website',
-        images: meta.og_imagem
-          ? [
-              {
-                url: meta.og_imagem.url,
-                width: meta.og_imagem.width ?? 512,
-                height: meta.og_imagem.height ?? 512,
-              },
-            ]
-          : [{ url: '/logo-ball.png', width: 512, height: 512 }],
-      },
-    }
-  } catch {
-    // Fallback to static values if CMS is unavailable
-    return {
-      title: 'Divercity Park — Diversão para toda a família',
-      description:
-        'Divercity Park é o melhor parque indoor da região. Festas de aniversário, mais de 10 atrações, área para pais e muito mais.',
-      icons: FAVICON_ICONS,
-      openGraph: {
-        title: 'Divercity Park — Diversão para toda a família',
-        description:
-          'Festas inesquecíveis e mais de 10 atrações para toda a família.',
-        type: 'website',
-        images: [{ url: '/logo-ball.png', width: 512, height: 512 }],
-      },
-    }
+interface SEO {
+  title: string
+  description: string
+  keywords: string
+  og_title: string
+  og_description: string
+  og_image: string | null
+}
+
+export async function generateMetadata(): Promise<any> {
+  const data = await getContentType('Metadata')
+  const meta = (data?.SEO ?? {}) as SEO
+
+  return {
+    title: meta.title,
+    description: meta?.description ?? '',
+    keywords: (meta?.keywords ?? '').split(',').map((k) => k.trim()),
+    icons: FAVICON_ICONS,
+    openGraph: {
+      title: (meta?.og_title || meta?.title) ?? '',
+      description: (meta?.og_description || meta.description) ?? '',
+      type: 'website',
+      images: [{ url: meta?.og_image ?? '', width: 512, height: 512 }],
+    },
   }
 }
 
@@ -77,7 +63,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${poppins.variable}`}>
-      <body className="font-body antialiased"><ReactQueryProvider>{children}</ReactQueryProvider></body>
+      <body className="font-body antialiased">
+        <ReactQueryProvider>
+          <Suspense>{children}</Suspense>
+        </ReactQueryProvider>
+      </body>
     </html>
   )
 }

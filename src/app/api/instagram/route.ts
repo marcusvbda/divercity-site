@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCMSConfig } from '@/lib/cms'
+import { getCMSConfig } from '@/lib/cms-old'
 
 export interface InstagramPost {
   id: string
@@ -8,8 +8,6 @@ export interface InstagramPost {
   permalink: string
   media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM'
 }
-
-export const revalidate = 3600
 
 const FALLBACK_POSTS = [
   'https://placehold.co/600x600/8E4CCF/ffffff?text=Diversão+em+família',

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCMSConfig } from '@/lib/cms'
-
-export const dynamic = 'force-dynamic'
+import { getCMSConfig } from '@/lib/cms-old'
 
 export interface GoogleReview {
   id: string
@@ -13,7 +11,10 @@ export interface GoogleReview {
   relative_time_description: string
 }
 
-async function findPlaceId(apiKey: string, configPlaceId?: string): Promise<string | null> {
+async function findPlaceId(
+  apiKey: string,
+  configPlaceId?: string
+): Promise<string | null> {
   if (configPlaceId) return configPlaceId
 
   const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Divercity+Park+Maringá&inputtype=textquery&fields=place_id&key=${apiKey}`

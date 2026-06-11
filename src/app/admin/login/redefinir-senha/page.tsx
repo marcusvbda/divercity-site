@@ -6,11 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import RedefinirSenhaForm from "./RedefinirSenhaForm";
+import ResetPasswordForm from "./ResetPasswordForm";
 
 export const metadata = { title: "Redefinir senha — Admin Divercity" };
 
-export default async function RedefinirSenhaPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ code?: string; error?: string }>;
@@ -40,7 +40,7 @@ export default async function RedefinirSenhaPage({
             </CardContent>
           </Card>
         ) : (
-          <RedefinirSenhaForm code={code} />
+          <ResetPasswordForm code={code} />
         )}
       </div>
     </div>

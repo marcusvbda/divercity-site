@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { redefinirSenhaSchema, type RedefinirSenhaFormData } from "@/lib/schemas/auth";
+import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,16 +25,16 @@ interface Props extends React.ComponentProps<"div"> {
   code: string;
 }
 
-export default function RedefinirSenhaForm({ code, className, ...props }: Props) {
+export default function ResetPasswordForm({ code, className, ...props }: Props) {
   const router = useRouter();
-  const [pronto, setPronto] = useState(false);
-  const [trocaError, setTrocaError] = useState<string | null>(null);
-  const [trocaOk, setTrocaOk] = useState(false);
+  const [done, setDone] = useState(false);
+  const [exchangeError, setExchangeError] = useState<string | null>(null);
+  const [exchangeOk, setExchangeOk] = useState(false);
 
   useEffect(() => {
     supabaseBrowser.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) setTrocaError("Link inválido ou expirado.");
-      else setTrocaOk(true);
+      if (error) setExchangeError("Link inválido ou expirado.");
+      else setExchangeOk(true);
     });
   }, [code]);
 
@@ -42,24 +42,24 @@ export default function RedefinirSenhaForm({ code, className, ...props }: Props)
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RedefinirSenhaFormData>({
-    resolver: zodResolver(redefinirSenhaSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
   });
 
   const { mutate, isPending, error: mutateError } = useMutation({
-    mutationFn: async (data: RedefinirSenhaFormData) => {
+    mutationFn: async (data: ResetPasswordFormData) => {
       const { error } = await supabaseBrowser.auth.updateUser({
         password: data.password,
       });
       if (error) throw new Error("Não foi possível redefinir a senha.");
     },
     onSuccess: () => {
-      setPronto(true);
+      setDone(true);
       setTimeout(() => router.push("/admin/login"), 3000);
     },
   });
 
-  if (pronto) {
+  if (done) {
     return (
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
@@ -74,13 +74,13 @@ export default function RedefinirSenhaForm({ code, className, ...props }: Props)
     );
   }
 
-  if (trocaError) {
+  if (exchangeError) {
     return (
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Link inválido</CardTitle>
-            <CardDescription>{trocaError}</CardDescription>
+            <CardDescription>{exchangeError}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link
@@ -95,7 +95,7 @@ export default function RedefinirSenhaForm({ code, className, ...props }: Props)
     );
   }
 
-  if (!trocaOk) {
+  if (!exchangeOk) {
     return (
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>

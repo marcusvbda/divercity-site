@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { redefinirSenhaSchema, type RedefinirSenhaFormData } from "@/lib/schemas/auth";
+import { resetPasswordSchema as redefinirSenhaSchema, type ResetPasswordFormData as RedefinirSenhaFormData } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
