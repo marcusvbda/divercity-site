@@ -2,7 +2,23 @@
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
-export default function CtaButton({ className, onClick, cta, children }: any) {
+type CtaData = {
+  label?: string | null
+  href?: string | null
+  color?: string | null
+  bgColor?: string | null
+  border?: string | null
+  hoverColor?: string | null
+  hoverBgColor?: string | null
+  hoverBorder?: string | null
+}
+
+export default function CtaButton({ className, onClick, cta, children }: {
+  className?: string
+  onClick?: () => void
+  cta?: CtaData
+  children?: React.ReactNode
+}) {
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
@@ -14,13 +30,13 @@ export default function CtaButton({ className, onClick, cta, children }: any) {
       )}
       style={
         {
-          backgroundColor: cta?.bgColor,
-          color: cta?.color,
-          border: cta?.border ?? 'none',
-          '--hover-border': cta?.hoverBorder ?? cta?.border ?? 'none',
-          '--hover-color': cta?.hoverColor ?? cta?.color,
-          '--hover-bg-color': cta?.hoverBgColor ?? cta?.bgColor,
-        } as any
+          backgroundColor: cta?.bgColor ?? '',
+          color: cta?.color ?? '',
+          border: cta?.border || 'none',
+          '--hover-border': cta?.hoverBorder || cta?.border || 'none',
+          '--hover-color': cta?.hoverColor || cta?.color || '',
+          '--hover-bg-color': cta?.hoverBgColor || cta?.bgColor || '',
+        } as React.CSSProperties & Record<string, string>
       }
     >
       {children}

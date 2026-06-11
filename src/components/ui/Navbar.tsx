@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import { absoluteUrl, scrollTo } from '@/lib/helpers'
+import { scrollTo as smoothScrollTo } from '@/lib/helpers'
 import CtaButton from './cta'
 
 export default function Navbar({ navbar }: any) {
@@ -18,16 +18,20 @@ export default function Navbar({ navbar }: any) {
 
   const handleNavClick = (href: string) => {
     setMenuOpen(false)
-    scrollTo(href)
+    smoothScrollTo(href)
   }
 
-  const logo = navbar?.logo?.url
-    ? absoluteUrl(navbar?.logo?.url)
-    : 'https://placehold.co/600x400/1a1a2e/ffffff?text=logo'
+  const logo =
+    navbar?.Logo?.url?.value ||
+    'https://placehold.co/600x400/1a1a2e/ffffff?text=logo'
 
-  const menus = navbar?.menus ?? []
+  const menuItems: Array<{
+    id: number
+    value: { label: string; href: string }
+  }> = navbar?.Menus?.menuItems ?? []
 
-  const cta = navbar?.cta ?? {}
+  const cta: Record<string, string | null> =
+    navbar?.Actions?.actionBtn?.value ?? {}
 
   return (
     <motion.nav
@@ -48,7 +52,7 @@ export default function Navbar({ navbar }: any) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={logo as string}
+              src={logo}
               alt="Divercity Park"
               className="relative top-3 h-30 w-40 object-contain md:h-30 md:w-44 lg:h-30"
             />
@@ -56,15 +60,15 @@ export default function Navbar({ navbar }: any) {
 
           {/* Desktop Nav */}
           <ul className="hidden items-center gap-6 md:flex lg:gap-8">
-            {menus.map((item: any) => (
-              <li key={`menu-${item?.id}`}>
+            {menuItems.map((item) => (
+              <li key={`menu-${item.id}`}>
                 <button
-                  onClick={() => handleNavClick(item.url)}
+                  onClick={() => handleNavClick(item.value?.href ?? '')}
                   className={`font-body hover:text-brand-cyan text-sm font-medium transition-colors lg:text-base ${
                     scrolled ? 'text-gray-700' : 'text-white/90'
                   }`}
                 >
-                  {item.label}
+                  {item.value?.label ?? ''}
                 </button>
               </li>
             ))}
@@ -72,13 +76,13 @@ export default function Navbar({ navbar }: any) {
 
           {/* CTA + Hamburger */}
           <div className="flex items-center gap-3">
-            {cta?.id && (
+            {cta?.label && (
               <CtaButton
-                onClick={() => scrollTo(cta?.href)}
+                onClick={() => smoothScrollTo(cta.href ?? '')}
                 cta={cta}
                 className="px-5! py-2.5! text-sm!"
               >
-                {cta?.label}
+                {cta.label}
               </CtaButton>
             )}
             <button
@@ -105,24 +109,24 @@ export default function Navbar({ navbar }: any) {
             className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur-md md:hidden"
           >
             <ul className="flex flex-col gap-3 px-4 py-4">
-              {menus.map((item: any) => (
+              {menuItems.map((item) => (
                 <li key={`menu-item-${item.id}`}>
                   <button
-                    onClick={() => handleNavClick(item.url)}
+                    onClick={() => handleNavClick(item.value?.href ?? '')}
                     className="font-body hover:text-brand-cyan w-full py-2 text-left font-medium text-gray-700 transition-colors"
                   >
-                    {item.label}
+                    {item.value?.label ?? ''}
                   </button>
                 </li>
               ))}
-              {cta?.id && (
+              {cta?.label && (
                 <li>
                   <CtaButton
-                    onClick={() => handleNavClick(cta?.href)}
+                    onClick={() => handleNavClick(cta.href ?? '')}
                     cta={cta}
                     className="w-full! px-5! py-3!"
                   >
-                    {cta?.label}
+                    {cta.label}
                   </CtaButton>
                 </li>
               )}

@@ -15,38 +15,43 @@ import {
   getCMSBeneficios,
   getCMSPrecos,
 } from '@/lib/cms-old'
+import { getContentType } from '@/lib/cms'
 
 export default async function Home() {
-  const [config, atracoes, beneficios, precos] = await Promise.all([
-    getCMSConfig(),
-    getCMSAtracoes(),
-    getCMSBeneficios(),
-    getCMSPrecos(),
+  const [
+    navBarContent,
+    // config, atracoes, beneficios, precos
+  ] = await Promise.all([
+    getContentType('NavBar'),
+    // getCMSConfig(),
+    // getCMSAtracoes(),
+    // getCMSBeneficios(),
+    // getCMSPrecos(),
   ])
 
   return (
     <>
-      <Navbar navbar={config?.navbar ?? {}} />
+      <Navbar navbar={navBarContent} />
       <main>
-        <Hero hero={config?.hero ?? {}} />
-        <Atracoes
+        {/* <Hero hero={config?.hero ?? {}} /> */}
+        {/* <Atracoes
           attractionSection={config?.attractionSection ?? {}}
           atracoes={atracoes}
-        />
-        <PorQueEscolher
+        /> */}
+        {/* <PorQueEscolher
           beneficios={beneficios}
           benefitSection={config?.benefitSection ?? {}}
-        />
-        <Festas partySection={config?.partySection ?? {}} />
-        <Precos precos={precos} priceSection={config?.priceSection} />
+        /> */}
+        {/* <Festas partySection={config?.partySection ?? {}} /> */}
+        {/* <Precos precos={precos} priceSection={config?.priceSection} /> */}
         <Galeria />
         <Depoimentos />
-        <Contato
+        {/* <Contato
           config={config}
           contactSection={config?.contactSection ?? {}}
-        />
+        /> */}
       </main>
-      <Footer config={config} />
+      {/* <Footer config={config} /> */}
     </>
   )
 }

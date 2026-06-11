@@ -29,29 +29,39 @@ const FAVICON_ICONS: Metadata['icons'] = {
   other: [{ rel: 'manifest', url: '/favicon/site.webmanifest' }],
 }
 
+type CMSValue = { id: number; value: string | null } | null
+
 interface SEO {
-  title: string
-  description: string
-  keywords: string
-  og_title: string
-  og_description: string
-  og_image: string | null
+  title: CMSValue
+  description: CMSValue
+  keywords: CMSValue
+  og_title: CMSValue
+  og_description: CMSValue
+  og_image: CMSValue
+}
+
+function val(field: CMSValue, fallback = ''): string {
+  return field?.value ?? fallback
 }
 
 export async function generateMetadata(): Promise<any> {
   const data = await getContentType('Metadata')
   const meta = (data?.SEO ?? {}) as SEO
 
+  const ogImage = val(meta?.og_image) || '/logo-ball.png'
   return {
-    title: meta.title,
-    description: meta?.description ?? '',
-    keywords: (meta?.keywords ?? '').split(',').map((k) => k.trim()),
+    title: val(meta.title),
+    description: val(meta?.description),
+    keywords: val(meta?.keywords)
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean),
     icons: FAVICON_ICONS,
     openGraph: {
-      title: (meta?.og_title || meta?.title) ?? '',
-      description: (meta?.og_description || meta.description) ?? '',
+      title: val(meta?.og_title) || val(meta?.title),
+      description: val(meta?.og_description) || val(meta?.description),
       type: 'website',
-      images: [{ url: meta?.og_image ?? '', width: 512, height: 512 }],
+      images: [{ url: ogImage, width: 512, height: 512 }],
     },
   }
 }

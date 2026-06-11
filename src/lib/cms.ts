@@ -12,7 +12,17 @@ export async function getContentType(type: string): Promise<any> {
       components: {
         include: {
           fields: {
-            include: { values: true },
+            include: {
+              values: {
+                include: {
+                  instance: {
+                    include: {
+                      fieldValues: { include: { field: true } },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -21,13 +31,45 @@ export async function getContentType(type: string): Promise<any> {
 
   if (!contentType) return null;
 
-  const result: Record<string, Record<string, string | null>> = {};
+  const result: Record<string, Record<string, any>> = {};
 
   for (const component of contentType.components) {
-    const map: Record<string, string | null> = {};
+    const map: Record<string, any> = {};
+
     for (const field of component.fields) {
-      map[field.name] = field.values[0]?.value ?? null;
+      if (field.type === "multiple") {
+        map[field.name] = field.values.map((v) => {
+          if (v.instance) {
+            const instanceData: Record<string, string | null> = {};
+            for (const ifv of v.instance.fieldValues) {
+              instanceData[ifv.field.name] = ifv.value ?? null;
+            }
+            return { id: v.id, value: instanceData };
+          }
+          return {
+            id: v.id,
+            value: v.type === "json" ? JSON.parse(v.value ?? "null") : (v.value ?? ""),
+          };
+        });
+      } else {
+        const v = field.values[0] ?? null;
+        if (!v) {
+          map[field.name] = null;
+        } else if (v.instance) {
+          const instanceData: Record<string, string | null> = {};
+          for (const ifv of v.instance.fieldValues) {
+            instanceData[ifv.field.name] = ifv.value ?? null;
+          }
+          map[field.name] = { id: v.id, value: instanceData };
+        } else {
+          map[field.name] = {
+            id: v.id,
+            value: v.type === "json" ? JSON.parse(v.value ?? "null") : (v.value ?? null),
+          };
+        }
+      }
     }
+
     result[component.name] = map;
   }
 

@@ -16,33 +16,59 @@ model ContentType {
 }
 
 model ContentComponent {
-  id            Int              @id @default(autoincrement())
+  id            Int                @id @default(autoincrement())
   name          String
-  type          String           @default("simple")
   contentTypeId Int
-  contentType   ContentType      @relation(fields: [contentTypeId], references: [id])
+  contentType   ContentType        @relation(fields: [contentTypeId], references: [id])
   fields        ComponentField[]
+  instances     ComponentInstance[]
 
   @@unique([name, contentTypeId])
   @@map("content_components")
 }
 
 model ComponentField {
-  id                 Int                  @id @default(autoincrement())
+  id                 Int                          @id @default(autoincrement())
   name               String
+  type               String                       @default("simple")
   contentComponentId Int
-  contentComponent   ContentComponent     @relation(fields: [contentComponentId], references: [id])
+  contentComponent   ContentComponent             @relation(fields: [contentComponentId], references: [id])
   values             ComponentFieldValue[]
+  instanceValues     ComponentInstanceFieldValue[]
 
   @@unique([name, contentComponentId])
   @@map("component_fields")
 }
 
 model ComponentFieldValue {
-  id               Int            @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   value            String?
+  type             String             @default("string")
   componentFieldId Int
-  componentField   ComponentField @relation(fields: [componentFieldId], references: [id])
+  componentField   ComponentField     @relation(fields: [componentFieldId], references: [id])
+  instanceId       Int?
+  instance         ComponentInstance? @relation(fields: [instanceId], references: [id])
 
   @@map("component_field_values")
+}
+
+model ComponentInstance {
+  id                  Int                          @id @default(autoincrement())
+  templateComponentId Int
+  templateComponent   ContentComponent             @relation(fields: [templateComponentId], references: [id])
+  fieldValues         ComponentInstanceFieldValue[]
+  referencedBy        ComponentFieldValue[]
+
+  @@map("component_instances")
+}
+
+model ComponentInstanceFieldValue {
+  id         Int               @id @default(autoincrement())
+  value      String?
+  instanceId Int
+  instance   ComponentInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  fieldId    Int
+  field      ComponentField    @relation(fields: [fieldId], references: [id])
+
+  @@map("component_instance_field_values")
 }
