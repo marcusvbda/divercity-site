@@ -1,14 +1,18 @@
 'use client'
 
 import { Camera, MessageCircle, MapPin, Clock } from 'lucide-react'
-import { absoluteUrl } from '@/lib/helpers'
 
-interface FooterProps {
-  config: any
-}
-
-export default function Footer({ config }: FooterProps) {
+export default function Footer({ config }: any) {
   const currentYear = new Date().getFullYear()
+
+  const info = config?.Info ?? {}
+  const logoFooter = info?.logoFooter?.value ?? null
+  const weekdaysTime = info?.weekdaysTime?.value ?? ''
+  const holidaysTime = info?.holidaysTime?.value ?? ''
+  const googleMapsUrl = info?.googleMapsUrl?.value ?? ''
+  const address = info?.address?.value ?? ''
+  const instagramUrl = info?.instagramUrl?.value ?? ''
+  const wppNumber = info?.wppNumber?.value ?? ''
 
   return (
     <footer style={{ backgroundColor: '#212121' }} className="text-white">
@@ -19,7 +23,7 @@ export default function Footer({ config }: FooterProps) {
             <div className="mb-4 flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={absoluteUrl(config?.logoFooter?.url) as string}
+                src={logoFooter}
                 alt="Divercity Park"
                 className="h-16 w-16"
               />
@@ -46,15 +50,11 @@ export default function Footer({ config }: FooterProps) {
               <div className="font-body space-y-1 text-sm">
                 <p>
                   Segunda a Sábado :
-                  <span className="text-brand-cyan ml-2">
-                    {config.horario_semana}
-                  </span>
+                  <span className="text-brand-cyan ml-2">{weekdaysTime}</span>
                 </p>
                 <p>
                   Domingos e feriados :
-                  <span className="text-brand-cyan ml-2">
-                    {config.horario_feriado}
-                  </span>
+                  <span className="text-brand-cyan ml-2">{holidaysTime}</span>
                 </p>
               </div>
             </div>
@@ -66,12 +66,12 @@ export default function Footer({ config }: FooterProps) {
               </h4>
               <div className="font-body space-y-1 text-sm">
                 <a
-                  href={config.google_maps_url}
+                  href={googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand-cyan block underline underline-offset-2 transition-colors hover:text-white"
                 >
-                  {config.endereco}
+                  {address}
                 </a>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function Footer({ config }: FooterProps) {
             </h4>
             <div className="flex gap-3">
               <a
-                href={config.instagram_url}
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -93,7 +93,7 @@ export default function Footer({ config }: FooterProps) {
                 <Camera size={18} style={{ color: '#FF4F8A' }} />
               </a>
               <a
-                href={`https://api.whatsapp.com/send/?phone=${config.whatsapp_number}&text&type=phone_number&app_absent=0`}
+                href={`https://api.whatsapp.com/send/?phone=${wppNumber}&text&type=phone_number&app_absent=0`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"

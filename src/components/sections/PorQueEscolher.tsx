@@ -20,27 +20,14 @@ const ICON_MAP: Record<string, React.ElementType> = {
   HeartHandshake,
 }
 
-const BRAND_COLORS: Record<string, string> = {
-  'brand-cyan': '#12C7C8',
-  'brand-purple': '#8E4CCF',
-  'brand-pink': '#FF4F8A',
-  'brand-lime': '#9AD94B',
-  'brand-yellow': '#FFD23F',
-}
-
-/** Converte "from-brand-cyan to-brand-purple" → CSS gradient real.
- *  Se já for CSS válido (começa com #, linear-gradient, etc) usa direto. */
-function resolveGradient(g: string): string {
-  if (!g) return 'linear-gradient(135deg, #12C7C8, #8E4CCF)'
-  if (g.startsWith('linear-gradient') || g.startsWith('#')) return g
-  const m = g.match(/from-(\S+)\s+to-(\S+)/)
-  if (m) {
-    const from = BRAND_COLORS[m[1]] ?? '#12C7C8'
-    const to = BRAND_COLORS[m[2]] ?? '#8E4CCF'
-    return `linear-gradient(135deg, ${from}, ${to})`
-  }
-  return 'linear-gradient(135deg, #12C7C8, #8E4CCF)'
-}
+const GRADIENTS = [
+  'linear-gradient(135deg, #12C7C8, #8E4CCF)',
+  'linear-gradient(135deg, #8E4CCF, #FF4F8A)',
+  'linear-gradient(135deg, #FF4F8A, #FFD23F)',
+  'linear-gradient(135deg, #9AD94B, #12C7C8)',
+  'linear-gradient(135deg, #FFD23F, #FF4F8A)',
+  'linear-gradient(135deg, #12C7C8, #9AD94B)',
+]
 
 const containerVariants = {
   hidden: {},
@@ -56,7 +43,17 @@ const itemVariants = {
   },
 }
 
-export default function PorQueEscolher({ beneficios, benefitSection }: any) {
+type BenefitItem = {
+  id: number
+  value: { title?: string | null; description?: string | null; iconName?: string | null }
+}
+
+export default function PorQueEscolher({ benefits }: any) {
+  const badge    = benefits?.Section?.badge?.value    ?? ''
+  const title    = benefits?.Section?.title?.value    ?? ''
+  const subtitle = benefits?.Section?.subtitle?.value ?? ''
+  const list: BenefitItem[] = benefits?.Content?.Benefit ?? []
+
   return (
     <section className="section-padding bg-white">
       <div className="container-max">
@@ -68,13 +65,13 @@ export default function PorQueEscolher({ beneficios, benefitSection }: any) {
           className="mb-12 text-center"
         >
           <span className="bg-brand-purple/10 text-brand-purple font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
-            {benefitSection?.badge}
+            {badge}
           </span>
           <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
-            {benefitSection?.title}
+            {title}
           </h2>
           <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
-            {benefitSection?.subtitle}
+            {subtitle}
           </p>
         </motion.div>
 
@@ -85,11 +82,11 @@ export default function PorQueEscolher({ beneficios, benefitSection }: any) {
           viewport={{ once: true, margin: '-80px' }}
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {beneficios.map((b: any) => {
-            const Icon = ICON_MAP[b.iconeName]
+          {list.map((item, idx) => {
+            const Icon = ICON_MAP[item.value.iconName ?? ''] ?? Star
             return (
               <motion.div
-                key={b.titulo}
+                key={item.id}
                 variants={itemVariants}
                 whileHover={{
                   y: -6,
@@ -99,19 +96,15 @@ export default function PorQueEscolher({ beneficios, benefitSection }: any) {
               >
                 <div
                   className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl shadow-md"
-                  style={{ background: resolveGradient(b.gradiente) }}
+                  style={{ background: GRADIENTS[idx % GRADIENTS.length] }}
                 >
-                  {Icon ? (
-                    <Icon size={28} className="text-white" />
-                  ) : (
-                    <Star size={28} className="text-white" />
-                  )}
+                  <Icon size={28} className="text-white" />
                 </div>
                 <h3 className="font-heading mb-2 text-xl font-semibold text-gray-800">
-                  {b.titulo}
+                  {item.value.title}
                 </h3>
                 <p className="font-body text-sm leading-relaxed text-gray-500">
-                  {b.descricao}
+                  {item.value.description}
                 </p>
               </motion.div>
             )

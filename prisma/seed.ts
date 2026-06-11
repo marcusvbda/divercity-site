@@ -213,6 +213,57 @@ async function main() {
     'hoverBorder'
   )
 
+  // General/Price
+  const priceTemplateComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Price', contentTypeId: generalType.id } },
+    update: {},
+    create: { name: 'Price', contentTypeId: generalType.id },
+  })
+
+  await seedFields(priceTemplateComponent.id, [
+    { name: 'title',    value: '' },
+    { name: 'subtitle', value: '' },
+    { name: 'color',    value: '' },
+  ])
+
+  const priceTitleField    = await getField(priceTemplateComponent.id, 'title')
+  const priceSubtitleField = await getField(priceTemplateComponent.id, 'subtitle')
+  const priceColorField    = await getField(priceTemplateComponent.id, 'color')
+
+  // General/Tier
+  const tierTemplateComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Tier', contentTypeId: generalType.id } },
+    update: {},
+    create: { name: 'Tier', contentTypeId: generalType.id },
+  })
+
+  await seedFields(tierTemplateComponent.id, [
+    { name: 'label',        value: '' },
+    { name: 'valor',        value: '' },
+    { name: 'acompanhante', value: '' },
+  ])
+
+  const tierLabelField        = await getField(tierTemplateComponent.id, 'label')
+  const tierValorField        = await getField(tierTemplateComponent.id, 'valor')
+  const tierAcompanhanteField = await getField(tierTemplateComponent.id, 'acompanhante')
+
+  // General/Benefit
+  const benefitTemplateComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Benefit', contentTypeId: generalType.id } },
+    update: {},
+    create: { name: 'Benefit', contentTypeId: generalType.id },
+  })
+
+  await seedFields(benefitTemplateComponent.id, [
+    { name: 'title',       value: '' },
+    { name: 'description', value: '' },
+    { name: 'iconName',    value: '' },
+  ])
+
+  const benefitTitleField       = await getField(benefitTemplateComponent.id, 'title')
+  const benefitDescriptionField = await getField(benefitTemplateComponent.id, 'description')
+  const benefitIconNameField    = await getField(benefitTemplateComponent.id, 'iconName')
+
   // General/Attraction
   const attractionTemplateComponent = await prisma.contentComponent.upsert({
     where: { name_contentTypeId: { name: 'Attraction', contentTypeId: generalType.id } },
@@ -463,6 +514,333 @@ async function main() {
       data: { componentFieldId: attractionListField.id, instanceId: instance.id },
     })
   }
+
+  // ── BenefitsSection ──────────────────────────────────────────────────────
+  const benefitsSectionType = await prisma.contentType.upsert({
+    where: { name: 'BenefitsSection' },
+    update: {},
+    create: { name: 'BenefitsSection' },
+  })
+
+  const benefitsSectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: benefitsSectionType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: benefitsSectionType.id },
+  })
+
+  await seedFields(benefitsSectionComponent.id, [
+    { name: 'badge',    value: 'Nossos Diferenciais' },
+    { name: 'title',    value: 'Por que as famílias escolhem o Divercity Park?' },
+    { name: 'subtitle', value: 'Mais do que um parque — somos uma experiência completa para toda a família.' },
+  ])
+
+  const benefitsContentComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Content', contentTypeId: benefitsSectionType.id } },
+    update: {},
+    create: { name: 'Content', contentTypeId: benefitsSectionType.id },
+  })
+
+  const benefitListField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'Benefit', contentComponentId: benefitsContentComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'Benefit', type: 'multiple', contentComponentId: benefitsContentComponent.id },
+  })
+
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: benefitListField.id } })
+
+  const benefitsData = [
+    { title: 'Segurança Total',                iconName: 'Shield',          description: 'Monitoramento 24h, equipe treinada e equipamentos certificados para garantir a segurança de todas as crianças.' },
+    { title: 'Diversão para Todas as Idades',  iconName: 'Users',           description: 'Atrações para crianças de todas as idades, desde os pequeninos até os maiores, com opções para toda a família.' },
+    { title: 'Festas Personalizadas',          iconName: 'PartyPopper',     description: 'Pacotes completos de aniversário com decoração, buffet e acesso a todas as atrações do parque.' },
+    { title: 'Localização Conveniente',        iconName: 'MapPin',          description: 'Fácil acesso, estacionamento gratuito e localização central para toda a família chegar sem preocupações.' },
+    { title: 'Alimentação Saborosa',           iconName: 'UtensilsCrossed', description: 'Lanchonete completa com opções saudáveis e saborosas para crianças e adultos durante toda a visita.' },
+    { title: 'Atendimento Especializado',      iconName: 'HeartHandshake',  description: 'Equipe dedicada, atenciosa e apaixonada por proporcionar a melhor experiência para cada família.' },
+  ]
+
+  for (const item of benefitsData) {
+    const instance = await prisma.componentInstance.create({
+      data: { templateComponentId: benefitTemplateComponent.id },
+    })
+
+    await prisma.componentInstanceFieldValue.createMany({
+      data: [
+        { instanceId: instance.id, fieldId: benefitTitleField.id,       value: item.title },
+        { instanceId: instance.id, fieldId: benefitDescriptionField.id, value: item.description },
+        { instanceId: instance.id, fieldId: benefitIconNameField.id,    value: item.iconName },
+      ],
+    })
+
+    await prisma.componentFieldValue.create({
+      data: { componentFieldId: benefitListField.id, instanceId: instance.id },
+    })
+  }
+
+  // ── PriceSection ─────────────────────────────────────────────────────────
+  const priceSectionType = await prisma.contentType.upsert({
+    where: { name: 'PriceSection' },
+    update: {},
+    create: { name: 'PriceSection' },
+  })
+
+  const priceSectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: priceSectionType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: priceSectionType.id },
+  })
+
+  await seedFields(priceSectionComponent.id, [
+    { name: 'badge',    value: 'Passaportes' },
+    { name: 'title',    value: 'Preços' },
+    { name: 'subtitle', value: 'Escolha o passaporte ideal para o seu dia de diversão.' },
+  ])
+
+  const priceContentComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Content', contentTypeId: priceSectionType.id } },
+    update: {},
+    create: { name: 'Content', contentTypeId: priceSectionType.id },
+  })
+
+  // prices — multiple General/Price instances
+  const pricesListField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'prices', contentComponentId: priceContentComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'prices', type: 'multiple', contentComponentId: priceContentComponent.id },
+  })
+
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: pricesListField.id } })
+
+  const pricesData = [
+    { title: 'Segunda a Quinta-feira',             subtitle: 'exceto feriados', color: '#12C7C8' },
+    { title: 'Sexta a Sábado, Domingo e feriados', subtitle: '-',               color: '#8E4CCF' },
+  ]
+
+  for (const item of pricesData) {
+    const instance = await prisma.componentInstance.create({
+      data: { templateComponentId: priceTemplateComponent.id },
+    })
+
+    await prisma.componentInstanceFieldValue.createMany({
+      data: [
+        { instanceId: instance.id, fieldId: priceTitleField.id,    value: item.title },
+        { instanceId: instance.id, fieldId: priceSubtitleField.id, value: item.subtitle },
+        { instanceId: instance.id, fieldId: priceColorField.id,    value: item.color },
+      ],
+    })
+
+    await prisma.componentFieldValue.create({
+      data: { componentFieldId: pricesListField.id, instanceId: instance.id },
+    })
+  }
+
+  // tiers — PriceSection/Tiers component with weekdayTiers and weekendTiers
+  const priceTiersComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Tiers', contentTypeId: priceSectionType.id } },
+    update: {},
+    create: { name: 'Tiers', contentTypeId: priceSectionType.id },
+  })
+
+  const weekdayTiersField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'weekdayTiers', contentComponentId: priceTiersComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'weekdayTiers', type: 'multiple', contentComponentId: priceTiersComponent.id },
+  })
+
+  const weekendTiersField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'weekendTiers', contentComponentId: priceTiersComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'weekendTiers', type: 'multiple', contentComponentId: priceTiersComponent.id },
+  })
+
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: weekdayTiersField.id } })
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: weekendTiersField.id } })
+
+  const weekdayTiersData = [
+    { label: '30min',   valor: '45', acompanhante: '10' },
+    { label: '1 Hora',  valor: '55', acompanhante: '15' },
+    { label: '2 Horas', valor: '70', acompanhante: '20' },
+    { label: '3 Horas', valor: '80', acompanhante: '30' },
+  ]
+
+  const weekendTiersData = [
+    { label: '30min',   valor: '50',  acompanhante: '10' },
+    { label: '1 Hora',  valor: '65',  acompanhante: '15' },
+    { label: '2 Horas', valor: '80',  acompanhante: '20' },
+    { label: '3 Horas', valor: '100', acompanhante: '30' },
+  ]
+
+  for (const [fieldRef, items] of [
+    [weekdayTiersField, weekdayTiersData],
+    [weekendTiersField, weekendTiersData],
+  ] as const) {
+    for (const item of items) {
+      const instance = await prisma.componentInstance.create({
+        data: { templateComponentId: tierTemplateComponent.id },
+      })
+
+      await prisma.componentInstanceFieldValue.createMany({
+        data: [
+          { instanceId: instance.id, fieldId: tierLabelField.id,        value: item.label },
+          { instanceId: instance.id, fieldId: tierValorField.id,        value: item.valor },
+          { instanceId: instance.id, fieldId: tierAcompanhanteField.id, value: item.acompanhante },
+        ],
+      })
+
+      await prisma.componentFieldValue.create({
+        data: { componentFieldId: fieldRef.id, instanceId: instance.id },
+      })
+    }
+  }
+
+  // disclaimers — multiple simple strings
+  await seedFields(priceContentComponent.id, [
+    {
+      name: 'disclaimers',
+      type: 'multiple',
+      value: [
+        `**👨‍👧 Sobre Acompanhantes**\n\n🧒 Crianças de 1 a 4 anos — Recomenda-se estar acompanhadas de um responsável legal (maior de 18 anos). O acompanhante não paga. (Limite de 1 por criança.)\n\n♿ Pessoas com Necessidades Especiais (PNE) — Recomenda-se acompanhante maior de idade. O acompanhante é isento de pagamento. (Limite de 1 por pessoa.)\n\n👦 Crianças a partir de 5 anos — Acompanhante é opcional. Caso entre na área de brinquedos, será cobrada a taxa de acompanhante correspondente ao tempo escolhido.`,
+        `**💰 Sobre Valores e Descontos**\n\n👶 Crianças de 0 a 1 ano — Caso utilizem os brinquedos (inclusive área baby): ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n♿ Pessoas com Necessidades Especiais (PNE) — ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n🧒 Crianças a partir de 1 ano — Pagam o valor integral do passaporte escolhido.`,
+      ],
+    },
+  ])
+
+  // ── PartySection ─────────────────────────────────────────────────────────
+  const partySectionType = await prisma.contentType.upsert({
+    where: { name: 'PartySection' },
+    update: {},
+    create: { name: 'PartySection' },
+  })
+
+  const partySectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: partySectionType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: partySectionType.id },
+  })
+
+  await seedFields(partySectionComponent.id, [
+    { name: 'badge',       value: '🎂 Celebrações Especiais' },
+    { name: 'title',       value: 'Festas e Aniversários Inesquecíveis!' },
+    { name: 'description', value: 'Nossos pacotes completos incluem:' },
+    {
+      name: 'features',
+      type: 'multiple',
+      value: [
+        'Acesso a todas as atrações: Arena de Camas Elásticas, Guerreiro Ninja, Parede de Escalar, Pula-Pula e muito mais!',
+        'Estrutura completa com mesas, cadeiras e cilindros para decoração.',
+        'Espaço exclusivo para até 50 participantes com pulseiras de identificação e monitores.',
+        'Cozinha de apoio com geladeira expositora e réchaud para alimentos quentes.',
+        'Utilização do salão por até 5 horas (até 21h30 em dias normais; 19h30 em domingos e feriados).',
+        'Pode trazer suas próprias bebidas (já geladas) ou optar pelas do parque.',
+        'Decoração, garçons e buffet por conta do cliente — indicamos fornecedores parceiros.',
+        'Pagamento facilitado no Pix ou Cartão.',
+      ],
+    },
+  ])
+
+  const partyCTAsComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'CTAs', contentTypeId: partySectionType.id } },
+    update: {},
+    create: { name: 'CTAs', contentTypeId: partySectionType.id },
+  })
+
+  const partyMediaComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Media', contentTypeId: partySectionType.id } },
+    update: {},
+    create: { name: 'Media', contentTypeId: partySectionType.id },
+  })
+
+  await seedFields(partyMediaComponent.id, [
+    {
+      name: 'images',
+      type: 'multiple',
+      value: [
+        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/salao-de-festas.png',
+        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/dbz.png',
+        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/f1.png',
+        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/futebol.png',
+      ],
+    },
+  ])
+
+  await seedInstanceField(partyCTAsComponent.id, 'ctaBudget', ctaTemplateComponent.id, [
+    { fieldId: ctaLabelField.id,        value: 'Faça já o seu orçamento' },
+    { fieldId: ctaHrefField.id,         value: '#contato' },
+    { fieldId: ctaColorField.id,        value: '#fefefe' },
+    { fieldId: ctaBgColorField.id,      value: '#FF4F8A' },
+    { fieldId: ctaBorderField.id,       value: '' },
+    { fieldId: ctaHoverColorField.id,   value: '' },
+    { fieldId: ctaHoverBgColorField.id, value: '' },
+    { fieldId: ctaHoverBorderField.id,  value: '' },
+  ])
+
+  await seedInstanceField(partyCTAsComponent.id, 'ctaPrices', ctaTemplateComponent.id, [
+    { fieldId: ctaLabelField.id,        value: 'Ver preços' },
+    { fieldId: ctaHrefField.id,         value: '#precos' },
+    { fieldId: ctaColorField.id,        value: 'black' },
+    { fieldId: ctaBgColorField.id,      value: 'transparent' },
+    { fieldId: ctaBorderField.id,       value: '1px solid gray' },
+    { fieldId: ctaHoverColorField.id,   value: '' },
+    { fieldId: ctaHoverBgColorField.id, value: '' },
+    { fieldId: ctaHoverBorderField.id,  value: '' },
+  ])
+
+  // ── ContactSection ───────────────────────────────────────────────────────
+  const contactSectionType = await prisma.contentType.upsert({
+    where: { name: 'ContactSection' },
+    update: {},
+    create: { name: 'ContactSection' },
+  })
+
+  const contactSectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: contactSectionType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: contactSectionType.id },
+  })
+
+  await seedFields(contactSectionComponent.id, [
+    { name: 'badge',        value: 'Fale Conosco' },
+    { name: 'title',        value: 'Nos manda uma mensagem!' },
+    { name: 'subtitle',     value: 'Estamos aqui para tirar todas as suas dúvidas e ajudar a planejar a festa' },
+    { name: 'formBtnLabel', value: 'Enviar pelo WhatsApp' },
+  ])
+
+  const contactInfoComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Info', contentTypeId: contactSectionType.id } },
+    update: {},
+    create: { name: 'Info', contentTypeId: contactSectionType.id },
+  })
+
+  await seedFields(contactInfoComponent.id, [
+    { name: 'wppNumber',          value: '5514997569008' },
+    { name: 'address',            value: 'Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720' },
+    { name: 'googleMapsUrl',      value: 'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá' },
+    { name: 'weekdaysTime',       value: '10h às 22h' },
+    { name: 'holidaysTime',       value: '12h às 20h' },
+    { name: 'instagramUrl',       value: 'https://www.instagram.com/divercity.park' },
+    { name: 'googleMapsUrlIframe', value: '' },
+  ])
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  const footerType = await prisma.contentType.upsert({
+    where: { name: 'Footer' },
+    update: {},
+    create: { name: 'Footer' },
+  })
+
+  const footerInfoComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Info', contentTypeId: footerType.id } },
+    update: {},
+    create: { name: 'Info', contentTypeId: footerType.id },
+  })
+
+  await seedFields(footerInfoComponent.id, [
+    { name: 'logoFooter',    value: 'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/logo-ball-fundo.png' },
+    { name: 'weekdaysTime',  value: '10h às 22h' },
+    { name: 'holidaysTime',  value: '12h às 20h' },
+    { name: 'googleMapsUrl', value: 'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá' },
+    { name: 'address',       value: 'Av. Tuiuti, 710 – Gleba Patrimônio Maringa, Maringá 87043-720' },
+    { name: 'instagramUrl',  value: 'https://www.instagram.com/divercity.park' },
+    { name: 'wppNumber',     value: '5514997569008' },
+  ])
 
   console.log('Seed completo')
 }

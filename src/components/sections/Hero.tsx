@@ -1,24 +1,59 @@
 'use client'
 
-import { absoluteUrl, scrollTo } from '@/lib/helpers'
+import { scrollTo } from '@/lib/helpers'
 import { motion } from 'framer-motion'
 import CtaButton from '../ui/cta'
 
 const FLOATING_ELEMENTS = [
-  { color: '#12C7C8', size: 80, left: '8%',  top: '20%', delay: 0,   duration: 3   },
-  { color: '#8E4CCF', size: 60, left: '88%', top: '15%', delay: 0.5, duration: 4   },
-  { color: '#FF4F8A', size: 100,left: '5%',  top: '70%', delay: 1,   duration: 3.5 },
-  { color: '#9AD94B', size: 50, left: '92%', top: '65%', delay: 0.8, duration: 2.8 },
-  { color: '#FFD23F', size: 70, left: '80%', top: '45%', delay: 0.3, duration: 4.2 },
-  { color: '#12C7C8', size: 40, left: '15%', top: '50%', delay: 1.2, duration: 3.2 },
+  { color: '#12C7C8', size: 80, left: '8%', top: '20%', delay: 0, duration: 3 },
+  {
+    color: '#8E4CCF',
+    size: 60,
+    left: '88%',
+    top: '15%',
+    delay: 0.5,
+    duration: 4,
+  },
+  {
+    color: '#FF4F8A',
+    size: 100,
+    left: '5%',
+    top: '70%',
+    delay: 1,
+    duration: 3.5,
+  },
+  {
+    color: '#9AD94B',
+    size: 50,
+    left: '92%',
+    top: '65%',
+    delay: 0.8,
+    duration: 2.8,
+  },
+  {
+    color: '#FFD23F',
+    size: 70,
+    left: '80%',
+    top: '45%',
+    delay: 0.3,
+    duration: 4.2,
+  },
+  {
+    color: '#12C7C8',
+    size: 40,
+    left: '15%',
+    top: '50%',
+    delay: 1.2,
+    duration: 3.2,
+  },
 ]
 
 export default function Hero({ hero }: any) {
-  const title       = hero?.Content?.title?.value    ?? ''
-  const subtitle    = hero?.Content?.subtitle?.value ?? ''
-  const bgImage     = hero?.Media?.bgImage?.value    ?? null
-  const image       = hero?.Media?.image?.value      ?? null
-  const primaryCta  = hero?.Actions?.primaryCta?.value  ?? null
+  const title = hero?.Content?.title?.value ?? ''
+  const subtitle = hero?.Content?.subtitle?.value ?? ''
+  const bgImage = hero?.Media?.bgImage?.value ?? null
+  const image = hero?.Media?.image?.value ?? null
+  const primaryCta = hero?.Actions?.primaryCta?.value ?? null
   const secondaryCta = hero?.Actions?.secondaryCta?.value ?? null
 
   return (
@@ -32,7 +67,7 @@ export default function Hero({ hero }: any) {
           <div className="relative h-screen">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={absoluteUrl(bgImage) as string}
+              src={bgImage}
               alt="Divercity Park - Parque Indoor"
               className="absolute inset-0 h-full w-full object-cover"
             />
@@ -74,7 +109,7 @@ export default function Hero({ hero }: any) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={absoluteUrl(image) as string}
+              src={image}
               alt="Divercity Park"
               className="h-48 w-48 drop-shadow-2xl md:h-48 md:w-48"
             />

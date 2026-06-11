@@ -3,13 +3,17 @@
 ## ⛔ REGRAS ABSOLUTAS — NUNCA VIOLAR
 
 ### 1. Nunca commitar sem ser pedido
+
 **NUNCA faça `git commit` ou `git push` sem o usuário pedir explicitamente.**
+
 - Não commitar ao final de tarefas automaticamente
 - Não commitar como parte de um "plano de implementação"
 - Apenas executar `git commit` quando o usuário disser "commita", "faz o commit", "commit isso" ou equivalente
 
 ### 2. Nunca expor tokens, senhas ou credenciais
+
 **NUNCA escreva tokens, API keys, senhas ou segredos em:**
+
 - Arquivos de código-fonte (`.ts`, `.tsx`, `.js`, etc.)
 - Arquivos versionados (qualquer arquivo que vai para o git)
 - Mensagens de commit
@@ -19,23 +23,23 @@
 **Regra prática:** Se um valor começa com `sk-`, `eyJ`, é um hash longo ou parece uma senha — vai para `.env` / `.env.local`, nunca no código.
 
 **Arquivos que NUNCA devem ir para o git:**
+
 ```
 .env
 .env.local
-backend/.env
-frontend/.env.local
-.mcp.json          ← contém STRAPI_API_TOKEN
+.mcp.json
 ```
 
 Todos esses estão no `.gitignore`. Se detectar que um desses está sendo staged, bloqueie e avise.
 
 **Padrão correto:**
+
 ```typescript
 // ✅ Correto — lê do ambiente
-const token = process.env.STRAPI_API_TOKEN
+const token = process.env.INSTAGRAM_ACCESS_TOKEN
 
 // ❌ Errado — credencial hardcoded
-const token = '8ff2428f3729ceac...'
+const token = 'eyJhbGci...'
 ```
 
 ---
@@ -46,96 +50,67 @@ Site institucional do **Divercity Park** — parque indoor de diversão infantil
 
 ```
 divercity-site/
-  frontend/   — Next.js 16 (site público)
-  backend/    — Strapi v5 CMS (painel de administração de conteúdo)
+  src/        — Next.js 16 (site público)
+  prisma/     — Schema EAV + seed do CMS
   docs/       — Documentação, assets e imagens de referência
 ```
 
 ---
 
-## Stack Frontend
+## Stack
 
-| Tecnologia | Versão | Notas |
-|-----------|--------|-------|
-| Next.js | **16** App Router | React Compiler ativado, `cacheComponents: true` |
-| TypeScript | 5 | strict mode |
-| Tailwind CSS | **v4** | CSS-first config via `@theme` em globals.css |
-| Framer Motion | 12 | `whileInView` + `viewport` para scroll |
-| shadcn/ui | 4 | Componentes em `src/components/ui/` |
-| Lucide React | latest | Verificar se o ícone existe antes de usar |
+| Tecnologia    | Versão            | Notas                                                 |
+| ------------- | ----------------- | ----------------------------------------------------- |
+| Next.js       | **16** App Router | React Compiler ativado, `cacheComponents: true`       |
+| TypeScript    | 5                 | strict mode                                           |
+| Tailwind CSS  | **v4**            | CSS-first config via `@theme` em globals.css          |
+| Framer Motion | 12                | `whileInView` + `viewport` para scroll                |
+| shadcn/ui     | 4                 | Componentes em `src/components/ui/`                   |
+| Lucide React  | latest            | Verificar se o ícone existe antes de usar             |
+| Prisma        | 7                 | `prisma.config.ts` + `@prisma/adapter-pg`, schema EAV |
+| Supabase      | —                 | PostgreSQL + Auth + Storage                           |
 
-## Stack Backend (Strapi CMS)
+---
 
-| Tecnologia | Versão | Notas |
-|-----------|--------|-------|
-| Strapi | v5.47.0 | TypeScript, Document Service API |
-| SQLite | — | Desenvolvimento local (`.tmp/data.db`) |
-| PostgreSQL | — | Produção (cloud) — configurar via env vars |
-| `@sensinum/strapi-plugin-mcp` | 1.1.0 | Plugin MCP instalado no Strapi |
+## CMS — Arquitetura EAV
 
-**Para iniciar o backend local:**
+O CMS é um schema EAV customizado no Supabase/PostgreSQL via Prisma. 6 tabelas:
+
+| Tabela                            | Descrição                                                          |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `content_types`                   | Tipos de conteúdo (NavBar, Hero, Footer…)                          |
+| `content_components`              | Componentes de cada tipo (Section, Media, CTAs…)                   |
+| `component_fields`                | Campos de cada componente                                          |
+| `component_field_values`          | Valores simples ou referência a instance                           |
+| `component_instances`             | Instâncias de templates reutilizáveis (General/Cta, General/Link…) |
+| `component_instance_field_values` | Valores dos campos de cada instância                               |
+
+**Para popular o banco:**
+
 ```bash
-cd backend && npm run develop
-# Admin: http://localhost:1337/admin
-# API:   http://localhost:1337/api
+npx tsx prisma/seed.ts
 ```
 
----
+**Função de leitura:** `getContentType(name)` em `src/lib/cms.ts` — retorna objeto aninhado `{ ComponentName: { fieldName: { id, value } } }`.
 
-## Strapi — Content Types
+**ContentTypes existentes:**
 
-| UID | Tipo | Campos principais |
-|-----|------|-------------------|
-| `api::atracao.atracao` | Collection | nome, descricao, imagem, cor, ordem |
-| `api::preco.preco` | Collection | titulo, subtitulo, cor, ordem, tiers[] |
-| `api::depoimento.depoimento` | Collection | nome, estrelas, texto, avatar |
-| `api::beneficio.beneficio` | Collection | titulo, descricao, iconeName, gradiente, ordem |
-| `api::configuracao-site.configuracao-site` | Single | whatsapp_number, instagram_url, endereco, horarios, tokens de API |
+- `NavBar` — Logo, Actions (actionBtn CTA), Menus (menuItems links)
+- `Hero` — Content (title, subtitle), Media (bgImage, image), Actions (primaryCta, secondaryCta)
+- `Attractions` — Section (badge, title, subtitle), Content (Attraction[] múltiplo)
+- `BenefitsSection` — Section (badge, title, subtitle), Content (Benefit[] múltiplo)
+- `PartySection` — Section (badge, title, description, features[]), Media (images[]), CTAs (ctaBudget, ctaPrices)
+- `PriceSection` — Section (badge, title, subtitle), Content (prices[] múltiplo, disclaimers[])
+- `ContactSection` — Section (badge, title, subtitle, formBtnLabel), Info (wppNumber, address, googleMapsUrl, weekdaysTime, holidaysTime, instagramUrl, googleMapsUrlIframe)
+- `Footer` — Info (logoFooter, weekdaysTime, holidaysTime, googleMapsUrl, address, instagramUrl, wppNumber)
 
-**Componente:** `precos.tier` — label, valor, acompanhante (usado em `api::preco.preco`)
+**Templates reutilizáveis (General):**
 
----
-
-## Strapi — Regras
-
-- **Sempre usar Document Service API** (`strapi.documents(uid)`) — Entity Service é deprecated
-- Nunca usar `strapi.entityService.*` — Strapi v5 usa `strapi.documents(uid).*`
-- Usar `factories.createCoreController/Service/Router` para CRUD padrão
-- Invocar a skill `strapi-expert` antes de criar ou modificar qualquer código Strapi
-- Rotas administrativas: tipo `admin`, protegidas por `admin::isAuthenticatedAdmin`
-- Rotas públicas: tipo `content-api`, com `auth: false` quando necessário
-
----
-
-## Strapi MCP
-
-O `strapi-mcp` está instalado globalmente e configurado em `.mcp.json`:
-- **URL:** `http://localhost:1337`
-- **Token:** Configurar `STRAPI_API_TOKEN` no `.mcp.json` após criar um token em Strapi Admin > Settings > API Tokens
-
-Para ativar o MCP, adicione o token no `.mcp.json` e recarregue o Claude Code.
-
----
-
-## Strapi → Frontend (integração futura)
-
-Os dados em `frontend/src/lib/data.ts` marcados com `// substituir via CMS no futuro` devem ser migrados para chamadas à API do Strapi:
-
-```typescript
-// Local (atual)
-export const PRECOS: PriceGroup[] = [...]
-
-// CMS (futuro)
-const res = await fetch('http://localhost:1337/api/precos?populate=tiers')
-const data = await res.json()
-```
-
-**Rotas REST do Strapi:**
-- `GET /api/atracoes?sort=ordem`
-- `GET /api/precos?populate=tiers&sort=ordem`
-- `GET /api/depoimentos`
-- `GET /api/beneficios?sort=ordem`
-- `GET /api/configuracao-site`
+- `General/Link` — label, href
+- `General/Cta` — label, href, color, bgColor, border, hoverColor, hoverBgColor, hoverBorder
+- `General/Attraction` — name, description, image, color, sort
+- `General/Benefit` — title, description, iconName
+- `General/Price` — title, subtitle, color
 
 ---
 
@@ -148,7 +123,6 @@ const data = await res.json()
 - **`force-dynamic` não é compatível com `cacheComponents`** — usar `connection()` + `<Suspense>` no lugar.
 - **Root layout** envolve `children` com `<Suspense>` para permitir que rotas dinâmicas (admin) façam Partial Prerender.
 - **`middleware.ts` foi renomeado para `proxy.ts`** — convenção do Next.js 16.
-- **`backend/` está excluído do `tsconfig.json`** — não incluir arquivos Strapi na compilação do frontend.
 
 ---
 
@@ -184,48 +158,49 @@ const isInView = useInView(ref, ...)
 
 - **NUNCA inventar dados de negócio** (endereço, telefone, preços, atrações)
 - Todo conteúdo vem de `docs/plan.md` ou de instrução explícita do usuário
-- Imagens de atrações/festas: copiar de `docs/` para `frontend/public/`
+- Imagens: armazenadas no Supabase Storage (`vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/`)
 - Placeholder para imagens ausentes: `https://placehold.co/600x400/cor/fff?text=Nome`
-- Dados parametrizados estão em `frontend/src/lib/data.ts` com comentário `// substituir via CMS no futuro`
 
 ---
 
-## Estrutura de Componentes (Frontend)
+## Estrutura de Componentes
 
 ```
-frontend/src/
+src/
   app/
     layout.tsx          — fonts, metadata, favicons
-    page.tsx            — assembles all sections
+    page.tsx            — monta todas as seções
     globals.css         — Tailwind @theme + utilities
     api/
-      instagram/route.ts — posts do Instagram
-      reviews/route.ts   — avaliações do Google
+      instagram/route.ts — posts do Instagram (INSTAGRAM_ACCESS_TOKEN)
+      reviews/route.ts   — avaliações do Google (GOOGLE_PLACES_API_KEY)
   components/
     ui/
       Navbar.tsx
       ImageModal.tsx
+      cta.tsx
     sections/
-      Hero, Benefits, Atracoes, PorQueEscolher,
-      Festas, Precos, Galeria, Depoimentos, Contato, Footer
+      Hero, PorQueEscolher, Atracoes, Festas,
+      Precos, Galeria, Depoimentos, Contato, Footer
   lib/
-    data.ts             — dados estáticos (CMS-ready)
+    cms.ts      — getContentType() — leitura do CMS
+    prisma.ts   — instância do PrismaClient
+    helpers.ts  —  scrollTo
   types/
-    index.ts            — TypeScript interfaces
+    index.ts    — TypeScript interfaces
 ```
 
 ---
 
 ## MCPs Ativos
 
-| MCP | Status | Uso |
-|-----|--------|-----|
-| **Figma** (claude.ai) | ✅ Conectado | Design system, layouts |
-| **context-mode** | ✅ Conectado | Gerenciar janela de contexto |
-| **strapi-mcp** | ⚙️ Configurar token | Gerenciar conteúdo do CMS via Claude |
-| **@sensinum/strapi-plugin-mcp** | ⚙️ Instalado no backend | Strapi como servidor MCP |
+| MCP                   | Status       | Uso                          |
+| --------------------- | ------------ | ---------------------------- |
+| **Figma** (claude.ai) | ✅ Conectado | Design system, layouts       |
+| **context-mode**      | ✅ Conectado | Gerenciar janela de contexto |
+| **Supabase**          | ✅ Conectado | Banco, storage, auth         |
 
-**Skills disponíveis:** `strapi-expert`, `strapi-v5-expert`, `frontend-design`, `vercel-react-best-practices`
+**Skills disponíveis:** `supabase`, `frontend-design`, `vercel-react-best-practices`
 
 ---
 
@@ -237,4 +212,3 @@ frontend/src/
 - Não usar `bg-gradient-to-*` (Tailwind v3) — usar `bg-linear-to-*`
 - Não usar `flex-shrink-0` — usar `shrink-0`
 - Não inventar textos, preços ou informações do negócio
-- Não usar `strapi.entityService` (deprecated) — usar `strapi.documents()`

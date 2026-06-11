@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import ImageModal from '@/components/ui/ImageModal'
-import { absoluteUrl } from '@/lib/helpers'
 
 const containerVariants = {
   hidden: {},
@@ -22,14 +21,20 @@ const itemVariants = {
 
 type AttractionItem = {
   id: number
-  value: { name: string; description: string; image: string; color: string; sort: string }
+  value: {
+    name: string
+    description: string
+    image: string
+    color: string
+    sort: string
+  }
 }
 
 export default function Atracoes({ attractions }: any) {
   const [selected, setSelected] = useState<AttractionItem | null>(null)
 
-  const badge    = attractions?.Section?.badge?.value    ?? ''
-  const title    = attractions?.Section?.title?.value    ?? ''
+  const badge = attractions?.Section?.badge?.value ?? ''
+  const title = attractions?.Section?.title?.value ?? ''
   const subtitle = attractions?.Section?.subtitle?.value ?? ''
   const list: AttractionItem[] = attractions?.Content?.Attraction ?? []
 
@@ -75,7 +80,7 @@ export default function Atracoes({ attractions }: any) {
                 <div className="relative h-52 w-full bg-gray-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={absoluteUrl(item.value.image) as string}
+                    src={item.value.image}
                     alt={item.value.name}
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -101,7 +106,9 @@ export default function Atracoes({ attractions }: any) {
               variants={itemVariants}
               whileHover={{ y: -8 }}
               onClick={() =>
-                document.querySelector('#contato')?.scrollIntoView({ behavior: 'smooth' })
+                document
+                  .querySelector('#contato')
+                  ?.scrollIntoView({ behavior: 'smooth' })
               }
               className="group from-brand-purple to-brand-pink relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br p-8 text-center shadow-md transition-shadow hover:shadow-xl"
             >
@@ -121,7 +128,7 @@ export default function Atracoes({ attractions }: any) {
 
       {selected !== null && (
         <ImageModal
-          src={absoluteUrl(selected.value.image) as string}
+          src={selected.value.image}
           alt={selected.value.name}
           titulo={selected.value.name}
           descricao={selected.value.description}

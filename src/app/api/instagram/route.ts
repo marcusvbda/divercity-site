@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { getCMSConfig } from '@/lib/cms-old'
 
 export interface InstagramPost {
   id: string
@@ -28,11 +27,8 @@ function makeFallback(instagramUrl: string): InstagramPost[] {
 }
 
 export async function GET() {
-  // Token do Instagram vem do CMS, não do .env
-  const config = await getCMSConfig()
-  const token = config.instagram_access_token
-  const instagramUrl =
-    config.instagram_url ?? 'https://www.instagram.com/divercity.park'
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN
+  const instagramUrl = process.env.INSTAGRAM_URL ?? 'https://www.instagram.com/divercity.park'
 
   if (!token) {
     return NextResponse.json(makeFallback(instagramUrl))

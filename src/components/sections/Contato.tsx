@@ -4,52 +4,28 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
 
-export default function Contato({ config, contactSection }: any) {
-  const badge = contactSection?.badge ?? ''
-  const title = contactSection?.title ?? ''
-  const subtitle = contactSection?.subtitle ?? ''
-  const formBtnLabel = contactSection?.formBtnLabel ?? 'Enviar'
+export default function Contato({ contactSection }: any) {
+  const badge        = contactSection?.Section?.badge?.value        ?? ''
+  const title        = contactSection?.Section?.title?.value        ?? ''
+  const subtitle     = contactSection?.Section?.subtitle?.value     ?? ''
+  const formBtnLabel = contactSection?.Section?.formBtnLabel?.value ?? 'Enviar'
+
+  const wppNumber          = contactSection?.Info?.wppNumber?.value          ?? ''
+  const address            = contactSection?.Info?.address?.value            ?? ''
+  const googleMapsUrl      = contactSection?.Info?.googleMapsUrl?.value      ?? ''
+  const weekdaysTime       = contactSection?.Info?.weekdaysTime?.value       ?? ''
+  const holidaysTime       = contactSection?.Info?.holidaysTime?.value       ?? ''
+  const instagramUrl       = contactSection?.Info?.instagramUrl?.value       ?? ''
+  const googleMapsUrlIframe = contactSection?.Info?.googleMapsUrlIframe?.value ?? ''
+
   const [nome, setNome] = useState('')
   const [mensagem, setMensagem] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; mensagem?: string }>({})
 
-  const businessInfo = [
-    {
-      icon: MapPin,
-      label: 'Endereço',
-      value: config.endereco,
-      href: config.google_maps_url,
-      color: '#FF4F8A',
-    },
-    {
-      icon: Clock,
-      label: 'Horário de Funcionamento',
-      value: `${config.horario_semana}\n${config.horario_feriado}`,
-      href: null,
-      color: '#8E4CCF',
-    },
-  ]
-
-  const socialLinks = [
-    {
-      icon: Camera,
-      label: 'Instagram',
-      href: config.instagram_url,
-      color: '#FF4F8A',
-    },
-    {
-      icon: MessageCircle,
-      label: 'WhatsApp',
-      href: `https://api.whatsapp.com/send/?phone=${config.whatsapp_number}&text&type=phone_number&app_absent=0`,
-      color: '#9AD94B',
-    },
-  ]
-
   const validate = () => {
     const e: { nome?: string; mensagem?: string } = {}
     if (nome.trim().length < 2) e.nome = 'Nome deve ter pelo menos 2 caracteres'
-    if (mensagem.trim().length < 10)
-      e.mensagem = 'Mensagem deve ter pelo menos 10 caracteres'
+    if (mensagem.trim().length < 10) e.mensagem = 'Mensagem deve ter pelo menos 10 caracteres'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -58,7 +34,7 @@ export default function Contato({ config, contactSection }: any) {
     e.preventDefault()
     if (!validate()) return
     const texto = `Olá! Meu nome é ${nome.trim()}. ${mensagem.trim()}`
-    const url = `https://api.whatsapp.com/send?phone=${config.whatsapp_number}&text=${encodeURIComponent(texto)}`
+    const url = `https://api.whatsapp.com/send?phone=${wppNumber}&text=${encodeURIComponent(texto)}`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
@@ -92,86 +68,77 @@ export default function Contato({ config, contactSection }: any) {
             transition={{ duration: 0.7 }}
           >
             <div className="mb-8 space-y-6">
-              {businessInfo.map((info) => {
-                const Icon = info.icon
-                return (
-                  <div key={info.label} className="flex items-start gap-4">
-                    <div
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: info.color + '18' }}
-                    >
-                      <Icon size={22} style={{ color: info.color }} />
-                    </div>
-                    <div>
-                      <p className="font-body text-sm font-semibold text-gray-800">
-                        {info.label}
-                      </p>
-                      {info.href ? (
-                        <a
-                          href={info.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-body mt-0.5 text-sm hover:underline"
-                          style={{ color: info.color }}
-                        >
-                          {info.value
-                            .split('\n')
-                            .map((line: string, i: number) => (
-                              <span key={i} className="block">
-                                {line}
-                              </span>
-                            ))}
-                        </a>
-                      ) : (
-                        <div className="font-body mt-0.5 text-sm text-gray-500">
-                          {info.value
-                            .split('\n')
-                            .map((line: string, i: number) => (
-                              <span key={i} className="block">
-                                {line}
-                              </span>
-                            ))}
-                        </div>
-                      )}
-                    </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: '#FF4F8A18' }}>
+                  <MapPin size={22} style={{ color: '#FF4F8A' }} />
+                </div>
+                <div>
+                  <p className="font-body text-sm font-semibold text-gray-800">Endereço</p>
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-body mt-0.5 block text-sm hover:underline"
+                    style={{ color: '#FF4F8A' }}
+                  >
+                    {address}
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: '#8E4CCF18' }}>
+                  <Clock size={22} style={{ color: '#8E4CCF' }} />
+                </div>
+                <div>
+                  <p className="font-body text-sm font-semibold text-gray-800">Horário de Funcionamento</p>
+                  <div className="font-body mt-0.5 text-sm text-gray-500">
+                    <span className="block">Segunda a Sábado: {weekdaysTime}</span>
+                    <span className="block">Domingos e feriados: {holidaysTime}</span>
                   </div>
-                )
-              })}
+                </div>
+              </div>
             </div>
 
             {/* Social */}
             <div className="mb-8 flex gap-3">
-              {socialLinks.map((s) => {
-                const Icon = s.icon
-                return (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform hover:scale-110"
-                    style={{ backgroundColor: s.color + '18' }}
-                  >
-                    <Icon size={22} style={{ color: s.color }} />
-                  </a>
-                )
-              })}
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform hover:scale-110"
+                style={{ backgroundColor: '#FF4F8A18' }}
+              >
+                <Camera size={22} style={{ color: '#FF4F8A' }} />
+              </a>
+              <a
+                href={`https://api.whatsapp.com/send/?phone=${wppNumber}&text&type=phone_number&app_absent=0`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl transition-transform hover:scale-110"
+                style={{ backgroundColor: '#9AD94B18' }}
+              >
+                <MessageCircle size={22} style={{ color: '#9AD94B' }} />
+              </a>
             </div>
 
             {/* Map */}
-            <div className="overflow-hidden rounded-2xl shadow-md">
-              <iframe
-                src={config?.googleMapsUrlIframe}
-                width="100%"
-                height="208"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Localização Divercity Park"
-              />
-            </div>
+            {googleMapsUrlIframe && (
+              <div className="overflow-hidden rounded-2xl shadow-md">
+                <iframe
+                  src={googleMapsUrlIframe}
+                  width="100%"
+                  height="208"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Localização Divercity Park"
+                />
+              </div>
+            )}
           </motion.div>
 
           {/* Right: Form */}
@@ -182,12 +149,8 @@ export default function Contato({ config, contactSection }: any) {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-              {/* Nome */}
               <div>
-                <label
-                  htmlFor="nome"
-                  className="font-body mb-1.5 block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="nome" className="font-body mb-1.5 block text-sm font-medium text-gray-700">
                   Nome *
                 </label>
                 <input
@@ -197,24 +160,14 @@ export default function Contato({ config, contactSection }: any) {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   className={`font-body focus:border-brand-cyan focus:ring-brand-cyan/20 w-full rounded-xl border px-4 py-3 text-sm text-gray-700 placeholder-gray-400 transition-colors outline-none focus:ring-2 ${
-                    errors.nome
-                      ? 'border-red-400 bg-red-50'
-                      : 'border-gray-200 bg-gray-50'
+                    errors.nome ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
                   }`}
                 />
-                {errors.nome && (
-                  <p className="font-body mt-1 text-xs text-red-500">
-                    {errors.nome}
-                  </p>
-                )}
+                {errors.nome && <p className="font-body mt-1 text-xs text-red-500">{errors.nome}</p>}
               </div>
 
-              {/* Mensagem */}
               <div>
-                <label
-                  htmlFor="mensagem"
-                  className="font-body mb-1.5 block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="mensagem" className="font-body mb-1.5 block text-sm font-medium text-gray-700">
                   Mensagem *
                 </label>
                 <textarea
@@ -224,16 +177,10 @@ export default function Contato({ config, contactSection }: any) {
                   value={mensagem}
                   onChange={(e) => setMensagem(e.target.value)}
                   className={`font-body focus:border-brand-cyan focus:ring-brand-cyan/20 w-full resize-none rounded-xl border px-4 py-3 text-sm text-gray-700 placeholder-gray-400 transition-colors outline-none focus:ring-2 ${
-                    errors.mensagem
-                      ? 'border-red-400 bg-red-50'
-                      : 'border-gray-200 bg-gray-50'
+                    errors.mensagem ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50'
                   }`}
                 />
-                {errors.mensagem && (
-                  <p className="font-body mt-1 text-xs text-red-500">
-                    {errors.mensagem}
-                  </p>
-                )}
+                {errors.mensagem && <p className="font-body mt-1 text-xs text-red-500">{errors.mensagem}</p>}
               </div>
 
               <motion.button

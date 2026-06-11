@@ -12,10 +12,24 @@ import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
 
 export default async function Home() {
-  const [navBarContent, heroContent, attractionsContent] = await Promise.all([
+  const [
+    navBarContent,
+    FooterContent,
+    heroContent,
+    attractionsContent,
+    BenefitsContent,
+    PartySection,
+    PriceSection,
+    ContactSection,
+  ] = await Promise.all([
     getContentType('NavBar'),
+    getContentType('Footer'),
     getContentType('Hero'),
     getContentType('Attractions'),
+    getContentType('BenefitsSection'),
+    getContentType('PartySection'),
+    getContentType('PriceSection'),
+    getContentType('ContactSection'),
   ])
 
   return (
@@ -24,20 +38,14 @@ export default async function Home() {
       <main>
         <Hero hero={heroContent} />
         <Atracoes attractions={attractionsContent} />
-        {/* <PorQueEscolher
-          beneficios={beneficios}
-          benefitSection={config?.benefitSection ?? {}}
-        /> */}
-        {/* <Festas partySection={config?.partySection ?? {}} /> */}
-        {/* <Precos precos={precos} priceSection={config?.priceSection} /> */}
+        <PorQueEscolher benefits={BenefitsContent} />
+        <Festas partySection={PartySection} />
+        <Precos priceSection={PriceSection} />
         <Galeria />
         <Depoimentos />
-        {/* <Contato
-          config={config}
-          contactSection={config?.contactSection ?? {}}
-        /> */}
+        <Contato contactSection={ContactSection} />
       </main>
-      {/* <Footer config={config} /> */}
+      <Footer config={FooterContent} />
     </>
   )
 }

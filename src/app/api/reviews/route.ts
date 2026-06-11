@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { getCMSConfig } from '@/lib/cms-old'
 
 export interface GoogleReview {
   id: string
@@ -25,9 +24,8 @@ async function findPlaceId(
 }
 
 export async function GET() {
-  const config = await getCMSConfig()
-  const apiKey = config.google_places_api_key
-  const configPlaceId = config.google_place_id
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY
+  const configPlaceId = process.env.GOOGLE_PLACE_ID
 
   if (!apiKey) {
     return NextResponse.json([])
