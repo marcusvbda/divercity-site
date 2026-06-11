@@ -1,16 +1,7 @@
-import { connection } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import LogoutButton from './LogoutButton'
-
-export default async function AdminPage() {
-  await connection()
-  const session = await getServerSession(authOptions)
-
+export default function AdminPage() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <p>Olá, {session?.user.username}</p>
-      <LogoutButton />
+    <div className="flex flex-1 items-center justify-center p-8">
+      <p className="text-muted-foreground">dashboard content here...</p>
     </div>
   )
 }
