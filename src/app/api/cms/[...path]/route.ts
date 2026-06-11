@@ -10,7 +10,7 @@ async function proxy(
 ) {
   const { path } = await params
   const jwtToken = await getToken({ req })
-  const token = jwtToken?.strapiJwt ?? STRAPI_API_TOKEN
+  const token = STRAPI_API_TOKEN
 
   const search = req.nextUrl.searchParams.toString()
   const strapiPath = path.join('/')

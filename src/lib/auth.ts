@@ -1,107 +1,74 @@
-import { type AuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN ?? ''
+import { type AuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "@/lib/supabase";
 
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
-      name: 'Strapi',
+      name: "Supabase",
       credentials: {
-        identifier: { label: 'Email', type: 'email' },
-        password: { label: 'Senha', type: 'password' },
+        identifier: { label: "Email", type: "email" },
+        password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.identifier || !credentials?.password) return null
+        if (!credentials?.identifier || !credentials?.password) return null;
 
-        const res = await fetch(`${STRAPI_URL}/api/auth/local`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            identifier: credentials.identifier,
-            password: credentials.password,
-          }),
-        })
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.identifier,
+          password: credentials.password,
+        });
 
-        if (!res.ok) return null
-
-        const { jwt, user } = await res.json()
-
-        // Verifica role via token estático (evita depender de permissões do role)
-        const meRes = await fetch(
-          `${STRAPI_URL}/api/users/${user.id}?populate=role`,
-          { headers: { Authorization: `Bearer ${STRAPI_API_TOKEN}` } }
-        )
-
-        if (!meRes.ok) return null
-
-        const me = await meRes.json()
-
-        if (me.role?.name !== 'Admin') return null
+        if (error || !data.user || !data.session) return null;
 
         return {
-          id: String(user.id),
-          name: user.username,
-          email: user.email,
-          username: user.username,
-          strapiJwt: jwt,
-        }
+          id: data.user.id,
+          name: data.user.user_metadata?.name ?? data.user.email,
+          email: data.user.email!,
+          username: data.user.user_metadata?.name ?? data.user.email!,
+          supabaseAccessToken: data.session.access_token,
+        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.strapiJwt = user.strapiJwt
-        token.id = user.id
-        token.username = user.username ?? user.name ?? ''
-        token.email = user.email ?? ''
-        return token
+        token.id = user.id;
+        token.username = user.username ?? user.name ?? "";
+        token.email = user.email ?? "";
+        token.supabaseAccessToken = user.supabaseAccessToken;
+        return token;
       }
 
-      // Re-valida o usuário no Strapi a cada refresh de sessão
-      try {
-        const res = await fetch(`${STRAPI_URL}/api/users/${token.id}`, {
-          headers: { Authorization: `Bearer ${STRAPI_API_TOKEN}` },
-          cache: 'no-store',
-        })
+      // Re-valida o token Supabase a cada refresh de sessão
+      const { data, error } = await supabase.auth.getUser(
+        token.supabaseAccessToken
+      );
 
-        if (!res.ok) {
-          token.error = 'InvalidToken'
-          return token
-        }
-
-        const me = await res.json()
-
-        if (me.blocked) {
-          token.error = 'UserBlocked'
-          return token
-        }
-
-        delete token.error
-      } catch {
-        token.error = 'NetworkError'
+      if (error || !data.user) {
+        token.error = "InvalidToken";
+        return token;
       }
 
-      return token
+      delete token.error;
+      return token;
     },
     async session({ session, token }) {
       session.user = {
         id: token.id,
         username: token.username,
         email: token.email,
-      }
+      };
       if (token.error) {
-        session.error = token.error
+        session.error = token.error;
       }
-      return session
+      return session;
     },
   },
   pages: {
-    signIn: '/admin/login',
+    signIn: "/admin/login",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
-}
+};

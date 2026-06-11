@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 
 export default withAuth(
   function middleware(req) {
-    const isLoginPage = req.nextUrl.pathname === '/admin/login'
+    const { pathname } = req.nextUrl
+    const isLoginPage = pathname === '/admin/login'
     const isAuthenticated = !!req.nextauth.token
 
     if (isLoginPage && isAuthenticated) {
@@ -15,8 +16,10 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        const isLoginPage = req.nextUrl.pathname === '/admin/login'
-        if (isLoginPage) return true
+        const { pathname } = req.nextUrl
+        const isPublicLoginRoute =
+          pathname.startsWith('/admin/login')
+        if (isPublicLoginRoute) return true
         return !!token
       },
     },
