@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function getContentType(type: string): Promise<any> {
   "use cache";
   cacheTag("cms", `cms:${type}`);
-  cacheLife("hours");
+  cacheLife("max");
 
   const contentType = await prisma.contentType.findUnique({
     where: { name: type },

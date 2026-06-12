@@ -24,11 +24,10 @@ export function NavUser() {
   const { data: session } = useSession()
 
   const sessionUser = session?.user as any
-
   const name = sessionUser?.name ?? (session?.user as any)?.username ?? 'Admin'
   const email = sessionUser?.email ?? ''
   const avatar = sessionUser?.image ?? ''
-  const initials = sessionUser.slice(0, 2).toUpperCase()
+  const initials = name.slice(0, 2).toUpperCase()
 
   return (
     <SidebarMenu>

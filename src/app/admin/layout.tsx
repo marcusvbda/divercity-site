@@ -6,6 +6,8 @@ import SessionGuard from './SessionGuard'
 import { AppSidebar } from '@/components/app-sidebar'
 import { SiteHeader } from '@/components/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { getContentType } from '@/lib/cms'
+import { Toaster } from 'sonner'
 
 export default async function AdminLayout({
   children,
@@ -19,9 +21,13 @@ export default async function AdminLayout({
     return <NextAuthProvider session={null}>{children}</NextAuthProvider>
   }
 
+  const navbar = await getContentType('NavBar')
+  const logoUrl = navbar?.Logo?.url?.value as string | undefined
+
   return (
     <NextAuthProvider session={session}>
       <SessionGuard />
+      <Toaster richColors position="top-right" />
       <SidebarProvider
         style={
           {
@@ -30,7 +36,7 @@ export default async function AdminLayout({
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="inset" logoUrl={logoUrl} />
         <SidebarInset>
           <SiteHeader />
           <div className="flex flex-1 flex-col">{children}</div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -25,7 +25,6 @@ export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
   const [serverError, setServerError] = useState<string | null>(null);
@@ -48,7 +47,7 @@ export default function LoginForm({
       if (result?.error) throw new Error("E-mail ou senha inválidos");
       return result;
     },
-    onSuccess: () => router.push(callbackUrl),
+    onSuccess: () => { window.location.href = callbackUrl },
     onError: (err: Error) => setServerError(err.message),
   });
 

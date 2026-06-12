@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { BlocksIcon, LayoutDashboardIcon, SparklesIcon } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
@@ -20,18 +21,33 @@ const navMain = [
   { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
 ]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  logoUrl?: string
+}
+
+export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
+              className="h-auto !px-4 data-[slot=sidebar-menu-button]:p-2!"
               render={<a href="/admin" />}
             >
-              <SparklesIcon className="size-5! text-pink-500" />
-              <span className="text-base font-semibold">Divercity Park</span>
+              {logoUrl ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={logoUrl} alt="Divercity Park" className="w-full" />
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="size-5! text-pink-500" />
+                  <span className="text-base font-semibold">
+                    Divercity Park
+                  </span>
+                </>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
