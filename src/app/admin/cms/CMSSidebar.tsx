@@ -79,7 +79,11 @@ export function CMSSidebar() {
         </div>
         <nav className="flex flex-col gap-0.5 px-2 pb-4">
           {isLoading ? (
-            <NavSkeleton count={5} className="mx-1 h-8" varyWidth />
+            <NavSkeleton
+              count={5}
+              className="mx-1 h-8 bg-gray-300/20"
+              varyWidth
+            />
           ) : (
             contentTypes.map((ct) =>
               navItem(

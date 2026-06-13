@@ -2,7 +2,12 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { BlocksIcon, LayoutDashboardIcon, SparklesIcon } from 'lucide-react'
+import {
+  BlocksIcon,
+  ExternalLinkIcon,
+  LayoutDashboardIcon,
+  SparklesIcon,
+} from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -17,6 +22,7 @@ import {
 } from '@/components/ui/sidebar'
 
 const navMain = [
+  { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
   { title: 'Dashboard', url: '/admin', icon: <LayoutDashboardIcon /> },
   { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
 ]

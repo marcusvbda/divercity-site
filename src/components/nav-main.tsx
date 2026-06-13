@@ -16,6 +16,7 @@ export function NavMain({
     title: string
     url: string
     icon?: React.ReactNode
+    target?: string
   }[]
 }) {
   const pathname = usePathname()
@@ -35,7 +36,7 @@ export function NavMain({
                 <SidebarMenuButton
                   tooltip={item.title}
                   isActive={isActive}
-                  render={<a href={item.url} />}
+                  render={<a href={item.url} target={item.target} />}
                 >
                   {item.icon}
                   <span>{item.title}</span>
