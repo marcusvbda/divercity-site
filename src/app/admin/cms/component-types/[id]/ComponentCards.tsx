@@ -395,7 +395,7 @@ function ComponentSheetContent({ componentId }: { componentId: number }) {
   if (!data) return null
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-6">
+    <div className="flex flex-col gap-6 px-4 pb-8">
       {data.fields.length === 0 && (
         <p className="text-muted-foreground text-sm">
           Nenhum campo cadastrado.
