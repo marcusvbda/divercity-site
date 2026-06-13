@@ -161,6 +161,18 @@
   }
 }
 
+/* TipTap editor styles */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 200px;
+}
+.tiptap-editor .ProseMirror h1 { @apply text-2xl font-bold my-2; }
+.tiptap-editor .ProseMirror h2 { @apply text-xl font-bold my-2; }
+.tiptap-editor .ProseMirror h3 { @apply text-lg font-semibold my-1; }
+.tiptap-editor .ProseMirror ul { @apply list-disc pl-5 my-2; }
+.tiptap-editor .ProseMirror ol { @apply list-decimal pl-5 my-2; }
+.tiptap-editor .ProseMirror p { @apply my-1; }
+
 html {
   overflow-x: hidden;
 }

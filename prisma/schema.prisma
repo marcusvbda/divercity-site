@@ -73,3 +73,74 @@ model ComponentInstanceFieldValue {
 
   @@map("component_instance_field_values")
 }
+
+enum PartyStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum ContractStatus {
+  draft
+  pending
+  in_review
+  signed
+  completed
+  cancelled
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  cpf       String   @unique
+  name      String
+  email     String?
+  phone     String?
+  parties   Party[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customers")
+}
+
+model ContractTemplate {
+  id        Int      @id @default(autoincrement())
+  name      String
+  body      String
+  variables String[]
+  parties   Party[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contract_templates")
+}
+
+model Party {
+  id                 Int              @id @default(autoincrement())
+  customerId         Int
+  customer           Customer         @relation(fields: [customerId], references: [id])
+  contractTemplateId Int
+  contractTemplate   ContractTemplate @relation(fields: [contractTemplateId], references: [id])
+  date               DateTime
+  dateEnd            DateTime?
+  status             PartyStatus      @default(pending)
+  contract           Contract?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@map("parties")
+}
+
+model Contract {
+  id             Int            @id @default(autoincrement())
+  partyId        Int            @unique
+  party          Party          @relation(fields: [partyId], references: [id])
+  body           String
+  fieldValues    Json
+  status         ContractStatus @default(draft)
+  clientToken    String?        @unique
+  clientLinkOpen Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("contracts")
+}

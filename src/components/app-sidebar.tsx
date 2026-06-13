@@ -6,7 +6,9 @@ import {
   BlocksIcon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
+  PartyPopperIcon,
   SparklesIcon,
+  UsersIcon,
 } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
@@ -25,6 +27,12 @@ const navMain = [
   { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
   { title: 'Dashboard', url: '/admin', icon: <LayoutDashboardIcon /> },
   { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
+  { title: 'Clientes', url: '/admin/customers', icon: <UsersIcon /> },
+  {
+    title: 'Salão de Festas',
+    url: '/admin/parties',
+    icon: <PartyPopperIcon />,
+  },
 ]
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
@@ -38,13 +46,17 @@ export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="h-auto !px-4 data-[slot=sidebar-menu-button]:p-2!"
+              className="flex h-auto items-center justify-center !px-4 data-[slot=sidebar-menu-button]:p-2!"
               render={<a href="/admin" />}
             >
               {logoUrl ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={logoUrl} alt="Divercity Park" className="w-full" />
+                  <img
+                    src={logoUrl}
+                    alt="Divercity Park"
+                    className="w-full md:w-10/12"
+                  />
                 </>
               ) : (
                 <>
