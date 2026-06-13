@@ -73,7 +73,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${poppins.variable}`}>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased" suppressHydrationWarning>
         <ReactQueryProvider>
           <Suspense>{children}</Suspense>
         </ReactQueryProvider>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
@@ -8,7 +9,10 @@ import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import type { InstagramPost } from '@/app/api/instagram/route'
 
 export default function Galeria() {
-  const [posts, setPosts] = useState<InstagramPost[]>([])
+  const { data: posts = [] } = useQuery<InstagramPost[]>({
+    queryKey: ['instagram', 'posts'],
+    queryFn: () => fetch('/api/instagram').then((r) => r.json()),
+  })
 
   // Duplica os slides para garantir que o loop não abra lacuna
   const slides =
@@ -22,12 +26,6 @@ export default function Galeria() {
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
 
-  useEffect(() => {
-    fetch('/api/instagram')
-      .then((r) => r.json())
-      .then(setPosts)
-      .catch(console.error)
-  }, [])
 
   return (
     <section className="section-padding overflow-hidden bg-white">

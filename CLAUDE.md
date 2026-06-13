@@ -59,16 +59,17 @@ divercity-site/
 
 ## Stack
 
-| Tecnologia    | Versão            | Notas                                                 |
-| ------------- | ----------------- | ----------------------------------------------------- |
-| Next.js       | **16** App Router | React Compiler ativado, `cacheComponents: true`       |
-| TypeScript    | 5                 | strict mode                                           |
-| Tailwind CSS  | **v4**            | CSS-first config via `@theme` em globals.css          |
-| Framer Motion | 12                | `whileInView` + `viewport` para scroll                |
-| shadcn/ui     | 4                 | Componentes em `src/components/ui/`                   |
-| Lucide React  | latest            | Verificar se o ícone existe antes de usar             |
-| Prisma        | 7                 | `prisma.config.ts` + `@prisma/adapter-pg`, schema EAV |
-| Supabase      | —                 | PostgreSQL + Auth + Storage                           |
+| Tecnologia         | Versão            | Notas                                                 |
+| ------------------ | ----------------- | ----------------------------------------------------- |
+| Next.js            | **16** App Router | React Compiler ativado, `cacheComponents: true`       |
+| TypeScript         | 5                 | strict mode                                           |
+| Tailwind CSS       | **v4**            | CSS-first config via `@theme` em globals.css          |
+| Framer Motion      | 12                | `whileInView` + `viewport` para scroll                |
+| shadcn/ui          | 4                 | Componentes em `src/components/ui/`                   |
+| Lucide React       | latest            | Verificar se o ícone existe antes de usar             |
+| Prisma             | 7                 | `prisma.config.ts` + `@prisma/adapter-pg`, schema EAV |
+| Supabase           | —                 | PostgreSQL + Auth + Storage                           |
+| TanStack Query     | 5                 | `@tanstack/react-query` — obrigatório para fetch      |
 
 ---
 
@@ -204,6 +205,59 @@ src/
 
 ---
 
+## Fetching de Dados — Regra Obrigatória
+
+**NUNCA use `useEffect` + `fetch` para buscar dados em Client Components.**
+
+Sempre usar `@tanstack/react-query`:
+
+- **GET** → `useQuery`
+- **POST / PUT / DELETE / PATCH** → `useMutation`
+
+```tsx
+// ✅ Correto
+const { data, isLoading } = useQuery({
+  queryKey: ['chave'],
+  queryFn: () => fetch('/api/rota').then((r) => r.json()),
+})
+
+const mutation = useMutation({
+  mutationFn: (body) =>
+    fetch('/api/rota', { method: 'POST', body: JSON.stringify(body) }).then((r) => r.json()),
+})
+
+// ❌ Errado
+useEffect(() => {
+  fetch('/api/rota').then((r) => r.json()).then(setData)
+}, [])
+```
+
+O `ReactQueryProvider` já está configurado em `src/providers/ReactQueryProvider.tsx`.
+
+---
+
+## shadcn/ui — Regra Obrigatória
+
+**Antes de criar qualquer componente de UI, verificar se o shadcn/ui já tem um equivalente.**
+
+Os componentes instalados estão em `src/components/ui/`. Consultar também a [documentação do shadcn](https://ui.shadcn.com/docs/components) para componentes disponíveis mas não instalados (instalar via `npx shadcn@latest add <componente>`).
+
+Exemplos do que já existe e **não deve ser recriado**:
+
+| Necessidade              | Usar                          |
+| ------------------------ | ----------------------------- |
+| Botão                    | `Button` de `ui/button`       |
+| Input / Textarea         | `Input`, `Textarea`           |
+| Loading / pulse          | `Skeleton` de `ui/skeleton`   |
+| Badge / tag              | `Badge` de `ui/badge`         |
+| Modal / drawer           | `Sheet`, `Drawer`             |
+| Dropdown                 | `DropdownMenu`                |
+| Tooltip                  | `Tooltip`                     |
+| Select / Combobox        | `Select`                      |
+| Tabs                     | `Tabs`                        |
+
+---
+
 ## O que NÃO fazer
 
 - Não criar comentários explicando o que o código faz
@@ -212,3 +266,5 @@ src/
 - Não usar `bg-gradient-to-*` (Tailwind v3) — usar `bg-linear-to-*`
 - Não usar `flex-shrink-0` — usar `shrink-0`
 - Não inventar textos, preços ou informações do negócio
+- Não usar `useEffect` + `fetch` — usar React Query (`useQuery` / `useMutation`)
+- Não recriar componentes que o shadcn/ui já oferece

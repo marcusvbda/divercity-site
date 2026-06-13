@@ -16,10 +16,11 @@ export async function GET(req: NextRequest) {
   const sort = (VALID_SORT as readonly string[]).includes(rawSort) ? rawSort : 'id'
   const order: 'asc' | 'desc' = searchParams.get('order') === 'desc' ? 'desc' : 'asc'
   const filter = searchParams.get('filter') ?? ''
+  const editableParam = searchParams.get('editable')
 
-  const where = filter
-    ? { name: { contains: filter, mode: 'insensitive' as const } }
-    : {}
+  const where: Record<string, unknown> = {}
+  if (filter) where.name = { contains: filter, mode: 'insensitive' }
+  if (editableParam !== null) where.editable = editableParam !== 'false'
 
   const [data, total] = await Promise.all([
     prisma.contentType.findMany({

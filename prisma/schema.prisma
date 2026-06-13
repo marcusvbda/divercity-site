@@ -10,6 +10,7 @@ datasource db {
 model ContentType {
   id         Int                @id @default(autoincrement())
   name       String             @unique
+  editable   Boolean            @default(true)
   components ContentComponent[]
 
   @@map("content_types")

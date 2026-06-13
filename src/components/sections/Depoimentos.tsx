@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Star, ExternalLink } from 'lucide-react'
 import type { GoogleReview } from '@/app/api/reviews/route'
@@ -49,15 +49,14 @@ const itemVariants = {
 }
 
 export default function Depoimentos() {
-  const [reviews, setReviews] = useState<GoogleReview[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/reviews')
-      .then((r) => r.json())
-      .then((data) => { setReviews(data?.length ? data : FALLBACK_REVIEWS); setLoading(false) })
-      .catch(() => { setReviews(FALLBACK_REVIEWS); setLoading(false) })
-  }, [])
+  const { data: reviews = [], isLoading: loading } = useQuery<GoogleReview[]>({
+    queryKey: ['google', 'reviews'],
+    queryFn: () =>
+      fetch('/api/reviews')
+        .then((r) => r.json())
+        .then((data) => (data?.length ? data : FALLBACK_REVIEWS)),
+    placeholderData: FALLBACK_REVIEWS,
+  })
 
   return (
     <section className="section-padding bg-gray-50">

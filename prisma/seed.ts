@@ -154,8 +154,8 @@ async function main() {
   // ── General (reusable component templates) ────────────────────────────────
   const generalType = await prisma.contentType.upsert({
     where: { name: 'General' },
-    update: {},
-    create: { name: 'General' },
+    update: { editable: false },
+    create: { name: 'General', editable: false },
   })
 
   // General/Link
