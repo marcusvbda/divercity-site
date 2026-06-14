@@ -63,11 +63,24 @@ export function ClientPortal({ hash }: Props) {
   const allVars: string[] = (template?.variables ?? Object.keys(existingValues)).filter(v => !isDefaultVariable(v))
   const unfilledVars = allVars.filter((v) => !existingValues[v])
 
+  const completeMutation = useMutation({
+    mutationFn: () =>
+      fetch(`/api/client/contract/${hash}/complete`, { method: 'POST' }).then((r) => r.json()),
+  })
+
   // ALL hooks must be before early returns — skip step 1 if all variables are already filled
   useEffect(() => {
     if (!contract || isLoading) return
     if (step === 1 && unfilledVars.length === 0) setStep(2)
   }, [step, unfilledVars.length, contract, isLoading])
+
+  // Quando volta do DocuSign, confirma assinatura e atualiza contrato + festa
+  useEffect(() => {
+    if (dsEvent === 'signing_complete') {
+      completeMutation.mutate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (isLoading) {
     return (

@@ -10,24 +10,37 @@ import { toast } from 'sonner'
 import type { ContractTemplate } from '@/types/parties'
 import type { Column } from '@/components/ui/admin-data-table'
 
+function extractAllVars(body: string): string[] {
+  const matches = body.match(/\{\{(\w+)\}\}/g) ?? []
+  return [...new Set(matches.map(m => m.replace(/[{}]/g, '')))]
+}
+
+function isDefault(v: string) {
+  return v.startsWith('cliente_') || v.startsWith('festa_')
+}
+
 const columns: Column<ContractTemplate>[] = [
   { key: 'name', header: 'Nome', sortable: true, render: r => <span className="font-medium">{r.name}</span> },
   {
     key: 'variables',
     header: 'Variáveis',
-    render: r => (
-      <div className="flex flex-wrap gap-1">
-        {r.variables.length === 0 ? (
-          <span className="text-muted-foreground text-xs">Nenhuma</span>
-        ) : (
-          r.variables.map(v => (
-            <Badge key={v} variant="secondary" className="font-mono text-xs">
+    render: r => {
+      const all = extractAllVars(r.body ?? '')
+      if (all.length === 0) return <span className="text-muted-foreground text-xs">Nenhuma</span>
+      return (
+        <div className="flex flex-wrap gap-1">
+          {all.map(v => (
+            <Badge
+              key={v}
+              variant={isDefault(v) ? 'outline' : 'secondary'}
+              className="font-mono text-xs"
+            >
               {`{{${v}}}`}
             </Badge>
-          ))
-        )}
-      </div>
-    ),
+          ))}
+        </div>
+      )
+    },
   },
 ]
 

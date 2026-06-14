@@ -1,17 +1,17 @@
-import type {
-  Document as DocuSignDocument,
-  EnvelopeDefinition,
-  Recipients,
-  RecipientViewRequest,
-  SignHere,
-  Signer,
-  Tabs,
-} from 'docusign-esign'
-import { ApiClient, EnvelopesApi } from 'docusign-esign'
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 const SCOPES = ['signature', 'impersonation']
 
-export async function getDocuSignClient(): Promise<ApiClient> {
+// CJS require at call time — prevents static import analysis from pulling
+// docusign-esign into the client bundle.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ds(): any {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('docusign-esign')
+}
+
+export async function getDocuSignClient() {
+  const { ApiClient } = ds()
   const client = new ApiClient()
   client.setBasePath(process.env.DOCUSIGN_BASE_PATH!)
   client.setOAuthBasePath(process.env.DOCUSIGN_OAUTH_BASE_PATH!)
@@ -48,6 +48,7 @@ export async function createSigningSession({
   contractTitle: string
   returnUrl: string
 }): Promise<{ envelopeId: string; signingUrl: string }> {
+  const { EnvelopesApi } = ds()
   const client = await getDocuSignClient()
   const envelopesApi = new EnvelopesApi(client)
   const accountId = process.env.DOCUSIGN_ACCOUNT_ID!
@@ -67,57 +68,58 @@ export async function createSigningSession({
 </style>
 </head><body>${contractHtml}</body></html>`
 
-  const doc: DocuSignDocument = {
-    documentBase64: Buffer.from(fullHtml).toString('base64'),
-    name: contractTitle,
-    fileExtension: 'html',
-    documentId: '1',
-  }
+  const envelopeResult = await envelopesApi.createEnvelope(accountId, {
+    envelopeDefinition: {
+      emailSubject: `Contrato para assinatura — ${contractTitle}`,
+      documents: [{
+        documentBase64: Buffer.from(fullHtml).toString('base64'),
+        name: contractTitle,
+        fileExtension: 'html',
+        documentId: '1',
+      }],
+      recipients: {
+        signers: [{
+          email: signerEmail,
+          name: signerName,
+          clientUserId,
+          recipientId: '1',
+          routingOrder: '1',
+          tabs: {
+            signHereTabs: [{
+              documentId: '1',
+              pageNumber: '1',
+              recipientId: '1',
+              tabLabel: 'Assinatura',
+              xPosition: '100',
+              yPosition: '680',
+            }],
+          },
+        }],
+      },
+      status: 'sent',
+    },
+  })
 
-  const signHere: SignHere = {
-    documentId: '1',
-    pageNumber: '1',
-    recipientId: '1',
-    tabLabel: 'Assinatura',
-    xPosition: '100',
-    yPosition: '680',
-  }
-
-  const tabs: Tabs = { signHereTabs: [signHere] }
-
-  const signer: Signer = {
-    email: signerEmail,
-    name: signerName,
-    clientUserId,
-    recipientId: '1',
-    routingOrder: '1',
-    tabs,
-  }
-
-  const recipients: Recipients = { signers: [signer] }
-
-  const envelope: EnvelopeDefinition = {
-    emailSubject: `Contrato para assinatura — ${contractTitle}`,
-    documents: [doc],
-    recipients,
-    status: 'sent',
-  }
-
-  const envelopeResult = await envelopesApi.createEnvelope(accountId, { envelopeDefinition: envelope })
   const envelopeId = envelopeResult.envelopeId!
 
-  const viewRequest: RecipientViewRequest = {
-    authenticationMethod: 'none',
-    clientUserId,
-    recipientId: '1',
-    returnUrl,
-    userName: signerName,
-    email: signerEmail,
-  }
-
   const viewResult = await envelopesApi.createRecipientView(accountId, envelopeId, {
-    recipientViewRequest: viewRequest,
+    recipientViewRequest: {
+      authenticationMethod: 'none',
+      clientUserId,
+      recipientId: '1',
+      returnUrl,
+      userName: signerName,
+      email: signerEmail,
+    },
   })
 
   return { envelopeId, signingUrl: viewResult.url! }
+}
+
+export async function getEnvelopeStatus(envelopeId: string): Promise<string> {
+  const { EnvelopesApi } = ds()
+  const client = await getDocuSignClient()
+  const envelopesApi = new EnvelopesApi(client)
+  const envelope = await envelopesApi.getEnvelope(process.env.DOCUSIGN_ACCOUNT_ID!, envelopeId)
+  return envelope.status ?? 'unknown'
 }

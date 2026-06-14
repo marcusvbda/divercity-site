@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AdminDataTable } from '@/components/ui/admin-data-table'
 import { PartyCalendar } from './PartyCalendar'
-import type { Party, PartyStatus } from '@/types/parties'
+import type { Party, PartyStatus, ContractStatus } from '@/types/parties'
 import type { Column } from '@/components/ui/admin-data-table'
 
 const STATUS_LABELS: Record<PartyStatus, string> = {
@@ -20,6 +20,24 @@ const STATUS_LABELS: Record<PartyStatus, string> = {
 const STATUS_VARIANT: Record<PartyStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   pending: 'outline',
   confirmed: 'default',
+  cancelled: 'destructive',
+}
+
+const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
+  draft: 'Rascunho',
+  pending: 'Aguardando cliente',
+  in_review: 'Assinando…',
+  signed: 'Assinado',
+  completed: 'Concluído',
+  cancelled: 'Cancelado',
+}
+
+const CONTRACT_STATUS_VARIANT: Record<ContractStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  draft: 'outline',
+  pending: 'secondary',
+  in_review: 'secondary',
+  signed: 'default',
+  completed: 'default',
   cancelled: 'destructive',
 }
 
@@ -40,8 +58,19 @@ const columns: Column<Party>[] = [
   { key: 'customer', header: 'Cliente', render: r => <span className="font-medium">{r.customer?.name}</span> },
   { key: 'template', header: 'Template', render: r => <span className="text-muted-foreground text-sm">{r.contractTemplate?.name}</span> },
   {
+    key: 'contract',
+    header: 'Contrato',
+    render: r => r.contract ? (
+      <Badge variant={CONTRACT_STATUS_VARIANT[r.contract.status]}>
+        {CONTRACT_STATUS_LABELS[r.contract.status]}
+      </Badge>
+    ) : (
+      <span className="text-muted-foreground text-xs">Sem contrato</span>
+    ),
+  },
+  {
     key: 'status',
-    header: 'Status',
+    header: 'Festa',
     sortable: true,
     render: r => (
       <Badge variant={STATUS_VARIANT[r.status]}>
