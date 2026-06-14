@@ -8,13 +8,26 @@ import Color from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { useState } from 'react'
 import {
-  BoldIcon, ItalicIcon, UnderlineIcon, AlignLeftIcon, AlignCenterIcon,
-  AlignRightIcon, ListIcon, ListOrderedIcon, Heading1Icon, Heading2Icon,
-  Heading3Icon, PlusIcon,
+  BoldIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  AlignLeftIcon,
+  AlignCenterIcon,
+  AlignRightIcon,
+  ListIcon,
+  ListOrderedIcon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  PlusIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -56,9 +69,9 @@ export function TipTapEditor({ content, onChange }: Props) {
       title={title}
       onClick={onClick}
       className={cn(
-        'rounded p-1.5 text-sm transition-colors hover:bg-muted',
+        'hover:bg-muted rounded p-1.5 text-sm transition-colors',
         active && 'bg-muted text-foreground',
-        !active && 'text-muted-foreground',
+        !active && 'text-muted-foreground'
       )}
     >
       {children}
@@ -99,31 +112,37 @@ export function TipTapEditor({ content, onChange }: Props) {
           <UnderlineIcon className="size-4" />
         </ToolbarBtn>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
 
         <ToolbarBtn
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           active={editor.isActive('heading', { level: 1 })}
           title="Título 1"
         >
           <Heading1Icon className="size-4" />
         </ToolbarBtn>
         <ToolbarBtn
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           active={editor.isActive('heading', { level: 2 })}
           title="Título 2"
         >
           <Heading2Icon className="size-4" />
         </ToolbarBtn>
         <ToolbarBtn
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           active={editor.isActive('heading', { level: 3 })}
           title="Título 3"
         >
           <Heading3Icon className="size-4" />
         </ToolbarBtn>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
 
         <ToolbarBtn
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -140,7 +159,7 @@ export function TipTapEditor({ content, onChange }: Props) {
           <ListOrderedIcon className="size-4" />
         </ToolbarBtn>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
 
         <ToolbarBtn
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
@@ -164,22 +183,33 @@ export function TipTapEditor({ content, onChange }: Props) {
           <AlignRightIcon className="size-4" />
         </ToolbarBtn>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        <div className="bg-border mx-1 h-5 w-px" />
 
         {/* Insert variable */}
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-          <PopoverTrigger render={<Button variant="outline" size="sm" className="h-7 gap-1 text-xs"><PlusIcon className="size-3" />Variável</Button>} />
+          <PopoverTrigger
+            render={
+              <Button variant="outline" size="sm" className="h-7 gap-1 text-xs">
+                <PlusIcon className="size-3" />
+                Variável extra
+              </Button>
+            }
+          />
           <PopoverContent className="w-64 p-3">
-            <p className="text-muted-foreground mb-2 text-xs">Nome da variável (ex: nome_cliente)</p>
+            <p className="text-muted-foreground mb-2 text-xs">
+              Nome da variável (ex: nome_cliente)
+            </p>
             <div className="flex gap-2">
               <Input
                 value={varName}
-                onChange={e => setVarName(e.target.value)}
+                onChange={(e) => setVarName(e.target.value)}
                 placeholder="nome_variavel"
                 className="h-8 text-sm"
-                onKeyDown={e => e.key === 'Enter' && insertVariable()}
+                onKeyDown={(e) => e.key === 'Enter' && insertVariable()}
               />
-              <Button size="sm" onClick={insertVariable} className="h-8">OK</Button>
+              <Button size="sm" onClick={insertVariable} className="h-8">
+                OK
+              </Button>
             </div>
           </PopoverContent>
         </Popover>

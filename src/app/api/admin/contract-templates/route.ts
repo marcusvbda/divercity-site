@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ContractTemplateSchema } from '@/lib/schemas/parties'
+import { isDefaultVariable } from '@/lib/contract-defaults'
 
 function extractVariables(body: string): string[] {
   const matches = body.match(/\{\{(\w+)\}\}/g) ?? []
-  return [...new Set(matches.map((m) => m.replace(/[{}]/g, '')))]
+  return [...new Set(matches.map((m) => m.replace(/[{}]/g, '')))].filter(v => !isDefaultVariable(v))
 }
 
 export async function GET(req: NextRequest) {

@@ -173,6 +173,15 @@
 .tiptap-editor .ProseMirror ol { @apply list-decimal pl-5 my-2; }
 .tiptap-editor .ProseMirror p { @apply my-1; }
 
+/* Contract preview — mirrors TipTap editor styles exactly */
+.contract-content h1 { @apply text-2xl font-bold my-2; }
+.contract-content h2 { @apply text-xl font-bold my-2; }
+.contract-content h3 { @apply text-lg font-semibold my-1; }
+.contract-content ul { @apply list-disc pl-5 my-2; }
+.contract-content ol { @apply list-decimal pl-5 my-2; }
+.contract-content p  { @apply my-1; }
+.contract-content p:empty::before { content: '\00a0'; }
+
 html {
   overflow-x: hidden;
 }

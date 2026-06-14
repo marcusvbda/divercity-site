@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Party, ContractStatus } from '@/types/parties'
+import { buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
+import { ContractPreview } from '@/components/ui/contract-preview'
 
 const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
   draft: 'Rascunho',
@@ -140,15 +142,25 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
     )
   }
 
-  const allVars: string[] =
-    (party as Party & { contractTemplate?: { variables?: string[] } })?.contractTemplate?.variables
-    ?? Object.keys(contract.fieldValues as Record<string, string>)
+  const partyWithTemplate = party as Party & { contractTemplate?: { variables?: string[]; body?: string } }
 
-  const renderedBody = contract.body.replace(
+  const allVars: string[] = (
+    partyWithTemplate?.contractTemplate?.variables
+    ?? Object.keys(contract.fieldValues as Record<string, string>)
+  ).filter(v => !isDefaultVariable(v))
+
+  const isLocked = contract.status === 'signed' || contract.status === 'completed' || contract.status === 'cancelled'
+  const bodyToRender = isLocked ? contract.body : (partyWithTemplate?.contractTemplate?.body ?? contract.body)
+
+  const defaultValues = buildDefaultValues(party as unknown as Parameters<typeof buildDefaultValues>[0])
+  const userValues = contract.fieldValues as Record<string, string>
+  const mergedValues = { ...defaultValues, ...userValues }
+
+  const renderedBody = bodyToRender.replace(
     /\{\{(\w+)\}\}/g,
     (_match: string, key: string) => {
-      const values = contract.fieldValues as Record<string, string>
-      if (values[key]) return `<span class="font-semibold">${values[key]}</span>`
+      if (mergedValues[key]) return mergedValues[key]
+      if (isDefaultVariable(key)) return ''
       return `<span class="bg-amber-100 text-amber-700 rounded px-1 font-mono text-sm">${_match}</span>`
     }
   )
@@ -209,15 +221,12 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
         )}
 
         <div className="rounded-lg border p-6">
-          <div
-            className="max-w-none text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: renderedBody }}
-          />
+          <ContractPreview html={renderedBody} />
         </div>
       </div>
 
       <div id="contract-print" className="p-8">
-        <div dangerouslySetInnerHTML={{ __html: renderedBody }} />
+        <ContractPreview html={renderedBody} />
       </div>
     </>
   )

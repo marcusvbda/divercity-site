@@ -5,7 +5,9 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { Contract } from '@/types/parties'
+import type { Contract, Party } from '@/types/parties'
+import { buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
+import { ContractPreview } from '@/components/ui/contract-preview'
 
 type Props = { hash: string }
 
@@ -38,8 +40,12 @@ export function ClientPortal({ hash }: Props) {
 
   // Derived values computed unconditionally (safe before hooks)
   const existingValues = (contract?.fieldValues as Record<string, string>) ?? {}
-  const template = (contract as Contract & { party?: { contractTemplate?: { variables?: string[] } } })?.party?.contractTemplate
-  const allVars: string[] = template?.variables ?? Object.keys(existingValues)
+  const contractParty = (contract as Contract & { party?: Party & { contractTemplate?: { variables?: string[]; body?: string } } })?.party
+  const template = contractParty?.contractTemplate
+  const defaultValues = contractParty ? buildDefaultValues(contractParty as unknown as Parameters<typeof buildDefaultValues>[0]) : {}
+  const mergedValues = { ...defaultValues, ...existingValues }
+
+  const allVars: string[] = (template?.variables ?? Object.keys(existingValues)).filter(v => !isDefaultVariable(v))
   const unfilledVars = allVars.filter((v) => !existingValues[v])
 
   // ALL hooks must be before early returns — skip step 1 if all variables are already filled
@@ -71,19 +77,13 @@ export function ClientPortal({ hash }: Props) {
   }
 
   if (contract.status === 'signed') {
-    const renderedBody = renderBody(
-      contract.body,
-      contract.fieldValues as Record<string, string>,
-    )
+    const renderedBody = renderBody(contract.body, mergedValues)
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-6 rounded-lg bg-green-50 p-4 text-center dark:bg-green-950/20">
           <p className="font-semibold text-green-700 dark:text-green-400">Contrato assinado</p>
         </div>
-        <div
-          className="text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderedBody }}
-        />
+        <ContractPreview html={renderedBody} />
       </div>
     )
   }
@@ -133,8 +133,7 @@ export function ClientPortal({ hash }: Props) {
   }
 
   if (step === 2) {
-    const mergedValues = { ...existingValues, ...fieldValues }
-    const renderedBody = renderBody(contract.body, mergedValues)
+    const renderedBody = renderBody(contract.body, { ...mergedValues, ...fieldValues })
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
@@ -146,10 +145,9 @@ export function ClientPortal({ hash }: Props) {
           </p>
         </div>
 
-        <div
-          className="mb-6 rounded-lg border p-6 text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderedBody }}
-        />
+        <div className="mb-6 rounded-lg border p-6">
+          <ContractPreview html={renderedBody} />
+        </div>
 
         <div className="flex gap-3">
           {unfilledVars.length > 0 && (
@@ -184,7 +182,8 @@ export function ClientPortal({ hash }: Props) {
 
 function renderBody(body: string, values: Record<string, string>): string {
   return body.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    if (values[key]) return `<span class="font-semibold">${values[key]}</span>`
+    if (values[key]) return values[key]
+    if (key.startsWith('cliente_') || key.startsWith('festa_')) return ''
     return `<span class="bg-amber-100 text-amber-700 rounded px-1 font-mono text-xs">${match}</span>`
   })
 }
