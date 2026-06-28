@@ -27,8 +27,8 @@ function makeFallback(instagramUrl: string): InstagramPost[] {
 }
 
 export async function GET() {
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN
-  const instagramUrl = process.env.INSTAGRAM_URL ?? 'https://www.instagram.com/divercity.park'
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN!
+  const instagramUrl = process.env.INSTAGRAM_URL!
 
   if (!token) {
     return NextResponse.json(makeFallback(instagramUrl))
