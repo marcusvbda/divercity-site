@@ -1,6 +1,5 @@
 import { connection } from 'next/server'
 import { NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
@@ -49,7 +48,6 @@ export async function GET() {
       update: { value: newToken },
     })
 
-    revalidateTag('instagram-posts')
     results.instagramRefresh = 'ok'
   } catch (err) {
     console.error('[cron] Instagram refresh error:', err)
