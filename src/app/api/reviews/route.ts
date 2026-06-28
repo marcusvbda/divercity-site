@@ -10,6 +10,10 @@ export interface GoogleReview {
   relative_time_description: string
 }
 
+const GOOGLE_TESTIMONIALS_MINIMUM_RATING = Number(
+  process.env.GOOGLE_TESTIMONIALS_MINIMUM_RATING ?? 4
+)
+
 async function findPlaceId(
   apiKey: string,
   configPlaceId?: string
@@ -37,6 +41,7 @@ export async function GET() {
 
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&language=pt-BR&reviews_sort=newest&key=${apiKey}`
     const res = await fetch(detailsUrl, { next: { revalidate: 3600 } })
+    console.log(detailsUrl)
 
     if (!res.ok) throw new Error(`Places API error: ${res.status}`)
 
@@ -53,7 +58,9 @@ export async function GET() {
       })
     )
 
-    return NextResponse.json(reviews.filter((r) => r.rating > 4))
+    return NextResponse.json(
+      reviews.filter((r) => r.rating > GOOGLE_TESTIMONIALS_MINIMUM_RATING)
+    )
   } catch (err) {
     console.error('Erro ao buscar reviews do Google:', err)
     return NextResponse.json([])

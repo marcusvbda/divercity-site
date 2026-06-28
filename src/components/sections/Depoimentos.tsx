@@ -45,7 +45,11 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' as const },
+  },
 }
 
 export default function Depoimentos() {
@@ -66,39 +70,42 @@ export default function Depoimentos() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="mb-12 text-center"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-yellow/20 text-yellow-700 font-body font-semibold text-sm mb-3">
+          <span className="bg-brand-yellow/20 font-body mb-3 inline-block rounded-full px-4 py-1.5 text-sm font-semibold text-yellow-700">
             ⭐ Avaliações Google
           </span>
-          <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="font-heading mb-4 text-4xl font-bold text-gray-800 md:text-5xl">
             O que nossos clientes dizem
           </h2>
-          <p className="font-body text-gray-500 text-lg max-w-xl mx-auto">
+          <p className="font-body mx-auto max-w-xl text-lg text-gray-500">
             Famílias felizes são nossa maior conquista.
           </p>
         </motion.div>
 
         {/* Skeleton */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-3xl p-7 shadow-md animate-pulse">
-                <div className="flex gap-1 mb-4">
+              <div
+                key={i}
+                className="animate-pulse rounded-3xl bg-white p-7 shadow-md"
+              >
+                <div className="mb-4 flex gap-1">
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <div key={j} className="w-4 h-4 rounded bg-gray-200" />
+                    <div key={j} className="h-4 w-4 rounded bg-gray-200" />
                   ))}
                 </div>
-                <div className="space-y-2 mb-6">
-                  <div className="h-3 bg-gray-200 rounded w-full" />
-                  <div className="h-3 bg-gray-200 rounded w-4/5" />
-                  <div className="h-3 bg-gray-200 rounded w-3/5" />
+                <div className="mb-6 space-y-2">
+                  <div className="h-3 w-full rounded bg-gray-200" />
+                  <div className="h-3 w-4/5 rounded bg-gray-200" />
+                  <div className="h-3 w-3/5 rounded bg-gray-200" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200" />
+                  <div className="h-10 w-10 rounded-full bg-gray-200" />
                   <div className="space-y-1">
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                    <div className="h-2 bg-gray-200 rounded w-16" />
+                    <div className="h-3 w-24 rounded bg-gray-200" />
+                    <div className="h-2 w-16 rounded bg-gray-200" />
                   </div>
                 </div>
               </div>
@@ -113,17 +120,17 @@ export default function Depoimentos() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-80px' }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 gap-6 md:grid-cols-3"
           >
             {reviews.map((review) => (
               <motion.div
                 key={review.id}
                 variants={itemVariants}
                 whileHover={{ y: -6 }}
-                className="bg-white rounded-3xl p-7 shadow-md hover:shadow-xl transition-shadow flex flex-col"
+                className="flex flex-col rounded-3xl bg-white p-7 shadow-md transition-shadow hover:shadow-xl"
               >
                 {/* Stars */}
-                <div className="flex gap-1 mb-4">
+                <div className="mb-4 flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
@@ -138,8 +145,8 @@ export default function Depoimentos() {
                 </div>
 
                 {/* Quote */}
-                <p className="font-body text-gray-600 text-sm leading-relaxed mb-6 italic flex-1">
-                  &ldquo;{review.text}&rdquo;
+                <p className="font-body mb-6 flex-1 text-sm leading-relaxed text-gray-600 italic">
+                  {review.text ? `"${review.text}"` : ''}
                 </p>
 
                 {/* Author */}
@@ -149,22 +156,24 @@ export default function Depoimentos() {
                     <img
                       src={review.profile_photo_url}
                       alt={review.author_name}
-                      className="w-10 h-10 rounded-full object-cover shrink-0"
+                      className="h-10 w-10 shrink-0 rounded-full object-cover"
                       onError={(e) => {
                         e.currentTarget.src = `https://placehold.co/40x40/8E4CCF/ffffff?text=${review.author_name[0]}`
                       }}
                     />
                     <div>
-                      <p className="font-body font-semibold text-gray-800 text-sm">
+                      <p className="font-body text-sm font-semibold text-gray-800">
                         {review.author_name}
                       </p>
-                      <p className="font-body text-gray-400 text-xs">
+                      <p className="font-body text-xs text-gray-400">
                         {review.relative_time_description}
                       </p>
                     </div>
                   </div>
                   {/* Google logo badge */}
-                  <span className="text-xs text-gray-400 font-body shrink-0">Google</span>
+                  <span className="font-body shrink-0 text-xs text-gray-400">
+                    Google
+                  </span>
                 </div>
               </motion.div>
             ))}
@@ -177,13 +186,13 @@ export default function Depoimentos() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center mt-10"
+          className="mt-10 text-center"
         >
           <a
             href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-body text-sm font-semibold text-gray-500 hover:text-brand-cyan transition-colors"
+            className="font-body hover:text-brand-cyan inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition-colors"
           >
             Ver todas as avaliações no Google
             <ExternalLink size={14} />
