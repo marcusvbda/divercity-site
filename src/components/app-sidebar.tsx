@@ -7,6 +7,7 @@ import {
   ExternalLinkIcon,
   LayoutDashboardIcon,
   PartyPopperIcon,
+  Settings2Icon,
   SparklesIcon,
   UsersIcon,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ const navMain = [
     url: '/admin/parties',
     icon: <PartyPopperIcon />,
   },
+  { title: 'Configurações', url: '/admin/settings', icon: <Settings2Icon /> },
 ]
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
 export interface InstagramPost {
   id: string
@@ -27,8 +28,13 @@ function makeFallback(instagramUrl: string): InstagramPost[] {
 }
 
 export async function GET() {
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN!
-  const instagramUrl = process.env.INSTAGRAM_URL!
+  const [tokenSetting, urlSetting] = await Promise.all([
+    prisma.setting.findUnique({ where: { key: 'instagram_access_token' } }),
+    prisma.setting.findUnique({ where: { key: 'instagram_url' } }),
+  ])
+
+  const token = tokenSetting?.value
+  const instagramUrl = urlSetting?.value ?? 'https://www.instagram.com/divercity.park'
 
   if (!token) {
     return NextResponse.json(makeFallback(instagramUrl))
@@ -37,7 +43,7 @@ export async function GET() {
   try {
     const fields = 'id,media_type,media_url,thumbnail_url,permalink'
     const url = `https://graph.instagram.com/me/media?fields=${fields}&limit=12&access_token=${token}`
-    const res = await fetch(url, { next: { revalidate: 3600 } })
+    const res = await fetch(url, { next: { revalidate: 3600, tags: ['instagram-posts'] } })
 
     if (!res.ok) throw new Error(`Instagram API error: ${res.status}`)
 

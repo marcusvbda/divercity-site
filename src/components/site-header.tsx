@@ -7,6 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 const PATH_TITLES: [string, string][] = [
   ['/admin/cms/component-types', 'Tipos de Conteúdo'],
   ['/admin/cms', 'CMS'],
+  ['/admin/settings', 'Configurações'],
   ['/admin', 'Dashboard'],
 ]
 
