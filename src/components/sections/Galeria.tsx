@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 import type { InstagramPost } from '@/app/api/instagram/route'
 
 export default function Galeria() {
-  const { data: posts = [] } = useQuery<InstagramPost[]>({
+  const { data: posts = [], isLoading } = useQuery<InstagramPost[]>({
     queryKey: ['instagram', 'posts'],
     queryFn: () => fetch('/api/instagram').then((r) => r.json()),
   })
@@ -54,7 +54,17 @@ export default function Galeria() {
           </p>
         </motion.div>
 
-        {Boolean(posts && posts.length) && (
+        {isLoading && (
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="w-52 shrink-0 sm:w-64 md:w-72">
+                <div className="aspect-square animate-pulse rounded-2xl bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && posts.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -94,21 +104,9 @@ export default function Galeria() {
                     </div>
                   )
                 })}
-
-                {/* Skeleton enquanto carrega */}
-                {posts.length === 0 &&
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-52 flex-none pl-4 sm:w-64 md:w-72"
-                    >
-                      <div className="aspect-square animate-pulse rounded-2xl bg-gray-200" />
-                    </div>
-                  ))}
               </div>
             </div>
 
-            {/* Navigation */}
             <button
               onClick={scrollPrev}
               className="hover:bg-brand-cyan absolute top-1/2 left-0 z-10 flex h-10 w-10 -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-colors hover:text-white"

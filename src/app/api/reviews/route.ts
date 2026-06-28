@@ -14,6 +14,23 @@ const GOOGLE_TESTIMONIALS_MINIMUM_RATING = Number(
   process.env.GOOGLE_TESTIMONIALS_MINIMUM_RATING ?? 4
 )
 
+function relativeTime(unixTimestamp: number): string {
+  const diff = Math.floor(Date.now() / 1000) - unixTimestamp
+  const minutes = Math.floor(diff / 60)
+  const hours = Math.floor(diff / 3600)
+  const days = Math.floor(diff / 86400)
+  const weeks = Math.floor(diff / (86400 * 7))
+  const months = Math.floor(diff / (86400 * 30))
+  const years = Math.floor(diff / (86400 * 365))
+
+  if (minutes < 60) return `há ${minutes} minuto${minutes !== 1 ? 's' : ''}`
+  if (hours < 24) return `há ${hours} hora${hours !== 1 ? 's' : ''}`
+  if (days < 7) return `há ${days} dia${days !== 1 ? 's' : ''}`
+  if (weeks < 5) return `há ${weeks} semana${weeks !== 1 ? 's' : ''}`
+  if (months < 12) return `há ${months} mês${months !== 1 ? 'es' : ''}`
+  return `há ${years} ano${years !== 1 ? 's' : ''}`
+}
+
 async function findPlaceId(
   apiKey: string,
   configPlaceId?: string
@@ -41,7 +58,6 @@ export async function GET() {
 
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&language=pt-BR&reviews_sort=newest&key=${apiKey}`
     const res = await fetch(detailsUrl, { next: { revalidate: 3600 } })
-    console.log(detailsUrl)
 
     if (!res.ok) throw new Error(`Places API error: ${res.status}`)
 
@@ -54,7 +70,7 @@ export async function GET() {
         text: r.text as string,
         time: r.time as number,
         profile_photo_url: r.profile_photo_url as string,
-        relative_time_description: r.relative_time_description as string,
+        relative_time_description: relativeTime(r.time as number),
       })
     )
 
