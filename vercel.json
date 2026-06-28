@@ -1,12 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/keep-alive",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/refresh-instagram-token",
-      "schedule": "0 0 1 * *"
+      "path": "/api/cron",
+      "schedule": "0 0 * * *"
     }
   ]
 }
