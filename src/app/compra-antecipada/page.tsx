@@ -1,6 +1,7 @@
 import Navbar from '@/components/ui/Navbar'
 
 import Footer from '@/components/sections/Footer'
+import CompraAntecipadaCheckout from '@/components/checkout/CompraAntecipadaCheckout'
 import { getContentType } from '@/lib/cms'
 
 export default async function CompraAntecipadaPage() {
@@ -11,8 +12,10 @@ export default async function CompraAntecipadaPage() {
 
   return (
     <>
-      <Navbar navbar={navBarContent}>NAVBAR CONTENT</Navbar>
-      <main>content here</main>
+      <Navbar navbar={navBarContent} hideContent={true} />
+      <main className="pt-16">
+        <CompraAntecipadaCheckout />
+      </main>
       <Footer config={FooterContent} />
     </>
   )

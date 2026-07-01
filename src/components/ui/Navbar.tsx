@@ -7,7 +7,7 @@ import { scrollTo as smoothScrollTo } from '@/lib/helpers'
 import CtaButton from './cta'
 import { useRouter } from 'next/navigation'
 
-export default function Navbar({ navbar, children = null }: any) {
+export default function Navbar({ navbar, hideContent = false }: any) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -61,9 +61,7 @@ export default function Navbar({ navbar, children = null }: any) {
             />
           </button>
 
-          {children ? (
-            children
-          ) : (
+          {!hideContent && (
             <>
               {/* Desktop Nav */}
               <ul className="hidden items-center gap-6 md:flex lg:gap-8">
@@ -107,7 +105,7 @@ export default function Navbar({ navbar, children = null }: any) {
         </div>
       </div>
 
-      {!children && (
+      {!hideContent && (
         <>
           {/* Mobile Menu */}
           <AnimatePresence>
