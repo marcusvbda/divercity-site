@@ -3,6 +3,7 @@ import Hero from '@/components/sections/Hero'
 import PorQueEscolher from '@/components/sections/PorQueEscolher'
 import Festas from '@/components/sections/Festas'
 import Precos from '@/components/sections/Precos'
+import CompraAntecipada from '@/components/sections/CompraAntecipada'
 import Galeria from '@/components/sections/Galeria'
 import Depoimentos from '@/components/sections/Depoimentos'
 import Contato from '@/components/sections/Contato'
@@ -41,6 +42,8 @@ export default async function Home() {
         <PorQueEscolher benefits={BenefitsContent} />
         <Festas partySection={PartySection} />
         <Precos priceSection={PriceSection} />
+        <CompraAntecipada />
+
         <Galeria />
         <Depoimentos />
         <Contato contactSection={ContactSection} />

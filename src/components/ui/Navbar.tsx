@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { scrollTo as smoothScrollTo } from '@/lib/helpers'
 import CtaButton from './cta'
+import { useRouter } from 'next/navigation'
 
-export default function Navbar({ navbar }: any) {
+export default function Navbar({ navbar, showMenus = true }: any) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -33,6 +34,8 @@ export default function Navbar({ navbar }: any) {
   const cta: Record<string, string | null> =
     navbar?.Actions?.actionBtn?.value ?? {}
 
+  const router = useRouter()
+
   return (
     <motion.nav
       initial={{ y: -100, opacity: 0 }}
@@ -46,7 +49,7 @@ export default function Navbar({ navbar }: any) {
         <div className="flex h-16 items-center justify-between md:h-20">
           {/* Logo */}
           <button
-            onClick={() => handleNavClick('#inicio')}
+            onClick={() => router.push('/')}
             className="flex flex-shrink-0 items-center gap-2"
             aria-label="Ir para o início"
           >
@@ -58,82 +61,90 @@ export default function Navbar({ navbar }: any) {
             />
           </button>
 
-          {/* Desktop Nav */}
-          <ul className="hidden items-center gap-6 md:flex lg:gap-8">
-            {menuItems.map((item) => (
-              <li key={`menu-${item.id}`}>
-                <button
-                  onClick={() => handleNavClick(item.value?.href ?? '')}
-                  className={`font-body hover:text-brand-cyan text-sm font-medium transition-colors lg:text-base ${
-                    scrolled ? 'text-gray-700' : 'text-white/90'
-                  }`}
-                >
-                  {item.value?.label ?? ''}
-                </button>
-              </li>
-            ))}
-          </ul>
+          {showMenus && (
+            <>
+              {/* Desktop Nav */}
+              <ul className="hidden items-center gap-6 md:flex lg:gap-8">
+                {menuItems.map((item) => (
+                  <li key={`menu-${item.id}`}>
+                    <button
+                      onClick={() => handleNavClick(item.value?.href ?? '')}
+                      className={`font-body hover:text-brand-cyan text-sm font-medium transition-colors lg:text-base ${
+                        scrolled ? 'text-gray-700' : 'text-white/90'
+                      }`}
+                    >
+                      {item.value?.label ?? ''}
+                    </button>
+                  </li>
+                ))}
+              </ul>
 
-          {/* CTA + Hamburger */}
-          <div className="flex items-center gap-3">
-            {cta?.label && (
-              <CtaButton
-                onClick={() => smoothScrollTo(cta.href ?? '')}
-                cta={cta}
-                className="px-5! py-2.5! text-sm!"
-              >
-                {cta.label}
-              </CtaButton>
-            )}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`rounded-lg p-2 transition-colors md:hidden ${
-                scrolled ? 'text-gray-700' : 'text-white'
-              }`}
-              aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-            >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur-md md:hidden"
-          >
-            <ul className="flex flex-col gap-3 px-4 py-4">
-              {menuItems.map((item) => (
-                <li key={`menu-item-${item.id}`}>
-                  <button
-                    onClick={() => handleNavClick(item.value?.href ?? '')}
-                    className="font-body hover:text-brand-cyan w-full py-2 text-left font-medium text-gray-700 transition-colors"
-                  >
-                    {item.value?.label ?? ''}
-                  </button>
-                </li>
-              ))}
-              {cta?.label && (
-                <li>
+              {/* CTA + Hamburger */}
+              <div className="flex items-center gap-3">
+                {cta?.label && (
                   <CtaButton
-                    onClick={() => handleNavClick(cta.href ?? '')}
+                    onClick={() => smoothScrollTo(cta.href ?? '')}
                     cta={cta}
-                    className="w-full! px-5! py-3!"
+                    className="px-5! py-2.5! text-sm!"
                   >
                     {cta.label}
                   </CtaButton>
-                </li>
-              )}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                )}
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className={`rounded-lg p-2 transition-colors md:hidden ${
+                    scrolled ? 'text-gray-700' : 'text-white'
+                  }`}
+                  aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+                >
+                  {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {showMenus && (
+        <>
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur-md md:hidden"
+              >
+                <ul className="flex flex-col gap-3 px-4 py-4">
+                  {menuItems.map((item) => (
+                    <li key={`menu-item-${item.id}`}>
+                      <button
+                        onClick={() => handleNavClick(item.value?.href ?? '')}
+                        className="font-body hover:text-brand-cyan w-full py-2 text-left font-medium text-gray-700 transition-colors"
+                      >
+                        {item.value?.label ?? ''}
+                      </button>
+                    </li>
+                  ))}
+                  {cta?.label && (
+                    <li>
+                      <CtaButton
+                        onClick={() => handleNavClick(cta.href ?? '')}
+                        cta={cta}
+                        className="w-full! px-5! py-3!"
+                      >
+                        {cta.label}
+                      </CtaButton>
+                    </li>
+                  )}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </motion.nav>
   )
 }
