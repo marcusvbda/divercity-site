@@ -11,7 +11,7 @@ export default async function CompraAntecipadaPage() {
 
   return (
     <>
-      <Navbar navbar={navBarContent} showMenus={false} />
+      <Navbar navbar={navBarContent}>NAVBAR CONTENT</Navbar>
       <main>content here</main>
       <Footer config={FooterContent} />
     </>
