@@ -21,6 +21,7 @@ export default async function Home() {
     BenefitsContent,
     PartySection,
     PriceSection,
+    AdvancePurchaseSection,
     ContactSection,
   ] = await Promise.all([
     getContentType('NavBar'),
@@ -30,6 +31,7 @@ export default async function Home() {
     getContentType('BenefitsSection'),
     getContentType('PartySection'),
     getContentType('PriceSection'),
+    getContentType('AdvancePurchaseSection'),
     getContentType('ContactSection'),
   ])
 
@@ -42,7 +44,7 @@ export default async function Home() {
         <PorQueEscolher benefits={BenefitsContent} />
         <Festas partySection={PartySection} />
         <Precos priceSection={PriceSection} />
-        <CompraAntecipada />
+        <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
 
         <Galeria />
         <Depoimentos />

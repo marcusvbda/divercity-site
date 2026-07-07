@@ -39,7 +39,7 @@ export function SubSidebarNavLink({
       )}
     >
       <Icon className="size-4 shrink-0" />
-      {title}
+      <span className="min-w-0 wrap-break-word">{title}</span>
     </Link>
   )
 }

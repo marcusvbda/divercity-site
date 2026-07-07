@@ -285,6 +285,23 @@ async function main() {
   const attractionColorField       = await getField(attractionTemplateComponent.id, 'color')
   const attractionSortField        = await getField(attractionTemplateComponent.id, 'sort')
 
+  // General/Feature
+  const featureTemplateComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Feature', contentTypeId: generalType.id } },
+    update: {},
+    create: { name: 'Feature', contentTypeId: generalType.id },
+  })
+
+  await seedFields(featureTemplateComponent.id, [
+    { name: 'label',    value: '' },
+    { name: 'iconName', value: '' },
+    { name: 'color',    value: '' },
+  ])
+
+  const featureLabelField    = await getField(featureTemplateComponent.id, 'label')
+  const featureIconNameField = await getField(featureTemplateComponent.id, 'iconName')
+  const featureColorField    = await getField(featureTemplateComponent.id, 'color')
+
   // ── NavBar ────────────────────────────────────────────────────────────────
   const navbarType = await prisma.contentType.upsert({
     where: { name: 'NavBar' },
@@ -778,6 +795,85 @@ async function main() {
     { fieldId: ctaColorField.id,        value: 'black' },
     { fieldId: ctaBgColorField.id,      value: 'transparent' },
     { fieldId: ctaBorderField.id,       value: '1px solid gray' },
+    { fieldId: ctaHoverColorField.id,   value: '' },
+    { fieldId: ctaHoverBgColorField.id, value: '' },
+    { fieldId: ctaHoverBorderField.id,  value: '' },
+  ])
+
+  // ── AdvancePurchaseSection ───────────────────────────────────────────────
+  const advancePurchaseType = await prisma.contentType.upsert({
+    where: { name: 'AdvancePurchaseSection' },
+    update: {},
+    create: { name: 'AdvancePurchaseSection' },
+  })
+
+  const advancePurchaseSectionComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Section', contentTypeId: advancePurchaseType.id } },
+    update: {},
+    create: { name: 'Section', contentTypeId: advancePurchaseType.id },
+  })
+
+  await seedFields(advancePurchaseSectionComponent.id, [
+    { name: 'title',    value: 'Compre antecipadamente' },
+    { name: 'subtitle', value: 'Evite filas e garanta sua diversão!' },
+  ])
+
+  const advancePurchaseContentComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Content', contentTypeId: advancePurchaseType.id } },
+    update: {},
+    create: { name: 'Content', contentTypeId: advancePurchaseType.id },
+  })
+
+  // features — multiple General/Feature instances
+  const featureListField = await prisma.componentField.upsert({
+    where: { name_contentComponentId: { name: 'features', contentComponentId: advancePurchaseContentComponent.id } },
+    update: { type: 'multiple' },
+    create: { name: 'features', type: 'multiple', contentComponentId: advancePurchaseContentComponent.id },
+  })
+
+  await prisma.componentFieldValue.deleteMany({ where: { componentFieldId: featureListField.id } })
+
+  const advanceFeaturesData = [
+    { label: 'Entrada garantida',     iconName: 'Ticket', color: '#FF4F8A' },
+    { label: 'Pagamento seguro',      iconName: 'Lock',   color: '#8E4CCF' },
+    { label: 'QR Code na entrada',    iconName: 'QrCode', color: '#9AD94B' },
+    { label: 'Cancelamento flexível', iconName: 'Clock',  color: '#FFD23F' },
+  ]
+
+  for (const item of advanceFeaturesData) {
+    const instance = await prisma.componentInstance.create({
+      data: { templateComponentId: featureTemplateComponent.id },
+    })
+
+    await prisma.componentInstanceFieldValue.createMany({
+      data: [
+        { instanceId: instance.id, fieldId: featureLabelField.id,    value: item.label },
+        { instanceId: instance.id, fieldId: featureIconNameField.id, value: item.iconName },
+        { instanceId: instance.id, fieldId: featureColorField.id,    value: item.color },
+      ],
+    })
+
+    await prisma.componentFieldValue.create({
+      data: { componentFieldId: featureListField.id, instanceId: instance.id },
+    })
+  }
+
+  await seedFields(advancePurchaseContentComponent.id, [
+    { name: 'disclaimer', value: '*Consulte as regras no momento da compra' },
+  ])
+
+  const advancePurchaseActionsComponent = await prisma.contentComponent.upsert({
+    where: { name_contentTypeId: { name: 'Actions', contentTypeId: advancePurchaseType.id } },
+    update: {},
+    create: { name: 'Actions', contentTypeId: advancePurchaseType.id },
+  })
+
+  await seedInstanceField(advancePurchaseActionsComponent.id, 'cta', ctaTemplateComponent.id, [
+    { fieldId: ctaLabelField.id,        value: 'Comprar agora' },
+    { fieldId: ctaHrefField.id,         value: 'compra-antecipada' },
+    { fieldId: ctaColorField.id,        value: '#fefefe' },
+    { fieldId: ctaBgColorField.id,      value: '#FF4F8A' },
+    { fieldId: ctaBorderField.id,       value: '' },
     { fieldId: ctaHoverColorField.id,   value: '' },
     { fieldId: ctaHoverBgColorField.id, value: '' },
     { fieldId: ctaHoverBorderField.id,  value: '' },

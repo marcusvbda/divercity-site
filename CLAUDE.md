@@ -102,6 +102,7 @@ npx tsx prisma/seed.ts
 - `BenefitsSection` — Section (badge, title, subtitle), Content (Benefit[] múltiplo)
 - `PartySection` — Section (badge, title, description, features[]), Media (images[]), CTAs (ctaBudget, ctaPrices)
 - `PriceSection` — Section (badge, title, subtitle), Content (prices[] múltiplo, disclaimers[])
+- `AdvancePurchaseSection` — Section (title, subtitle), Content (features[] múltiplo, disclaimer), Actions (cta)
 - `ContactSection` — Section (badge, title, subtitle, formBtnLabel), Info (wppNumber, address, googleMapsUrl, weekdaysTime, holidaysTime, instagramUrl, googleMapsUrlIframe)
 - `Footer` — Info (logoFooter, weekdaysTime, holidaysTime, googleMapsUrl, address, instagramUrl, wppNumber)
 
@@ -111,6 +112,7 @@ npx tsx prisma/seed.ts
 - `General/Cta` — label, href, color, bgColor, border, hoverColor, hoverBgColor, hoverBorder
 - `General/Attraction` — name, description, image, color, sort
 - `General/Benefit` — title, description, iconName
+- `General/Feature` — label, iconName, color
 - `General/Price` — title, subtitle, color
 
 ---
