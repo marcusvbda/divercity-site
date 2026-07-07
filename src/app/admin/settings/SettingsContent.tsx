@@ -60,6 +60,14 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
   const [instagramToken, setInstagramToken] = useState(get(settings, 'instagram_access_token'))
   const [instagramUrl, setInstagramUrl] = useState(get(settings, 'instagram_url'))
 
+  const [stripeSecretKey, setStripeSecretKey] = useState(get(settings, 'stripe_secret_key'))
+  const [stripePublishableKey, setStripePublishableKey] = useState(
+    get(settings, 'stripe_publishable_key')
+  )
+  const [stripeWebhookSecret, setStripeWebhookSecret] = useState(
+    get(settings, 'stripe_webhook_secret')
+  )
+
   function save(entries: { key: string; value: string }[]) {
     startTransition(async () => {
       try {
@@ -85,6 +93,7 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
         <TabsList className="mb-6">
           <TabsTrigger value="google">Google</TabsTrigger>
           <TabsTrigger value="instagram">Instagram</TabsTrigger>
+          <TabsTrigger value="stripe">Stripe</TabsTrigger>
         </TabsList>
 
         <TabsContent value="google" className="space-y-5">
@@ -171,6 +180,55 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
             disabled={isPending}
           >
             {isPending ? 'Salvando…' : 'Salvar Instagram'}
+          </Button>
+        </TabsContent>
+
+        <TabsContent value="stripe" className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="stripe-publishable-key">Publishable Key</Label>
+            <Input
+              id="stripe-publishable-key"
+              value={stripePublishableKey}
+              onChange={(e) => setStripePublishableKey(e.target.value)}
+              placeholder="pk_live_..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="stripe-secret-key">Secret Key</Label>
+            <SecretInput
+              value={stripeSecretKey}
+              onChange={setStripeSecretKey}
+              placeholder="sk_live_..."
+            />
+            <p className="text-xs text-gray-400">
+              dashboard.stripe.com → Desenvolvedores → Chaves de API
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="stripe-webhook-secret">Webhook Signing Secret</Label>
+            <SecretInput
+              value={stripeWebhookSecret}
+              onChange={setStripeWebhookSecret}
+              placeholder="whsec_..."
+            />
+            <p className="text-xs text-gray-400">
+              dashboard.stripe.com → Desenvolvedores → Webhooks → assinatura do endpoint
+            </p>
+          </div>
+
+          <Button
+            onClick={() =>
+              save([
+                { key: 'stripe_publishable_key', value: stripePublishableKey },
+                { key: 'stripe_secret_key', value: stripeSecretKey },
+                { key: 'stripe_webhook_secret', value: stripeWebhookSecret },
+              ])
+            }
+            disabled={isPending}
+          >
+            {isPending ? 'Salvando…' : 'Salvar Stripe'}
           </Button>
         </TabsContent>
       </Tabs>

@@ -9,6 +9,9 @@ const TAG_MAP: Record<string, string> = {
   google_testimonials_minimum_rating: 'google-reviews',
   instagram_access_token: 'instagram-posts',
   instagram_url: 'instagram-posts',
+  stripe_publishable_key: 'stripe-config',
+  stripe_secret_key: 'stripe-config',
+  stripe_webhook_secret: 'stripe-config',
 }
 
 export async function updateSettings(settings: { key: string; value: string }[]) {
