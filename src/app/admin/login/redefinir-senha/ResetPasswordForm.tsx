@@ -21,22 +21,39 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-interface Props extends React.ComponentProps<"div"> {
-  code: string;
-}
+type Props = React.ComponentProps<"div">;
 
-export default function ResetPasswordForm({ code, className, ...props }: Props) {
+export default function ResetPasswordForm({ className, ...props }: Props) {
   const router = useRouter();
   const [done, setDone] = useState(false);
   const [exchangeError, setExchangeError] = useState<string | null>(null);
   const [exchangeOk, setExchangeOk] = useState(false);
 
   useEffect(() => {
-    supabaseBrowser.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) setExchangeError("Link inválido ou expirado.");
-      else setExchangeOk(true);
-    });
-  }, [code]);
+    let active = true;
+
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = hash.get("access_token");
+    const refresh_token = hash.get("refresh_token");
+
+    if (!access_token || !refresh_token) {
+      setExchangeError("Link inválido ou expirado.");
+      return;
+    }
+
+    supabaseBrowser.auth
+      .setSession({ access_token, refresh_token })
+      .then(({ error }) => {
+        if (!active) return;
+        if (error) setExchangeError("Link inválido ou expirado.");
+        else setExchangeOk(true);
+        history.replaceState(null, "", window.location.pathname);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const {
     register,

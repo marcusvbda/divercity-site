@@ -40,6 +40,7 @@ export default function ForgotPasswordForm({
         data.email,
         { redirectTo: `${window.location.origin}/admin/login/redefinir-senha` }
       );
+      console.log("[DEBUG] resetPasswordForEmail error", { message: error?.message, status: error?.status, code: error?.code });
       if (error) throw new Error("Não foi possível enviar o e-mail. Tente novamente.");
     },
     onSuccess: () => setSent(true),

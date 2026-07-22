@@ -27,15 +27,20 @@ const itemVariants = {
 
 type FeatureItem = {
   id: number
-  value: { label?: string | null; iconName?: string | null; color?: string | null }
+  value: {
+    label?: string | null
+    iconName?: string | null
+    color?: string | null
+  }
 }
 
 type CtaValue = { label?: string | null; href?: string | null }
 
 export default function CompraAntecipada({ advancePurchaseSection }: any) {
-  const title      = advancePurchaseSection?.Section?.title?.value      ?? ''
-  const subtitle   = advancePurchaseSection?.Section?.subtitle?.value   ?? ''
-  const features: FeatureItem[] = advancePurchaseSection?.Content?.features ?? []
+  const title = advancePurchaseSection?.Section?.title?.value ?? ''
+  const subtitle = advancePurchaseSection?.Section?.subtitle?.value ?? ''
+  const features: FeatureItem[] =
+    advancePurchaseSection?.Content?.features ?? []
   const disclaimer = advancePurchaseSection?.Content?.disclaimer?.value ?? ''
   const cta: CtaValue = advancePurchaseSection?.Actions?.cta?.value ?? {}
 
@@ -53,16 +58,14 @@ export default function CompraAntecipada({ advancePurchaseSection }: any) {
             <h2 className="font-heading mb-2 text-3xl font-bold text-gray-800 md:text-4xl">
               {title}
             </h2>
-            <p className="font-body mb-8 text-lg text-gray-500">
-              {subtitle}
-            </p>
+            <p className="font-body mb-8 text-lg text-gray-500">{subtitle}</p>
 
             <motion.div
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-80px' }}
-              className="mb-6 grid w-full grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-4"
+              className="mb-6 grid w-full grid-cols-2 gap-4 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-3"
             >
               {features.map((item) => {
                 const Icon = ICON_MAP[item.value.iconName ?? ''] ?? Star

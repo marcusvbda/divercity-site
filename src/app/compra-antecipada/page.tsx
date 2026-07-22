@@ -6,9 +6,10 @@ import CompraAntecipadaCheckout from '@/components/checkout/CompraAntecipadaChec
 import { getContentType } from '@/lib/cms'
 
 export default async function CompraAntecipadaPage() {
-  const [navBarContent, FooterContent] = await Promise.all([
+  const [navBarContent, FooterContent, advancePurchaseSection] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
+    getContentType('AdvancePurchaseSection'),
   ])
 
   return (
@@ -36,7 +37,7 @@ export default async function CompraAntecipadaPage() {
         </div>
       </Navbar>
       <main className="pt-16">
-        <CompraAntecipadaCheckout />
+        <CompraAntecipadaCheckout advancePurchaseSection={advancePurchaseSection} />
       </main>
       <Footer config={FooterContent} />
     </>
