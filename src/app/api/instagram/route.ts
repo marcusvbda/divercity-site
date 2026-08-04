@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { fetchInstagramPosts, type InstagramPost } from '@/lib/instagram'
 
-export interface InstagramPost {
-  id: string
-  media_url: string
-  thumbnail_url?: string
-  permalink: string
-  media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM'
-}
+export type { InstagramPost } from '@/lib/instagram'
 
 const FALLBACK_POSTS = [
   'https://placehold.co/600x600/8E4CCF/ffffff?text=Diversão+em+família',
@@ -34,30 +29,16 @@ export async function GET() {
   ])
 
   const token = tokenSetting?.value
-  const instagramUrl = urlSetting?.value ?? 'https://www.instagram.com/divercity.park'
+  const instagramUrl =
+    urlSetting?.value ?? 'https://www.instagram.com/divercity.park'
 
   if (!token) {
     return NextResponse.json(makeFallback(instagramUrl))
   }
 
   try {
-    const fields = 'id,media_type,media_url,thumbnail_url,permalink'
-    const url = `https://graph.instagram.com/me/media?fields=${fields}&limit=12&access_token=${token}`
-    const res = await fetch(url, { next: { revalidate: 3600, tags: ['instagram-posts'] } })
-
-    if (!res.ok) throw new Error(`Instagram API error: ${res.status}`)
-
-    const data = await res.json()
-    const posts: InstagramPost[] = (data.data as InstagramPost[]).filter(
-      (p) =>
-        p.media_type === 'IMAGE' ||
-        p.media_type === 'CAROUSEL_ALBUM' ||
-        p.thumbnail_url
-    )
-
-    return NextResponse.json(
-      posts.length > 0 ? posts : makeFallback(instagramUrl)
-    )
+    const posts = await fetchInstagramPosts(token)
+    return NextResponse.json(posts ?? makeFallback(instagramUrl))
   } catch (err) {
     console.error('Erro ao buscar posts do Instagram:', err)
     return NextResponse.json(makeFallback(instagramUrl))

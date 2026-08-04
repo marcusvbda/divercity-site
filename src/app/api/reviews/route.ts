@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { fetchGoogleReviews } from '@/lib/google-reviews'
 
 export interface GoogleReview {
   id: string
@@ -28,21 +29,13 @@ function relativeTime(unixTimestamp: number): string {
   return `há ${years} ano${years !== 1 ? 's' : ''}`
 }
 
-async function findPlaceId(apiKey: string, configPlaceId?: string): Promise<string | null> {
-  if (configPlaceId) return configPlaceId
-
-  const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Divercity+Park+Maringá&inputtype=textquery&fields=place_id&key=${apiKey}`
-  const res = await fetch(url, { next: { revalidate: 86400, tags: ['google-reviews'] } })
-  if (!res.ok) return null
-  const data = await res.json()
-  return data?.candidates?.[0]?.place_id ?? null
-}
-
 export async function GET() {
   const [apiKeySetting, placeIdSetting, minRatingSetting] = await Promise.all([
     prisma.setting.findUnique({ where: { key: 'google_places_api_key' } }),
     prisma.setting.findUnique({ where: { key: 'google_place_id' } }),
-    prisma.setting.findUnique({ where: { key: 'google_testimonials_minimum_rating' } }),
+    prisma.setting.findUnique({
+      where: { key: 'google_testimonials_minimum_rating' },
+    }),
   ])
 
   const apiKey = apiKeySetting?.value
@@ -54,28 +47,17 @@ export async function GET() {
   }
 
   try {
-    const placeId = await findPlaceId(apiKey, configPlaceId)
-    if (!placeId) return NextResponse.json([])
+    const reviews = await fetchGoogleReviews(apiKey, configPlaceId)
+    if (!reviews) return NextResponse.json([])
 
-    const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&language=pt-BR&reviews_sort=newest&key=${apiKey}`
-    const res = await fetch(detailsUrl, { next: { revalidate: 3600, tags: ['google-reviews'] } })
+    const withRelativeTime: GoogleReview[] = reviews.map((r) => ({
+      ...r,
+      relative_time_description: relativeTime(r.time),
+    }))
 
-    if (!res.ok) throw new Error(`Places API error: ${res.status}`)
-
-    const data = await res.json()
-    const reviews: GoogleReview[] = (data?.result?.reviews ?? []).map(
-      (r: Record<string, unknown>, i: number) => ({
-        id: String(i),
-        author_name: r.author_name as string,
-        rating: r.rating as number,
-        text: r.text as string,
-        time: r.time as number,
-        profile_photo_url: r.profile_photo_url as string,
-        relative_time_description: relativeTime(r.time as number),
-      })
+    return NextResponse.json(
+      withRelativeTime.filter((r) => r.rating >= minRating)
     )
-
-    return NextResponse.json(reviews.filter((r) => r.rating >= minRating))
   } catch (err) {
     console.error('Erro ao buscar reviews do Google:', err)
     return NextResponse.json([])
