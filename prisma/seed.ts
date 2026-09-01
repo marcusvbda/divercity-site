@@ -790,8 +790,7 @@ async function main() {
     {
       title: 'Alimentação Saborosa',
       iconName: 'UtensilsCrossed',
-      description:
-        'Lanchonete completa com opções saudáveis e saborosas para crianças e adultos durante toda a visita.',
+      description: 'Opções de bebidas, chopp, petiscos e café.',
     },
     {
       title: 'Atendimento Especializado',
@@ -1069,8 +1068,8 @@ async function main() {
         'Estrutura completa com mesas, cadeiras e cilindros para decoração.',
         'Espaço exclusivo para até 50 participantes com pulseiras de identificação e monitores.',
         'Cozinha de apoio com geladeira expositora e réchaud para alimentos quentes.',
-        'Utilização do salão por até 5 horas (até 21h30 em dias normais; 19h30 em domingos e feriados).',
-        'Pode trazer suas próprias bebidas (já geladas) ou optar pelas do parque.',
+        'Utilização do salão por até 3 horas.',
+        'Opção de bebidas fornecidas pelo parque, mediante disponibilidade e solicitação antecipada.',
         'Decoração, garçons e buffet por conta do cliente — indicamos fornecedores parceiros.',
         'Pagamento facilitado no Pix ou Cartão.',
       ],
@@ -1099,9 +1098,6 @@ async function main() {
       type: 'multiple',
       value: [
         'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/salao-de-festas.png',
-        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/dbz.png',
-        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/f1.png',
-        'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/futebol.png',
       ],
     },
   ])
@@ -1127,7 +1123,7 @@ async function main() {
     'ctaPrices',
     ctaTemplateComponent.id,
     [
-      { fieldId: ctaLabelField.id, value: 'Ver preços' },
+      { fieldId: ctaLabelField.id, value: 'Ver preços dos passaportes' },
       { fieldId: ctaHrefField.id, value: '#precos' },
       { fieldId: ctaColorField.id, value: 'black' },
       { fieldId: ctaBgColorField.id, value: 'transparent' },
