@@ -59,6 +59,12 @@ export const PartyBudgetReservationSchema = CustomerSchema.extend({
     path: ["date"],
   });
 
+export const GuestTypeSchema = z.enum(["child", "adult"]);
+export const GuestSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  type: GuestTypeSchema,
+});
+
 export type CustomerInput = z.infer<typeof CustomerSchema>;
 export type ContractTemplateInput = z.infer<typeof ContractTemplateSchema>;
 export type PartyInput = z.infer<typeof PartySchema>;
@@ -66,3 +72,5 @@ export type ContractFieldValues = z.infer<typeof ContractFieldValuesSchema>;
 export type UpdateContractInput = z.infer<typeof UpdateContractSchema>;
 export type PartyPaymentOption = z.infer<typeof PartyPaymentOptionSchema>;
 export type PartyBudgetReservationInput = z.infer<typeof PartyBudgetReservationSchema>;
+export type GuestType = z.infer<typeof GuestTypeSchema>;
+export type GuestInput = z.infer<typeof GuestSchema>;

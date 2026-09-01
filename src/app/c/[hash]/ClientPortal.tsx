@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import type { Contract, Party } from '@/types/parties'
 import { buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
 import { ContractPreview } from '@/components/ui/contract-preview'
+import { GuestList } from './GuestList'
 
 type Props = { hash: string }
 
@@ -104,7 +105,7 @@ export function ClientPortal({ hash }: Props) {
     )
   }
 
-  if (contract.status === 'signed') {
+  if (contract.status === 'signed' || contract.status === 'completed') {
     const renderedBody = renderBody(contract.body, mergedValues)
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
@@ -112,6 +113,7 @@ export function ClientPortal({ hash }: Props) {
           <p className="font-semibold text-green-700 dark:text-green-400">Contrato assinado</p>
         </div>
         <ContractPreview html={renderedBody} />
+        <GuestList hash={hash} />
       </div>
     )
   }

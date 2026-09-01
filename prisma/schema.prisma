@@ -100,6 +100,11 @@ enum PartyPaymentStatus {
   failed
 }
 
+enum GuestType {
+  child
+  adult
+}
+
 model Customer {
   id        Int      @id @default(autoincrement())
   cpf       String   @unique
@@ -150,8 +155,20 @@ model Party {
   stripePaymentIntentId   String?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
+  guests                  Guest[]
 
   @@map("parties")
+}
+
+model Guest {
+  id        Int       @id @default(autoincrement())
+  partyId   Int
+  party     Party     @relation(fields: [partyId], references: [id])
+  name      String
+  type      GuestType
+  createdAt DateTime  @default(now())
+
+  @@map("guests")
 }
 
 model Contract {

@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -17,6 +18,7 @@ export function NavMain({
     url: string
     icon?: React.ReactNode
     target?: string
+    badge?: number
   }[]
 }) {
   const pathname = usePathname()
@@ -40,6 +42,11 @@ export function NavMain({
                 >
                   {item.icon}
                   <span>{item.title}</span>
+                  {Boolean(item.badge && item.badge > 0) && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {item.badge}
+                    </Badge>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )

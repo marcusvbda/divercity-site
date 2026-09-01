@@ -74,3 +74,12 @@ export interface PartyWithDetails extends Party {
   contractTemplate: ContractTemplate;
   contract?: Contract | null;
 }
+
+export type GuestType = "child" | "adult";
+export interface Guest {
+  id: number;
+  partyId: number;
+  name: string;
+  type: GuestType;
+  createdAt: string;
+}

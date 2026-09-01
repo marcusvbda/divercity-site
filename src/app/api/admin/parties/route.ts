@@ -6,13 +6,20 @@ export async function GET(req: NextRequest) {
   const page = Number(req.nextUrl.searchParams.get('page') ?? '1')
   const perPage = Math.min(Number(req.nextUrl.searchParams.get('perPage') ?? '15'), 100)
   const status = req.nextUrl.searchParams.get('status')
+  const paymentStatus = req.nextUrl.searchParams.get('paymentStatus')
   const sort = req.nextUrl.searchParams.get('sort') ?? 'date'
   const dir = (req.nextUrl.searchParams.get('dir') ?? 'asc') as 'asc' | 'desc'
 
   const allowedSort: Record<string, boolean> = { date: true, status: true }
   const orderBy = allowedSort[sort] ? { [sort]: dir } : { date: 'asc' as const }
 
-  const where = status ? { status: status as 'pending' | 'confirmed' | 'cancelled' } : undefined
+  const where =
+    status || paymentStatus
+      ? {
+          ...(status ? { status: status as 'pending' | 'confirmed' | 'cancelled' } : {}),
+          ...(paymentStatus ? { paymentStatus: paymentStatus as 'pending' | 'paid' | 'failed' } : {}),
+        }
+      : undefined
 
   const [data, total] = await Promise.all([
     prisma.party.findMany({

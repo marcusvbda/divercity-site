@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import Image from 'next/image'
+import { useQuery } from '@tanstack/react-query'
 import {
   BlocksIcon,
   ExternalLinkIcon,
@@ -24,24 +25,37 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-const navMain = [
-  { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
-  { title: 'Dashboard', url: '/admin', icon: <LayoutDashboardIcon /> },
-  { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
-  { title: 'Clientes', url: '/admin/customers', icon: <UsersIcon /> },
-  {
-    title: 'Salão de Festas',
-    url: '/admin/parties',
-    icon: <PartyPopperIcon />,
-  },
-  { title: 'Configurações', url: '/admin/settings', icon: <Settings2Icon /> },
-]
-
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   logoUrl?: string
 }
 
 export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
+  const { data: pendingPartiesCount } = useQuery({
+    queryKey: ['admin', 'parties', 'pending-paid-count'],
+    queryFn: () =>
+      fetch('/api/admin/parties?status=pending&paymentStatus=paid&perPage=1').then(
+        async (r) => {
+          if (!r.ok) throw new Error('failed to fetch pending parties count')
+          const json = await r.json()
+          return json.pagination.total as number
+        },
+      ),
+  })
+
+  const navMain = [
+    { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
+    { title: 'Dashboard', url: '/admin', icon: <LayoutDashboardIcon /> },
+    { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
+    { title: 'Clientes', url: '/admin/customers', icon: <UsersIcon /> },
+    {
+      title: 'Salão de Festas',
+      url: '/admin/parties',
+      icon: <PartyPopperIcon />,
+      badge: pendingPartiesCount,
+    },
+    { title: 'Configurações', url: '/admin/settings', icon: <Settings2Icon /> },
+  ]
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
