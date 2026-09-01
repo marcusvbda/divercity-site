@@ -1038,6 +1038,25 @@ async function main() {
     },
   ])
 
+  // ── Cadastro de Serviços/Produtos ────────────────────────────────────────
+  // Preços operacionais usados pelo motor de orçamento de festas, geridos em
+  // /admin/services. Valores abaixo são mínimos/placeholder e devem ser
+  // revisados pelo admin.
+  const SERVICES: { key: string; name: string; weekdayPrice: string; weekendPrice: string }[] = [
+    { key: 'party_salon', name: 'Salão de Festas (3 horas)', weekdayPrice: '80', weekendPrice: '100' },
+    { key: 'party_passport_package', name: 'Pacote de 10 Passaportes (festa)', weekdayPrice: '150', weekendPrice: '150' },
+    { key: 'party_passport_single', name: 'Passaporte Avulso (festa)', weekdayPrice: '18', weekendPrice: '18' },
+    { key: 'party_companion', name: 'Acompanhante (festa)', weekdayPrice: '30', weekendPrice: '30' },
+  ]
+
+  for (const service of SERVICES) {
+    await prisma.service.upsert({
+      where: { key: service.key },
+      update: {},
+      create: service,
+    })
+  }
+
   // ── PartySection ─────────────────────────────────────────────────────────
   const partySectionType = await prisma.contentType.upsert({
     where: { name: 'PartySection' },
@@ -1519,6 +1538,35 @@ async function main() {
     { name: 'instagramUrl', value: 'https://www.instagram.com/divercity.park' },
     { name: 'wppNumber', value: '5514997569008' },
   ])
+
+  // ── ContractTemplate padrão ──────────────────────────────────────────────
+  // Mock mínimo para o fluxo de orçamento/reserva de festas funcionar de ponta
+  // a ponta. O texto abaixo é um placeholder e PRECISA ser revisado
+  // juridicamente e substituído pelo contrato real antes de ir para produção.
+  const PLACEHOLDER_TEMPLATE_NAME = 'Contrato Padrão de Festa (placeholder)'
+  const existingDefaultTemplate = await prisma.contractTemplate.findFirst({
+    where: { isDefault: true },
+  })
+  if (!existingDefaultTemplate) {
+    const placeholderTemplate = await prisma.contractTemplate.findFirst({
+      where: { name: PLACEHOLDER_TEMPLATE_NAME },
+    })
+    if (placeholderTemplate) {
+      await prisma.contractTemplate.update({
+        where: { id: placeholderTemplate.id },
+        data: { isDefault: true },
+      })
+    } else {
+      await prisma.contractTemplate.create({
+        data: {
+          name: PLACEHOLDER_TEMPLATE_NAME,
+          body: '<h1>CONTRATO DE RESERVA — MODELO PADRÃO (PLACEHOLDER)</h1><p>Este é um texto de exemplo gerado automaticamente para permitir o funcionamento do fluxo de reserva. Substitua este conteúdo pelo contrato real em /admin/contract-templates antes de usar em produção.</p><p>Cliente: {{cliente_name}} — CPF: {{cliente_cpf}}</p><p>Data da festa: {{festa_date}}</p>',
+          variables: [],
+          isDefault: true,
+        },
+      })
+    }
+  }
 
   console.log('Seed completo')
 }

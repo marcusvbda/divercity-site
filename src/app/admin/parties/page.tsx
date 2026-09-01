@@ -131,6 +131,21 @@ export default function PartiesPage() {
           queryKey={['admin', 'parties']}
           endpoint="/api/admin/parties"
           columns={columns}
+          filters={[
+            { key: 'customerName', placeholder: 'Buscar por cliente...', type: 'search' },
+            {
+              key: 'status',
+              type: 'select',
+              placeholder: 'Status da festa',
+              options: [
+                { label: 'Todos os status', value: '' },
+                { label: 'Pendente', value: 'pending' },
+                { label: 'Confirmada', value: 'confirmed' },
+                { label: 'Cancelada', value: 'cancelled' },
+              ],
+            },
+            { key: 'date', type: 'date' },
+          ]}
           actions={party => (
             <Button variant="ghost" size="sm" nativeButton={false} render={<Link href={`/admin/parties/${party.id}`} />}>
               Ver

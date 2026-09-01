@@ -5,7 +5,7 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const isLoginPage = pathname === '/admin/login'
-    const isAuthenticated = !!req.nextauth.token
+    const isAuthenticated = !!req.nextauth.token && !req.nextauth.token.error
 
     if (isLoginPage && isAuthenticated) {
       return NextResponse.redirect(new URL('/admin', req.url))

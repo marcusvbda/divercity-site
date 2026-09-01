@@ -45,6 +45,7 @@ export const PartyBudgetReservationSchema = CustomerSchema.extend({
     .min(1, "Quantidade total de participantes inválida")
     .max(50, "Máximo de 50 participantes no total"),
   paymentOption: PartyPaymentOptionSchema,
+  passportSingleCount: z.number().int().min(0, "Quantidade inválida"),
   termsAccepted: z
     .boolean()
     .refine((v) => v === true, "É necessário aceitar os termos e condições"),
@@ -65,6 +66,12 @@ export const GuestSchema = z.object({
   type: GuestTypeSchema,
 });
 
+export const ServiceSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  weekdayPrice: z.number().min(0, "Valor inválido"),
+  weekendPrice: z.number().min(0, "Valor inválido"),
+});
+
 export type CustomerInput = z.infer<typeof CustomerSchema>;
 export type ContractTemplateInput = z.infer<typeof ContractTemplateSchema>;
 export type PartyInput = z.infer<typeof PartySchema>;
@@ -74,3 +81,4 @@ export type PartyPaymentOption = z.infer<typeof PartyPaymentOptionSchema>;
 export type PartyBudgetReservationInput = z.infer<typeof PartyBudgetReservationSchema>;
 export type GuestType = z.infer<typeof GuestTypeSchema>;
 export type GuestInput = z.infer<typeof GuestSchema>;
+export type ServiceInput = z.infer<typeof ServiceSchema>;

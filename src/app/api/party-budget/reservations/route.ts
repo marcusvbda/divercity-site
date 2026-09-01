@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { getStripeClient } from "@/lib/stripe";
 import { PartyBudgetReservationSchema } from "@/lib/schemas/parties";
 import { computeQuote, getPartyDateEnd, isSlotAvailable } from "@/lib/party-budget";
 
@@ -22,6 +20,7 @@ export async function POST(req: NextRequest) {
     adultsCount,
     totalParticipants,
     paymentOption,
+    passportSingleCount,
   } = parsed.data;
 
   const date = new Date(dateStr);
@@ -38,30 +37,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let quote;
-  try {
-    quote = await computeQuote({ date, paymentOption });
-  } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Erro ao calcular orçamento" },
-      { status: 500 }
-    );
-  }
-
   const available = await isSlotAvailable(date, dateEnd);
   if (!available) {
     return NextResponse.json(
-      { error: "Data/horário indisponível — já existe uma festa confirmada neste horário" },
+      { error: "Data/horário indisponível — já existe uma festa agendada neste horário" },
       { status: 409 }
     );
   }
 
-  let stripe: Stripe;
+  let quote;
   try {
-    stripe = await getStripeClient();
+    quote = await computeQuote({ date, paymentOption, passportSingleCount });
   } catch (err) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Stripe não configurado" },
+      { error: err instanceof Error ? err.message : "Erro ao calcular orçamento" },
       { status: 500 }
     );
   }
@@ -71,86 +60,47 @@ export async function POST(req: NextRequest) {
     fieldValues[v] = "";
   });
 
-  const origin = req.nextUrl.origin;
-
   try {
-    const result = await prisma.$transaction(
-      async (tx) => {
-        const customer = await tx.customer.upsert({
-          where: { cpf },
-          create: { cpf, name, email: email || null, phone: phone || null },
-          update: { name, email: email || null, phone: phone || null },
-        });
+    const party = await prisma.$transaction(async (tx) => {
+      const customer = await tx.customer.upsert({
+        where: { cpf },
+        create: { cpf, name, email: email || null, phone: phone || null },
+        update: { name, email: email || null, phone: phone || null },
+      });
 
-        const party = await tx.party.create({
-          data: {
-            customerId: customer.id,
-            contractTemplateId: template.id,
-            date,
-            dateEnd,
-            status: "pending",
-            childrenCount,
-            adultsCount,
-            totalParticipants,
-            paymentOption,
-            salonPrice: quote.salonPrice,
-            passportPackagePrice: quote.passportPackagePrice,
-            totalPrice: quote.total,
-            termsAcceptedAt: new Date(),
-            paymentStatus: "pending",
-          },
-        });
+      const newParty = await tx.party.create({
+        data: {
+          customerId: customer.id,
+          contractTemplateId: template.id,
+          date,
+          dateEnd,
+          status: "pending",
+          childrenCount,
+          adultsCount,
+          totalParticipants,
+          paymentOption,
+          salonPrice: quote.salonPrice,
+          passportPackagePrice: quote.passportPackagePrice,
+          passportSinglePrice: quote.passportSinglePrice,
+          passportSingleCount: quote.passportSingleCount,
+          totalPrice: quote.total,
+          termsAcceptedAt: new Date(),
+        },
+      });
 
-        await tx.contract.create({
-          data: {
-            partyId: party.id,
-            body: template.body,
-            fieldValues,
-            status: "draft",
-          },
-        });
+      await tx.contract.create({
+        data: {
+          partyId: newParty.id,
+          body: template.body,
+          fieldValues,
+          status: "draft",
+        },
+      });
 
-        const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-          {
-            price_data: {
-              currency: "brl",
-              product_data: { name: "Reserva de Salão de Festas — 3 horas" },
-              unit_amount: Math.round(quote.salonPrice * 100),
-            },
-            quantity: 1,
-          },
-        ];
+      return newParty;
+    });
 
-        if (paymentOption === "salon_and_passports" && quote.passportPackagePrice !== null) {
-          lineItems.push({
-            price_data: {
-              currency: "brl",
-              product_data: { name: "Pacote de 10 Passaportes" },
-              unit_amount: Math.round(quote.passportPackagePrice * 100),
-            },
-            quantity: 1,
-          });
-        }
-
-        const session = await stripe.checkout.sessions.create({
-          mode: "payment",
-          line_items: lineItems,
-          success_url: `${origin}/orcamento/sucesso?party=${party.id}&session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${origin}/orcamento/cancelado?party=${party.id}`,
-          metadata: { partyId: String(party.id) },
-        });
-
-        await tx.party.update({
-          where: { id: party.id },
-          data: { stripeCheckoutSessionId: session.id },
-        });
-
-        return { partyId: party.id, checkoutUrl: session.url };
-      },
-      { timeout: 15000 }
-    );
-
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json({ partyId: party.id }, { status: 201 });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Erro ao criar reserva" },

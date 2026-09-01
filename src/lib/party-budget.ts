@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { getContentType } from "@/lib/cms";
 import type { PartyPaymentOption } from "@/lib/schemas/parties";
 
 export const PARTY_DURATION_MS = 3 * 60 * 60 * 1000;
@@ -19,51 +18,48 @@ function isWeekend(date: Date): boolean {
   return weekday === "Sat" || weekday === "Sun";
 }
 
-type PriceTier = { id: number; value: { label: string; valor: string; acompanhante: string } };
+export type ServicePricing = {
+  salonPrice: number;
+  passportPackagePrice: number;
+  passportSinglePrice: number;
+};
 
-export async function getSalonPrice(date: Date): Promise<number> {
-  const priceSection = await getContentType("PriceSection");
-  const tiers = priceSection?.Tiers;
-  const list: PriceTier[] | undefined = isWeekend(date)
-    ? tiers?.weekendTiers
-    : tiers?.weekdayTiers;
+const SERVICE_KEYS = {
+  salon: "party_salon",
+  passportPackage: "party_passport_package",
+  passportSingle: "party_passport_single",
+} as const;
 
-  const tier = list?.find((t) => t.value?.label === "3 Horas");
-  if (!tier) {
+function servicePrice(
+  services: { key: string | null; name: string; weekdayPrice: unknown; weekendPrice: unknown }[],
+  key: string,
+  weekend: boolean
+): number {
+  const service = services.find((s) => s.key === key);
+  if (!service) {
     throw new Error(
-      'Valor do salão (tier "3 Horas") não encontrado no CMS. Configure em /admin/cms → PriceSection → Tiers.'
+      `Serviço "${key}" não cadastrado. Configure em /admin/services.`
     );
   }
-
-  const value = Number(tier.value.valor);
-  if (Number.isNaN(value)) {
-    throw new Error('Valor do salão configurado ("3 Horas") é inválido.');
-  }
-  return value;
+  return Number(weekend ? service.weekendPrice : service.weekdayPrice);
 }
 
-export async function getPassportPackagePrice(): Promise<number> {
-  const setting = await prisma.setting.findUnique({
-    where: { key: "party_passport_package_price" },
+export async function getServicePricing(date: Date): Promise<ServicePricing> {
+  const services = await prisma.service.findMany({
+    where: { key: { in: Object.values(SERVICE_KEYS) } },
   });
-  if (!setting?.value) {
-    throw new Error(
-      "Valor do pacote de passaportes não configurado. Configure em /admin/settings → Festas."
-    );
-  }
+  const weekend = isWeekend(date);
 
-  const value = Number(setting.value);
-  if (Number.isNaN(value)) {
-    throw new Error("Valor do pacote de passaportes configurado é inválido.");
-  }
-  return value;
+  return {
+    salonPrice: servicePrice(services, SERVICE_KEYS.salon, weekend),
+    passportPackagePrice: servicePrice(services, SERVICE_KEYS.passportPackage, weekend),
+    passportSinglePrice: servicePrice(services, SERVICE_KEYS.passportSingle, weekend),
+  };
 }
 
 export async function isSlotAvailable(date: Date, dateEnd: Date): Promise<boolean> {
   const blockingParties = await prisma.party.findMany({
-    where: {
-      OR: [{ status: "confirmed" }, { status: "pending", paymentStatus: "paid" }],
-    },
+    where: { status: { not: "cancelled" } },
     select: { date: true, dateEnd: true },
   });
 
@@ -78,23 +74,45 @@ export async function isSlotAvailable(date: Date, dateEnd: Date): Promise<boolea
   return !conflict;
 }
 
+export const PASSPORT_PACKAGE_SIZE = 10;
+
 export type PartyQuote = {
   salonPrice: number;
   passportPackagePrice: number | null;
+  passportSinglePrice: number | null;
+  passportSingleCount: number | null;
   total: number;
 };
 
 export async function computeQuote({
   date,
   paymentOption,
+  passportSingleCount = 0,
 }: {
   date: Date;
   paymentOption: PartyPaymentOption;
+  passportSingleCount?: number;
 }): Promise<PartyQuote> {
-  const salonPrice = await getSalonPrice(date);
-  const passportPackagePrice =
-    paymentOption === "salon_and_passports" ? await getPassportPackagePrice() : null;
-  const total = salonPrice + (passportPackagePrice ?? 0);
+  const pricing = await getServicePricing(date);
 
-  return { salonPrice, passportPackagePrice, total };
+  if (paymentOption !== "salon_and_passports") {
+    return {
+      salonPrice: pricing.salonPrice,
+      passportPackagePrice: null,
+      passportSinglePrice: null,
+      passportSingleCount: null,
+      total: pricing.salonPrice,
+    };
+  }
+
+  const total =
+    pricing.salonPrice + pricing.passportPackagePrice + passportSingleCount * pricing.passportSinglePrice;
+
+  return {
+    salonPrice: pricing.salonPrice,
+    passportPackagePrice: pricing.passportPackagePrice,
+    passportSinglePrice: pricing.passportSinglePrice,
+    passportSingleCount,
+    total,
+  };
 }

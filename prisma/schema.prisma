@@ -94,12 +94,6 @@ enum PartyPaymentOption {
   salon_and_passports
 }
 
-enum PartyPaymentStatus {
-  pending
-  paid
-  failed
-}
-
 enum GuestType {
   child
   adult
@@ -147,12 +141,10 @@ model Party {
   paymentOption           PartyPaymentOption?
   salonPrice              Decimal?            @db.Decimal(10, 2)
   passportPackagePrice    Decimal?            @db.Decimal(10, 2)
+  passportSinglePrice     Decimal?            @db.Decimal(10, 2)
+  passportSingleCount     Int?
   totalPrice              Decimal?            @db.Decimal(10, 2)
   termsAcceptedAt         DateTime?
-  paymentStatus           PartyPaymentStatus  @default(pending)
-  paidAt                  DateTime?
-  stripeCheckoutSessionId String?             @unique
-  stripePaymentIntentId   String?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
   guests                  Guest[]
@@ -194,4 +186,16 @@ model Setting {
   updatedAt DateTime @updatedAt
 
   @@map("settings")
+}
+
+model Service {
+  id           Int      @id @default(autoincrement())
+  key          String?  @unique
+  name         String
+  weekdayPrice Decimal  @db.Decimal(10, 2)
+  weekendPrice Decimal  @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("services")
 }

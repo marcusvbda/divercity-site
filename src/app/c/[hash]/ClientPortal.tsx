@@ -105,6 +105,20 @@ export function ClientPortal({ hash }: Props) {
     )
   }
 
+  if (contract.status === 'cancelled' || contractParty?.status === 'cancelled') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+        <div className="text-center">
+          <h1 className="text-xl font-bold">Reserva cancelada</h1>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Esta reserva foi cancelada. Se você acredita que isso é um engano, entre em contato
+            com o Divercity Park.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (contract.status === 'signed' || contract.status === 'completed') {
     const renderedBody = renderBody(contract.body, mergedValues)
     return (

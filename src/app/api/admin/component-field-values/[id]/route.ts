@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { revalidateTag } from 'next/cache'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -18,7 +19,10 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const updated = await prisma.componentFieldValue.update({
     where: { id: fvId },
     data: { value: String(value ?? '') },
+    include: { componentField: { include: { contentComponent: { include: { contentType: true } } } } },
   })
+
+  revalidateTag(`cms:${updated.componentField.contentComponent.contentType.name}`, {})
 
   return NextResponse.json(updated)
 }

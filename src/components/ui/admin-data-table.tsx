@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { SearchIcon, ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -34,7 +35,8 @@ export type Column<T> = {
 export type FilterConfig = {
   key: string
   placeholder?: string
-  type?: 'search'
+  type?: 'search' | 'select' | 'date'
+  options?: { label: string; value: string }[]
 }
 
 type Pagination = {
@@ -66,11 +68,19 @@ export function AdminDataTable<T extends { id: number | string }>({
   actions,
   defaultPerPage = 15,
 }: AdminDataTableProps<T>) {
+  const searchParams = useSearchParams()
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(defaultPerPage)
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
-  const [filterValues, setFilterValues] = useState<Record<string, string>>({})
+  const [filterValues, setFilterValues] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {}
+    filters?.forEach(f => {
+      const v = searchParams.get(f.key)
+      if (v) initial[f.key] = v
+    })
+    return initial
+  })
 
   function buildUrl() {
     const params = new URLSearchParams()
@@ -124,17 +134,56 @@ export function AdminDataTable<T extends { id: number | string }>({
     <div className="flex flex-col gap-4">
       {filters && filters.length > 0 && (
         <div className="flex flex-wrap gap-3">
-          {filters.map(filter => (
-            <div key={filter.key} className="relative max-w-sm">
-              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-              <Input
-                placeholder={filter.placeholder ?? 'Buscar...'}
-                className="pl-9"
-                value={filterValues[filter.key] ?? ''}
-                onChange={e => handleFilterChange(filter.key, e.target.value)}
-              />
-            </div>
-          ))}
+          {filters.map(filter => {
+            if (filter.type === 'select') {
+              const currentValue = filterValues[filter.key] || 'all'
+              const currentLabel = (filter.options ?? []).find(
+                opt => (opt.value || 'all') === currentValue
+              )?.label
+              return (
+                <Select
+                  key={filter.key}
+                  value={currentValue}
+                  onValueChange={v => handleFilterChange(filter.key, v === 'all' ? '' : (v ?? ''))}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder={filter.placeholder}>{currentLabel}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(filter.options ?? []).map(opt => (
+                      <SelectItem key={opt.value || 'all'} value={opt.value || 'all'}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            }
+
+            if (filter.type === 'date') {
+              return (
+                <Input
+                  key={filter.key}
+                  type="date"
+                  className="w-44"
+                  value={filterValues[filter.key] ?? ''}
+                  onChange={e => handleFilterChange(filter.key, e.target.value)}
+                />
+              )
+            }
+
+            return (
+              <div key={filter.key} className="relative max-w-sm">
+                <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                <Input
+                  placeholder={filter.placeholder ?? 'Buscar...'}
+                  className="pl-9"
+                  value={filterValues[filter.key] ?? ''}
+                  onChange={e => handleFilterChange(filter.key, e.target.value)}
+                />
+              </div>
+            )
+          })}
         </div>
       )}
 

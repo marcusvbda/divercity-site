@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { PartySchema } from '@/lib/schemas/parties'
 
@@ -6,20 +7,25 @@ export async function GET(req: NextRequest) {
   const page = Number(req.nextUrl.searchParams.get('page') ?? '1')
   const perPage = Math.min(Number(req.nextUrl.searchParams.get('perPage') ?? '15'), 100)
   const status = req.nextUrl.searchParams.get('status')
-  const paymentStatus = req.nextUrl.searchParams.get('paymentStatus')
+  const customerName = req.nextUrl.searchParams.get('customerName')
+  const dateParam = req.nextUrl.searchParams.get('date')
   const sort = req.nextUrl.searchParams.get('sort') ?? 'date'
   const dir = (req.nextUrl.searchParams.get('dir') ?? 'asc') as 'asc' | 'desc'
 
   const allowedSort: Record<string, boolean> = { date: true, status: true }
   const orderBy = allowedSort[sort] ? { [sort]: dir } : { date: 'asc' as const }
 
-  const where =
-    status || paymentStatus
-      ? {
-          ...(status ? { status: status as 'pending' | 'confirmed' | 'cancelled' } : {}),
-          ...(paymentStatus ? { paymentStatus: paymentStatus as 'pending' | 'paid' | 'failed' } : {}),
-        }
-      : undefined
+  const conditions: Prisma.PartyWhereInput[] = []
+  if (status) conditions.push({ status: status as 'pending' | 'confirmed' | 'cancelled' })
+  if (customerName) conditions.push({ customer: { name: { contains: customerName, mode: 'insensitive' } } })
+  if (dateParam) {
+    const dayStart = new Date(`${dateParam}T00:00:00.000Z`)
+    if (!Number.isNaN(dayStart.getTime())) {
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+      conditions.push({ date: { gte: dayStart, lt: dayEnd } })
+    }
+  }
+  const where: Prisma.PartyWhereInput | undefined = conditions.length > 0 ? { AND: conditions } : undefined
 
   const [data, total] = await Promise.all([
     prisma.party.findMany({
@@ -51,7 +57,7 @@ export async function POST(req: NextRequest) {
     : new Date(newStart.getTime() + 4 * 60 * 60 * 1000)
 
   const blockingParties = await prisma.party.findMany({
-    where: { OR: [{ status: 'confirmed' }, { status: 'pending', paymentStatus: 'paid' }] },
+    where: { status: { not: 'cancelled' } },
     select: { id: true, date: true, dateEnd: true },
   })
   const conflict = blockingParties.some(p => {
@@ -60,7 +66,7 @@ export async function POST(req: NextRequest) {
     return newStart < pEnd && newEnd > pStart
   })
   if (conflict) {
-    return NextResponse.json({ error: 'Conflito com festa já confirmada ou já paga neste horário' }, { status: 409 })
+    return NextResponse.json({ error: 'Conflito com outra festa já agendada neste horário' }, { status: 409 })
   }
 
   const template = await prisma.contractTemplate.findUnique({

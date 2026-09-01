@@ -68,10 +68,6 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
     get(settings, 'stripe_webhook_secret')
   )
 
-  const [partyPassportPackagePrice, setPartyPassportPackagePrice] = useState(
-    get(settings, 'party_passport_package_price')
-  )
-
   function save(entries: { key: string; value: string }[]) {
     startTransition(async () => {
       try {
@@ -98,7 +94,6 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
           <TabsTrigger value="google">Google</TabsTrigger>
           <TabsTrigger value="instagram">Instagram</TabsTrigger>
           <TabsTrigger value="stripe">Stripe</TabsTrigger>
-          <TabsTrigger value="parties">Festas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="google" className="space-y-5">
@@ -234,38 +229,6 @@ export function SettingsContent({ settings }: { settings: Setting[] }) {
             disabled={isPending}
           >
             {isPending ? 'Salvando…' : 'Salvar Stripe'}
-          </Button>
-        </TabsContent>
-
-        <TabsContent value="parties" className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="party-passport-package-price">
-              Valor do pacote de 10 passaportes (R$)
-            </Label>
-            <Input
-              id="party-passport-package-price"
-              type="number"
-              step="0.01"
-              min={0}
-              value={partyPassportPackagePrice}
-              onChange={(e) => setPartyPassportPackagePrice(e.target.value)}
-              placeholder="350.00"
-            />
-            <p className="text-xs text-gray-400">
-              Cobrado junto do salão quando o cliente escolhe a opção &quot;Salão + Passaportes&quot;
-              na reserva pelo site.
-            </p>
-          </div>
-
-          <Button
-            onClick={() =>
-              save([
-                { key: 'party_passport_package_price', value: partyPassportPackagePrice },
-              ])
-            }
-            disabled={isPending}
-          >
-            {isPending ? 'Salvando…' : 'Salvar Festas'}
           </Button>
         </TabsContent>
       </Tabs>

@@ -1,6 +1,8 @@
 'use client'
 
-import { BlocksIcon, ArrowRightIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useQuery } from '@tanstack/react-query'
+import { BlocksIcon, ArrowRightIcon, PartyPopperIcon, BellIcon, CheckCircle2Icon } from 'lucide-react'
 
 const features = [
   {
@@ -14,6 +16,75 @@ const features = [
     iconColor: 'text-brand-cyan',
   },
 ]
+
+function PendingPartiesCard() {
+  const { data: count, isLoading } = useQuery({
+    queryKey: ['admin', 'parties', 'pending-count'],
+    queryFn: () =>
+      fetch('/api/admin/parties?status=pending&perPage=1').then(async (r) => {
+        if (!r.ok) throw new Error('failed to fetch pending parties count')
+        const json = await r.json()
+        return json.pagination.total as number
+      }),
+  })
+
+  const hasPending = !isLoading && (count ?? 0) > 0
+
+  return (
+    <Link
+      href={hasPending ? '/admin/parties?status=pending' : '/admin/parties'}
+      className={`group relative overflow-hidden rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+        hasPending
+          ? 'border-brand-pink/30 bg-linear-to-br from-brand-pink/5 via-white to-white'
+          : 'bg-card'
+      }`}
+    >
+      <div
+        className={`absolute inset-x-0 top-0 h-0.5 bg-linear-to-r ${
+          hasPending ? 'from-brand-pink to-brand-yellow' : 'from-brand-lime to-brand-cyan'
+        }`}
+      />
+
+      <div className="flex items-start justify-between gap-4">
+        <div
+          className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+            hasPending ? 'bg-brand-pink/15' : 'bg-brand-lime/15'
+          }`}
+        >
+          {hasPending ? (
+            <BellIcon className="text-brand-pink size-5" />
+          ) : (
+            <PartyPopperIcon className="text-brand-lime size-5" />
+          )}
+        </div>
+        {hasPending ? (
+          <span className="bg-brand-pink inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white">
+            {count} pendente{count === 1 ? '' : 's'}
+            <ArrowRightIcon className="size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </span>
+        ) : (
+          !isLoading && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-500">
+              <CheckCircle2Icon className="size-3" />
+              Em dia
+            </span>
+          )
+        )}
+      </div>
+
+      <div className="mt-4">
+        <h3 className="text-base font-semibold">Reservas de Festas</h3>
+        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+          {isLoading
+            ? 'Carregando...'
+            : hasPending
+              ? `${count} reserva${count === 1 ? '' : 's'} nova${count === 1 ? '' : 's'} aguardando contato pelo WhatsApp.`
+              : 'Nenhuma reserva pendente no momento.'}
+        </p>
+      </div>
+    </Link>
+  )
+}
 
 export default function DashboardContent({ userName }: { userName: string }) {
   const hour = new Date().getHours()
@@ -52,6 +123,7 @@ export default function DashboardContent({ userName }: { userName: string }) {
           Funcionalidades
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
+          <PendingPartiesCard />
           {features.map((f) => {
             const Icon = f.icon
             return (

@@ -10,6 +10,7 @@ import {
   PartyPopperIcon,
   Settings2Icon,
   SparklesIcon,
+  TagIcon,
   UsersIcon,
 } from 'lucide-react'
 
@@ -31,9 +32,9 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 
 export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
   const { data: pendingPartiesCount } = useQuery({
-    queryKey: ['admin', 'parties', 'pending-paid-count'],
+    queryKey: ['admin', 'parties', 'pending-count'],
     queryFn: () =>
-      fetch('/api/admin/parties?status=pending&paymentStatus=paid&perPage=1').then(
+      fetch('/api/admin/parties?status=pending&perPage=1').then(
         async (r) => {
           if (!r.ok) throw new Error('failed to fetch pending parties count')
           const json = await r.json()
@@ -53,6 +54,7 @@ export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
       icon: <PartyPopperIcon />,
       badge: pendingPartiesCount,
     },
+    { title: 'Preços e Serviços', url: '/admin/services', icon: <TagIcon /> },
     { title: 'Configurações', url: '/admin/settings', icon: <Settings2Icon /> },
   ]
 

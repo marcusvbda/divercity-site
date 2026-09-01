@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Navbar from '@/components/ui/Navbar'
 import Footer from '@/components/sections/Footer'
 import OrcamentoWizard from '@/components/orcamento/OrcamentoWizard'
+import { OrcamentoNavbarHeader } from '@/components/orcamento/OrcamentoNavbarHeader'
 import { getContentType } from '@/lib/cms'
 
 export const metadata: Metadata = {
@@ -18,7 +19,9 @@ export default async function OrcamentoPage() {
 
   return (
     <>
-      <Navbar navbar={navBarContent} />
+      <Navbar navbar={navBarContent}>
+        <OrcamentoNavbarHeader subtitle="Orçamento e pagamento do salão de festas" />
+      </Navbar>
       <main className="pt-16">
         <OrcamentoWizard />
       </main>

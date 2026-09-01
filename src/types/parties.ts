@@ -28,7 +28,6 @@ export interface ContractTemplate {
 }
 
 export type PartyPaymentOption = "salon_only" | "salon_and_passports";
-export type PartyPaymentStatus = "pending" | "paid" | "failed";
 
 export interface Party {
   id: number;
@@ -46,12 +45,10 @@ export interface Party {
   paymentOption?: PartyPaymentOption | null;
   salonPrice?: string | null;
   passportPackagePrice?: string | null;
+  passportSinglePrice?: string | null;
+  passportSingleCount?: number | null;
   totalPrice?: string | null;
   termsAcceptedAt?: string | null;
-  paymentStatus: PartyPaymentStatus;
-  paidAt?: string | null;
-  stripeCheckoutSessionId?: string | null;
-  stripePaymentIntentId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,4 +80,14 @@ export interface Guest {
   name: string;
   type: GuestType;
   createdAt: string;
+}
+
+export interface Service {
+  id: number;
+  key?: string | null;
+  name: string;
+  weekdayPrice: string;
+  weekendPrice: string;
+  createdAt: string;
+  updatedAt: string;
 }

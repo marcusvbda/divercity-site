@@ -17,6 +17,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ has
   if (contract.status === 'signed') {
     return NextResponse.json({ error: 'Contrato já assinado' }, { status: 400 })
   }
+  if (contract.status === 'cancelled' || contract.party.status === 'cancelled') {
+    return NextResponse.json({ error: 'Esta reserva foi cancelada' }, { status: 400 })
+  }
   if (!contract.party.customer.email) {
     return NextResponse.json({ error: 'Cliente sem e-mail cadastrado' }, { status: 422 })
   }

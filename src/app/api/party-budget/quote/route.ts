@@ -5,6 +5,7 @@ import { PartyPaymentOptionSchema } from "@/lib/schemas/parties";
 export async function GET(req: NextRequest) {
   const dateParam = req.nextUrl.searchParams.get("date");
   const paymentOptionParam = req.nextUrl.searchParams.get("paymentOption");
+  const passportSingleCountParam = req.nextUrl.searchParams.get("passportSingleCount");
 
   if (!dateParam) {
     return NextResponse.json({ error: 'Parâmetro "date" é obrigatório' }, { status: 400 });
@@ -24,17 +25,33 @@ export async function GET(req: NextRequest) {
   }
   const paymentOption = paymentOptionParsed.data;
 
+  const passportSingleCount = passportSingleCountParam ? Number(passportSingleCountParam) : 0;
+  if (!Number.isInteger(passportSingleCount) || passportSingleCount < 0) {
+    return NextResponse.json(
+      { error: 'Parâmetro "passportSingleCount" deve ser um inteiro ≥ 0' },
+      { status: 400 }
+    );
+  }
+
   try {
     const dateEnd = getPartyDateEnd(date);
     const [available, quote] = await Promise.all([
       isSlotAvailable(date, dateEnd),
-      computeQuote({ date, paymentOption }),
+      computeQuote({ date, paymentOption, passportSingleCount }),
     ]);
 
     const breakdown = [
       { label: "Salão (3 horas)", value: quote.salonPrice },
       ...(quote.passportPackagePrice !== null
-        ? [{ label: "10 passaportes", value: quote.passportPackagePrice }]
+        ? [{ label: "1x pacote de 10 passaportes", value: quote.passportPackagePrice }]
+        : []),
+      ...(quote.passportSinglePrice !== null && (quote.passportSingleCount ?? 0) > 0
+        ? [
+            {
+              label: `${quote.passportSingleCount}x passaporte avulso adicional`,
+              value: quote.passportSinglePrice * quote.passportSingleCount!,
+            },
+          ]
         : []),
     ];
 
@@ -42,6 +59,8 @@ export async function GET(req: NextRequest) {
       available,
       salonPrice: quote.salonPrice,
       passportPackagePrice: quote.passportPackagePrice,
+      passportSinglePrice: quote.passportSinglePrice,
+      passportSingleCount: quote.passportSingleCount,
       total: quote.total,
       breakdown,
     });
