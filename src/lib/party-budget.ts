@@ -60,12 +60,14 @@ export async function getPassportPackagePrice(): Promise<number> {
 }
 
 export async function isSlotAvailable(date: Date, dateEnd: Date): Promise<boolean> {
-  const confirmedParties = await prisma.party.findMany({
-    where: { status: "confirmed" },
+  const blockingParties = await prisma.party.findMany({
+    where: {
+      OR: [{ status: "confirmed" }, { status: "pending", paymentStatus: "paid" }],
+    },
     select: { date: true, dateEnd: true },
   });
 
-  const conflict = confirmedParties.some((p) => {
+  const conflict = blockingParties.some((p) => {
     const pStart = new Date(p.date);
     const pEnd = p.dateEnd
       ? new Date(p.dateEnd)

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { CheckCircle2 } from 'lucide-react'
 import Navbar from '@/components/ui/Navbar'
 import Footer from '@/components/sections/Footer'
+import PartyStatusMessage from '@/components/orcamento/PartyStatusMessage'
 import { getContentType } from '@/lib/cms'
 
 export const metadata: Metadata = {
@@ -13,23 +13,17 @@ export const metadata: Metadata = {
 async function PartyMessage({
   searchParams,
 }: {
-  searchParams: Promise<{ party?: string }>
+  searchParams: Promise<{ party?: string; session_id?: string }>
 }) {
-  const { party } = await searchParams
+  const { party, session_id } = await searchParams
 
-  return (
-    <p className="font-body text-lg text-gray-600">
-      {party
-        ? `Recebemos sua reserva #${party}! Em breve entraremos em contato para os próximos passos (confirmação e assinatura do contrato).`
-        : 'Recebemos sua reserva! Em breve entraremos em contato para os próximos passos (confirmação e assinatura do contrato).'}
-    </p>
-  )
+  return <PartyStatusMessage partyId={party} sessionId={session_id} />
 }
 
 export default async function OrcamentoSucessoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ party?: string }>
+  searchParams: Promise<{ party?: string; session_id?: string }>
 }) {
   const [navBarContent, FooterContent] = await Promise.all([
     getContentType('NavBar'),
@@ -43,18 +37,9 @@ export default async function OrcamentoSucessoPage({
         <section className="section-padding bg-gray-50">
           <div className="container-max">
             <div className="mx-auto flex max-w-xl flex-col items-center rounded-2xl bg-white p-8 text-center shadow-sm md:p-12">
-              <div className="bg-brand-lime/10 mb-6 flex h-16 w-16 items-center justify-center rounded-full">
-                <CheckCircle2 size={32} className="text-brand-lime" />
-              </div>
-              <h1 className="font-heading mb-4 text-3xl font-bold text-gray-800 md:text-4xl">
-                Reserva recebida!
-              </h1>
               <Suspense
                 fallback={
-                  <p className="font-body text-lg text-gray-600">
-                    Recebemos sua reserva! Em breve entraremos em contato para os próximos passos
-                    (confirmação e assinatura do contrato).
-                  </p>
+                  <p className="font-body text-lg text-gray-600">Carregando status da sua reserva...</p>
                 }
               >
                 <PartyMessage searchParams={searchParams} />

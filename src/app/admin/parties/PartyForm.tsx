@@ -96,7 +96,8 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
       const newStart = new Date(`${dateStr}T${start}:00.000Z`)
       const newEnd = new Date(`${dateStr}T${end}:00.000Z`)
       const conflict = parties.some(p => {
-        if (p.status !== 'confirmed') return false
+        const isBlocking = p.status === 'confirmed' || (p.status === 'pending' && p.paymentStatus === 'paid')
+        if (!isBlocking) return false
         if (defaultValues?.id && p.id === defaultValues.id) return false
         const pStart = new Date(p.date)
         const pEnd = p.dateEnd ? new Date(p.dateEnd) : new Date(pStart.getTime() + 4 * 60 * 60 * 1000)

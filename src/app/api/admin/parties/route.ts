@@ -43,17 +43,17 @@ export async function POST(req: NextRequest) {
     ? new Date(parsed.data.dateEnd)
     : new Date(newStart.getTime() + 4 * 60 * 60 * 1000)
 
-  const confirmedParties = await prisma.party.findMany({
-    where: { status: 'confirmed' },
+  const blockingParties = await prisma.party.findMany({
+    where: { OR: [{ status: 'confirmed' }, { status: 'pending', paymentStatus: 'paid' }] },
     select: { id: true, date: true, dateEnd: true },
   })
-  const conflict = confirmedParties.some(p => {
+  const conflict = blockingParties.some(p => {
     const pStart = new Date(p.date)
     const pEnd = p.dateEnd ? new Date(p.dateEnd) : new Date(pStart.getTime() + 4 * 60 * 60 * 1000)
     return newStart < pEnd && newEnd > pStart
   })
   if (conflict) {
-    return NextResponse.json({ error: 'Conflito com festa já confirmada neste horário' }, { status: 409 })
+    return NextResponse.json({ error: 'Conflito com festa já confirmada ou já paga neste horário' }, { status: 409 })
   }
 
   const template = await prisma.contractTemplate.findUnique({
