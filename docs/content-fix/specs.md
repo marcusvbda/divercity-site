@@ -1,31 +1,59 @@
 # Content Fix
 
-Este documento reúne correções e ajustes de conteúdo identificados no site.
+Este documento reúne ajustes de conteúdo e comunicação identificados no site do Divercity Park.
 
-**Importante:**
+## IMPORTANTE - Gerenciamento de conteúdo
 
-- Alterar apenas o conteúdo textual.
-- Não modificar layout, estilos ou comportamento dos componentes.
-- Todo o conteúdo deve continuar sendo gerenciado pelo CMS (Strapi).
+Todo conteúdo textual alterado ou criado nesta feature deve ser gerenciado pelo CMS interno já existente no sistema.
 
----
+- NÃO adicionar textos ou conteúdos fixos diretamente no código do frontend.
+- Utilizar a estrutura existente do CMS sempre que possível.
+- Caso algum conteúdo necessário ainda não seja gerenciável pelo CMS, adaptar o CMS para permitir seu gerenciamento.
+- O frontend deve apenas consumir e apresentar o conteúdo fornecido pelo CMS.
 
-## 1. Seção "Alimentação saborosa"
+## 1. Alimentação
 
-### Objetivo
+### Texto atual
 
-Corrigir a descrição da lanchonete para não transmitir a ideia de um restaurante completo.
+"Lanchonete completa"
 
-### Alteração solicitada
+### Alteração
 
-**Texto atual**
+Remover essa descrição, pois ela não representa corretamente o serviço oferecido.
 
-> Lanchonete completa
+Substituir por:
 
-**Substituir por**
+"Opções de bebidas, chopp, petiscos e café."
 
-> Lanchonete com bebidas, chope, petiscos e café, ideal para os pais aguardarem enquanto as crianças brincam.
+## 2. Salão de festas
 
-### Resultado esperado
+Informar claramente:
 
-A seção deve comunicar que existe uma lanchonete com opções de consumo, sem sugerir um restaurante completo.
+"Utilização do salão por até 3 horas."
+
+## 3. Bebidas para festas
+
+Informar:
+
+"Opção de bebidas fornecidas pelo parque, mediante disponibilidade e solicitação antecipada."
+
+## 4. Fotos de aniversário
+
+- Remover imagens que não sejam do próprio Divercity Park.
+- Utilizar somente fotos reais de festas realizadas no parque.
+
+## 5. Botão "Ver preços"
+
+Verificar o direcionamento atual do botão.
+
+O usuário precisa saber claramente se o botão direciona para:
+
+- Preços dos passaportes.
+- Preços das festas.
+
+Caso o mesmo botão esteja sendo utilizado para os dois contextos, separar as ações:
+
+- "Ver preços dos passaportes"
+- "Ver preços das festas"
+
+O texto e o destino de cada botão devem deixar claro o conteúdo que será apresentado.

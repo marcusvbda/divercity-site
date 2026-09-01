@@ -1,55 +1,147 @@
 # Ticket in Advance
 
-Este documento especifica a feature de compra antecipada de ingressos.
+Este documento especifica a compra antecipada de passaportes pelo site e o processo de check-in no Divercity Park.
 
-A feature será dividida em duas frentes principais:
+## Objetivo
 
-## 1. Compra antecipada de ingressos no site
+Permitir que o cliente compre antecipadamente e chegue ao parque com um QR Code para realizar a conferência e entrada, reduzindo a necessidade de atendimento no caixa.
 
-### Objetivo
+## 1. Dados da compra
 
-Permitir que o cliente compre ingressos antecipadamente pelo site.
+Para cada criança, solicitar:
 
-### Escopo inicial
+- Nome.
+- Data de nascimento.
+- Dados do responsável.
+- Telefone.
+- WhatsApp.
+- Tipo de passaporte.
+- Informações sobre acompanhante, quando aplicável.
 
-Nesta etapa será criado o fluxo de compra no frontend do site.
+A data de nascimento é obrigatória.
 
-O cliente deverá:
+## 2. Regras de preço
 
-- Selecionar o ingresso desejado.
-- Informar os dados necessários para a compra.
-- Informar os dados necessários da criança.
-- Realizar o pagamento.
-- Receber uma confirmação da compra.
-- Receber um QR Code relacionado ao ingresso adquirido.
+### Crianças de 0 a 12 meses
 
-### Detalhamento
+50% de desconto.
 
-Os campos, regras de negócio, formas de pagamento, tipos de ingresso e comportamento completo deste fluxo serão detalhados posteriormente.
+### PNE
 
----
+50% de desconto.
 
-## 2. Validação de ingressos no Admin
+### Crianças a partir de 1 ano
 
-### Objetivo
+Valor integral do passaporte.
 
-Permitir que a equipe administrativa valide os ingressos comprados antecipadamente.
+O sistema deverá calcular automaticamente o valor aplicável utilizando a data de nascimento informada.
 
-### Escopo inicial
+## 3. Crianças de 0 a 4 anos
 
-Dentro do painel administrativo deverá existir um fluxo para leitura do QR Code apresentado pelo cliente.
+Uma criança de 0 a 4 anos possui direito a 1 acompanhante gratuito maior de 18 anos.
 
-A partir da leitura, o sistema deverá identificar o ingresso correspondente e informar se ele pode ou não ser utilizado.
+Durante a compra, perguntar se a criança ficará com ou sem acompanhante.
 
-### Fluxo geral
+### Com acompanhante
 
-1. Cliente apresenta o QR Code.
-2. Funcionário realiza a leitura pelo Admin.
-3. Sistema consulta os dados da compra.
-4. Sistema verifica a validade do ingresso.
-5. Admin informa se o ingresso pode ser utilizado.
-6. Caso válido, o ingresso é marcado conforme a regra de utilização que será definida posteriormente.
+- Informar que o acompanhante deve possuir mais de 18 anos.
+- Solicitar os dados necessários do acompanhante.
+- Informar que esse acompanhante está incluído gratuitamente.
 
-### Detalhamento
+### Sem acompanhante
 
-As regras de validação, estados possíveis do ingresso, permissões de acesso, informações apresentadas ao funcionário e comportamento após a validação serão detalhados posteriormente.
+O responsável deverá:
+
+- Ler e aceitar o Termo de Responsabilidade.
+- Informar telefone e WhatsApp.
+- Autorizar contato caso necessário.
+
+O aceite deverá ficar registrado.
+
+O check-in deverá apresentar um alerta indicando que a criança ficará sem acompanhante.
+
+## 4. Acompanhantes adicionais
+
+Permitir adicionar acompanhantes adicionais durante a compra.
+
+Deixar claro que:
+
+- O ingresso de acompanhante não permite utilização dos brinquedos.
+- Para utilizar os brinquedos, o acompanhante deverá adquirir o passaporte integral correspondente.
+
+## 5. Pagamento via Stripe
+
+O pagamento da compra antecipada deverá ser realizado utilizando o Stripe.
+
+O sistema já possui no painel administrativo uma área onde o administrador configura as credenciais do Stripe.
+
+### Regras
+
+- Utilizar exclusivamente as credenciais do Stripe configuradas no Admin.
+- NÃO adicionar credenciais fixas diretamente no código.
+- O fluxo de compra deverá criar um checkout da Stripe com base nos tickets/passaportes selecionados e nos valores calculados pelas regras do sistema.
+- A compra somente deverá ser considerada confirmada após a confirmação do pagamento pelo Stripe.
+- O QR Code somente deverá ser gerado após a confirmação do pagamento.
+
+## 6. Confirmação da compra e QR Code
+
+Após a confirmação do pagamento:
+
+- Gerar o QR Code relacionado à compra.
+- Exibir uma tela de confirmação para o cliente.
+- Exibir o QR Code diretamente nessa tela.
+- Disponibilizar uma opção para baixar/salvar a imagem do QR Code.
+- O cliente também poderá simplesmente tirar um print da tela.
+- Enviar o QR Code para o e-mail informado durante a compra.
+- O e-mail deverá conter as principais informações da compra e as orientações necessárias para utilização do ingresso.
+
+O mesmo QR Code apresentado na tela deverá ser o enviado por e-mail.
+
+## 7. Check-in pelo Admin
+
+O painel administrativo deverá permitir a leitura do QR Code.
+
+Após a leitura, apresentar:
+
+- Dados da criança.
+- Data de nascimento/idade.
+- Tipo de passaporte.
+- Valor pago.
+- Informações do acompanhante.
+- Confirmação de que o acompanhante possui mais de 18 anos, quando aplicável.
+- Existência de Termo de Responsabilidade, quando aplicável.
+- Telefone e WhatsApp do responsável.
+- Alertas específicos daquela compra.
+
+Fluxo:
+
+QR Code → conferência → validação → entrada.
+
+## 8. Avisos no comprovante
+
+Destacar no comprovante:
+
+**IMPORTANTE: APRESENTE UM DOCUMENTO COM FOTO DA CRIANÇA NA ENTRADA DO PARQUE PARA UTILIZAR O PASSAPORTE.**
+
+Para crianças de 0 a 4 anos com acompanhante gratuito, informar também a necessidade de comprovar que o acompanhante possui mais de 18 anos.
+
+Para crianças sem acompanhante, informar que o Termo de Responsabilidade deverá ter sido aceito e que telefone/WhatsApp para contato são obrigatórios.
+
+## Fora do escopo atual
+
+Nesta primeira versão NÃO será criada uma área autenticada para o cliente consultar suas compras.
+
+O acesso do cliente à compra será feito apenas através:
+
+- Da tela de confirmação após o pagamento.
+- Do QR Code exibido nessa tela.
+- Do e-mail enviado após a confirmação da compra.
+
+Também não fazem parte desta implementação:
+
+- Totem de autoatendimento.
+- Retirada automática de pulseira RFID.
+- Controle automático de tempo.
+- Processo automatizado de saída.
+
+Uma área de cliente com histórico de compras poderá ser implementada futuramente.
