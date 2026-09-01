@@ -25,6 +25,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const variables = extractVariables(parsed.data.body)
 
   const template = await prisma.$transaction(async (tx) => {
+    if (parsed.data.isDefault) {
+      await tx.contractTemplate.updateMany({
+        where: { isDefault: true, id: { not: Number(id) } },
+        data: { isDefault: false },
+      })
+    }
+
     const updated = await tx.contractTemplate.update({
       where: { id: Number(id) },
       data: { ...parsed.data, variables },

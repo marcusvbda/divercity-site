@@ -1,16 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import ImageModal from '@/components/ui/ImageModal'
 import CtaButton from '../ui/cta'
+import { scrollTo } from '@/lib/helpers'
 
 type FeatureItem = { id: number; value: string }
 type ImageItem   = { id: number; value: string }
 
 export default function Festas({ partySection }: any) {
   const [selectedImg, setSelectedImg] = useState<string | null>(null)
+  const router = useRouter()
+
+  const goToCta = (href: string) => {
+    if (href.startsWith('/')) router.push(href)
+    else scrollTo(href)
+  }
 
   const badge       = partySection?.Section?.badge?.value       ?? ''
   const title       = partySection?.Section?.title?.value       ?? ''
@@ -67,12 +75,20 @@ export default function Festas({ partySection }: any) {
 
               <div className="flex flex-col gap-4 sm:flex-row">
                 {ctaBudget && (
-                  <CtaButton cta={ctaBudget} className="px-8! py-4! text-lg!">
+                  <CtaButton
+                    onClick={() => goToCta(ctaBudget.href ?? '')}
+                    cta={ctaBudget}
+                    className="px-8! py-4! text-lg!"
+                  >
                     {ctaBudget.label}
                   </CtaButton>
                 )}
                 {ctaPrices && (
-                  <CtaButton cta={ctaPrices} className="px-8! py-4! text-lg!">
+                  <CtaButton
+                    onClick={() => goToCta(ctaPrices.href ?? '')}
+                    cta={ctaPrices}
+                    className="px-8! py-4! text-lg!"
+                  >
                     {ctaPrices.label}
                   </CtaButton>
                 )}

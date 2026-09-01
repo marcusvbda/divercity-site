@@ -1108,7 +1108,7 @@ async function main() {
     ctaTemplateComponent.id,
     [
       { fieldId: ctaLabelField.id, value: 'Faça já o seu orçamento' },
-      { fieldId: ctaHrefField.id, value: '#contato' },
+      { fieldId: ctaHrefField.id, value: '/orcamento' },
       { fieldId: ctaColorField.id, value: '#fefefe' },
       { fieldId: ctaBgColorField.id, value: '#FF4F8A' },
       { fieldId: ctaBorderField.id, value: '' },

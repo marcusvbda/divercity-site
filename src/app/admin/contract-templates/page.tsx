@@ -20,7 +20,17 @@ function isDefault(v: string) {
 }
 
 const columns: Column<ContractTemplate>[] = [
-  { key: 'name', header: 'Nome', sortable: true, render: r => <span className="font-medium">{r.name}</span> },
+  {
+    key: 'name',
+    header: 'Nome',
+    sortable: true,
+    render: r => (
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{r.name}</span>
+        {r.isDefault && <Badge>Padrão</Badge>}
+      </div>
+    ),
+  },
   {
     key: 'variables',
     header: 'Variáveis',

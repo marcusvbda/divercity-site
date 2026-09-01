@@ -22,9 +22,13 @@ export interface ContractTemplate {
   name: string;
   body: string;
   variables: string[];
+  isDefault: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+export type PartyPaymentOption = "salon_only" | "salon_and_passports";
+export type PartyPaymentStatus = "pending" | "paid" | "failed";
 
 export interface Party {
   id: number;
@@ -36,6 +40,18 @@ export interface Party {
   dateEnd?: string | null;
   status: PartyStatus;
   contract?: Contract | null;
+  childrenCount?: number | null;
+  adultsCount?: number | null;
+  totalParticipants?: number | null;
+  paymentOption?: PartyPaymentOption | null;
+  salonPrice?: string | null;
+  passportPackagePrice?: string | null;
+  totalPrice?: string | null;
+  termsAcceptedAt?: string | null;
+  paymentStatus: PartyPaymentStatus;
+  paidAt?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

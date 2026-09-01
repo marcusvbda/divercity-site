@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -23,6 +24,7 @@ type Props = {
 export function TemplateForm({ defaultValues, onSubmit, isLoading }: Props) {
   const [name, setName] = useState(defaultValues?.name ?? '')
   const [body, setBody] = useState(defaultValues?.body ?? '')
+  const [isDefault, setIsDefault] = useState(defaultValues?.isDefault ?? false)
   const [errors, setErrors] = useState<{ name?: string; body?: string }>({})
 
   const { data: contractVars, isLoading: varsLoading } = useQuery<ContractVariables>({
@@ -41,7 +43,7 @@ export function TemplateForm({ defaultValues, onSubmit, isLoading }: Props) {
       return
     }
     setErrors({})
-    onSubmit({ name: name.trim(), body })
+    onSubmit({ name: name.trim(), body, isDefault })
   }
 
   function copyVariable(variable: string) {
@@ -63,6 +65,11 @@ export function TemplateForm({ defaultValues, onSubmit, isLoading }: Props) {
         />
         {errors.name && <p className="text-destructive text-xs">{errors.name}</p>}
       </div>
+
+      <label className="flex w-fit items-center gap-2 text-sm">
+        <Checkbox checked={isDefault} onCheckedChange={(checked) => setIsDefault(checked === true)} />
+        Definir como modelo padrão (usado no orçamento/reserva pelo site)
+      </label>
 
       <div className="rounded-lg border p-4">
         <p className="mb-1 text-sm font-semibold">Variáveis padrão disponíveis</p>

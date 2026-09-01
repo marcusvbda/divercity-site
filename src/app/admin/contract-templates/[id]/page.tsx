@@ -54,7 +54,11 @@ export default function EditTemplatePage() {
         <p className="text-muted-foreground text-sm">{template?.name}</p>
       </div>
       <TemplateForm
-        defaultValues={template ? { name: template.name, body: template.body } : undefined}
+        defaultValues={
+          template
+            ? { name: template.name, body: template.body, isDefault: template.isDefault }
+            : undefined
+        }
         onSubmit={mutation.mutate}
         isLoading={mutation.isPending}
       />
