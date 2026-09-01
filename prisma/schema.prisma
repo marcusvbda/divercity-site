@@ -181,6 +181,7 @@ model Contract {
   clientToken         String?        @unique
   clientLinkOpen      Boolean        @default(false)
   docusignEnvelopeId  String?
+  sentAt              DateTime?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

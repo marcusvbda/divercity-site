@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ClipboardCopyIcon, PrinterIcon, LinkIcon } from 'lucide-react'
+import { ClipboardCopyIcon, PrinterIcon, LinkIcon, MessageCircleIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -124,6 +124,30 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
     onError: () => toast.error('Erro ao gerar link'),
   })
 
+  const sendWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      let token = contract?.clientToken
+      if (!token) {
+        const result = await fetch(`/api/admin/contracts/${contract?.id}/generate-token`, {
+          method: 'POST',
+        }).then(r => r.json())
+        token = result.clientToken
+      }
+      await fetch(`/api/admin/contracts/${contract?.id}/mark-sent`, { method: 'POST' })
+      return token as string
+    },
+    onSuccess: (token) => {
+      const phoneDigits = party?.customer?.phone?.replace(/\D/g, '') ?? ''
+      const url = `${window.location.origin}/c/${token}`
+      const message = `Olá ${party?.customer?.name ?? ''}! Segue o link para revisar e assinar o contrato da sua festa no Divercity Park: ${url}`
+      const waUrl = `https://api.whatsapp.com/send/?phone=55${phoneDigits}&text=${encodeURIComponent(message)}`
+      window.open(waUrl, '_blank', 'noopener,noreferrer')
+      queryClient.invalidateQueries({ queryKey: ['admin', 'parties', partyId] })
+      toast.success('Link aberto no WhatsApp')
+    },
+    onError: () => toast.error('Erro ao preparar envio'),
+  })
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
@@ -178,11 +202,29 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
 
       <div className="flex flex-col gap-6 print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge variant={CONTRACT_STATUS_VARIANT[contract.status]}>
-            {CONTRACT_STATUS_LABELS[contract.status]}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={CONTRACT_STATUS_VARIANT[contract.status]}>
+              {CONTRACT_STATUS_LABELS[contract.status]}
+            </Badge>
+            {contract.sentAt && (
+              <span className="text-muted-foreground text-xs">
+                Enviado em {new Date(contract.sentAt).toLocaleString('pt-BR')}
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => sendWhatsAppMutation.mutate()}
+              disabled={sendWhatsAppMutation.isPending || !party?.customer?.phone}
+              title={!party?.customer?.phone ? 'Cliente sem telefone cadastrado' : undefined}
+            >
+              <MessageCircleIcon className="size-4" />
+              Enviar via WhatsApp
+            </Button>
+
             <Button
               variant="outline"
               size="sm"

@@ -21,7 +21,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ has
   }
 
   const guests = contract.party.guests
-  return NextResponse.json({ guests, total: guests.length, limit: GUEST_LIMIT })
+  return NextResponse.json({
+    guests,
+    total: guests.length,
+    limit: GUEST_LIMIT,
+    quotedTotalParticipants: contract.party.totalParticipants,
+  })
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ hash: string }> }) {

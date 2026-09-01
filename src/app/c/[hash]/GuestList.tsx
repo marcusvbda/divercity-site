@@ -9,7 +9,12 @@ import type { Guest, GuestType } from '@/types/parties'
 
 type Props = { hash: string }
 
-type GuestsResponse = { guests: Guest[]; total: number; limit: number }
+type GuestsResponse = {
+  guests: Guest[]
+  total: number
+  limit: number
+  quotedTotalParticipants: number | null
+}
 
 export function GuestList({ hash }: Props) {
   const queryClient = useQueryClient()
@@ -74,7 +79,7 @@ export function GuestList({ hash }: Props) {
 
   if (!data) return null
 
-  const { guests, total, limit } = data
+  const { guests, total, limit, quotedTotalParticipants } = data
   const isFull = total >= limit
   const isNearLimit = total >= limit - 5
 
@@ -93,7 +98,8 @@ export function GuestList({ hash }: Props) {
     <div className="mt-8 rounded-lg border p-6">
       <h2 className="text-lg font-bold">Lista de Convidados</h2>
       <p className="text-muted-foreground mt-1 text-sm">
-        Cadastre aqui as crianças e adultos que participarão da festa.
+        Cadastre aqui <strong>todos</strong> os participantes da festa, incluindo o(a)
+        aniversariante — esta lista representa o total de pessoas que estarão presentes.
       </p>
 
       <div
@@ -106,6 +112,13 @@ export function GuestList({ hash }: Props) {
         <p className="font-semibold">
           Total: {total} / {limit} participantes
         </p>
+        {quotedTotalParticipants != null && (
+          <p className="mt-0.5 text-xs">
+            Sua reserva foi feita para {quotedTotalParticipants} participante
+            {quotedTotalParticipants === 1 ? '' : 's'} — use este número como referência ao
+            montar a lista.
+          </p>
+        )}
         <p className="mt-0.5 text-xs">
           Crianças utilizarão os brinquedos e precisarão de passaporte. Adultos participarão da
           festa, mas não utilizarão os brinquedos.

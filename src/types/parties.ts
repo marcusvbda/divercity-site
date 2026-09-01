@@ -65,6 +65,7 @@ export interface Contract {
   status: ContractStatus;
   clientToken?: string | null;
   clientLinkOpen: boolean;
+  sentAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
