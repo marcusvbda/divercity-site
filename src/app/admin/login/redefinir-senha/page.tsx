@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -38,7 +39,9 @@ export default async function ResetPasswordPage({
             </CardContent>
           </Card>
         ) : (
-          <ResetPasswordForm />
+          <Suspense>
+            <ResetPasswordForm />
+          </Suspense>
         )}
       </div>
     </div>

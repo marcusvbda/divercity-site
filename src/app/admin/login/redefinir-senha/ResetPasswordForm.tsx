@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -25,6 +25,7 @@ type Props = React.ComponentProps<"div">;
 
 export default function ResetPasswordForm({ className, ...props }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [done, setDone] = useState(false);
   const [exchangeError, setExchangeError] = useState<string | null>(null);
   const [exchangeOk, setExchangeOk] = useState(false);
@@ -32,17 +33,15 @@ export default function ResetPasswordForm({ className, ...props }: Props) {
   useEffect(() => {
     let active = true;
 
-    const hash = new URLSearchParams(window.location.hash.slice(1));
-    const access_token = hash.get("access_token");
-    const refresh_token = hash.get("refresh_token");
+    const code = searchParams.get("code");
 
-    if (!access_token || !refresh_token) {
+    if (!code) {
       setExchangeError("Link inválido ou expirado.");
       return;
     }
 
     supabaseBrowser.auth
-      .setSession({ access_token, refresh_token })
+      .exchangeCodeForSession(code)
       .then(({ error }) => {
         if (!active) return;
         if (error) setExchangeError("Link inválido ou expirado.");
@@ -53,7 +52,7 @@ export default function ResetPasswordForm({ className, ...props }: Props) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [searchParams]);
 
   const {
     register,
