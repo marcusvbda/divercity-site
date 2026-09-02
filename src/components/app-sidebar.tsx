@@ -1,16 +1,18 @@
 'use client'
 
 import * as React from 'react'
-import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
 import {
   BlocksIcon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
   PartyPopperIcon,
+  QrCodeIcon,
   Settings2Icon,
   SparklesIcon,
   TagIcon,
+  TicketIcon,
   UsersIcon,
 } from 'lucide-react'
 
@@ -31,6 +33,9 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 }
 
 export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
+  const { data: session } = useSession()
+  const isOperator = session?.user?.role === 'operator'
+
   const { data: pendingPartiesCount } = useQuery({
     queryKey: ['admin', 'parties', 'pending-count'],
     queryFn: () =>
@@ -41,9 +46,15 @@ export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
           return json.pagination.total as number
         },
       ),
+    enabled: !isOperator,
   })
 
-  const navMain = [
+  const operatorNavMain = [
+    { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
+    { title: 'Operação', url: '/admin/operacao', icon: <QrCodeIcon /> },
+  ]
+
+  const adminNavMain = [
     { title: 'Ver site', url: '/', icon: <ExternalLinkIcon />, target: '_blank' },
     { title: 'Dashboard', url: '/admin', icon: <LayoutDashboardIcon /> },
     { title: 'CMS', url: '/admin/cms', icon: <BlocksIcon /> },
@@ -55,8 +66,12 @@ export function AppSidebar({ logoUrl, ...props }: AppSidebarProps) {
       badge: pendingPartiesCount,
     },
     { title: 'Preços e Serviços', url: '/admin/services', icon: <TagIcon /> },
+    { title: 'Passaportes', url: '/admin/passport-types', icon: <TicketIcon /> },
+    { title: 'Operação', url: '/admin/operacao', icon: <QrCodeIcon /> },
     { title: 'Configurações', url: '/admin/settings', icon: <Settings2Icon /> },
   ]
+
+  const navMain = isOperator ? operatorNavMain : adminNavMain
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

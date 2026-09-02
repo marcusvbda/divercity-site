@@ -1,5 +1,6 @@
 import "next-auth";
 import "next-auth/jwt";
+import type { UserRole } from "@/generated/prisma/client";
 
 declare module "next-auth" {
   interface Session {
@@ -7,6 +8,7 @@ declare module "next-auth" {
       id: string;
       username: string;
       email: string;
+      role: UserRole;
     };
     error?: string;
   }
@@ -14,6 +16,7 @@ declare module "next-auth" {
   interface User {
     supabaseAccessToken: string;
     username: string;
+    role: UserRole;
   }
 }
 
@@ -23,6 +26,7 @@ declare module "next-auth/jwt" {
     id: string;
     username: string;
     email: string;
+    role: UserRole;
     error?: string;
   }
 }

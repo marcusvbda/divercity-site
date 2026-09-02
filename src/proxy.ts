@@ -1,14 +1,30 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 
+// Rotas do admin que a role `operator` pode acessar. Qualquer outra rota
+// sob /admin é restrita à role `admin` (CMS, preços, clientes, configurações etc).
+const OPERATOR_ALLOWED_PREFIXES = ['/admin/login', '/admin/operacao']
+
+function isOperatorAllowed(pathname: string) {
+  return OPERATOR_ALLOWED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + '/')
+  )
+}
+
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
+    const token = req.nextauth.token
     const isLoginPage = pathname === '/admin/login'
-    const isAuthenticated = !!req.nextauth.token && !req.nextauth.token.error
+    const isAuthenticated = !!token && !token.error
 
     if (isLoginPage && isAuthenticated) {
-      return NextResponse.redirect(new URL('/admin', req.url))
+      const destination = token?.role === 'operator' ? '/admin/operacao' : '/admin'
+      return NextResponse.redirect(new URL(destination, req.url))
+    }
+
+    if (isAuthenticated && token?.role === 'operator' && !isOperatorAllowed(pathname)) {
+      return NextResponse.redirect(new URL('/admin/operacao', req.url))
     }
 
     return NextResponse.next()

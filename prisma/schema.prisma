@@ -199,3 +199,125 @@ model Service {
 
   @@map("services")
 }
+
+enum UserRole {
+  admin
+  operator
+}
+
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  role      UserRole @default(operator)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  checkedInOrders  TicketOrder[] @relation("CheckedInBy")
+  checkedOutOrders TicketOrder[] @relation("CheckedOutBy")
+
+  @@map("users")
+}
+
+enum TicketOrderStatus {
+  pending_payment
+  paid
+  payment_failed
+  cancelled
+  checked_in
+  checked_out
+}
+
+model PassportType {
+  id                    String   @id @default(cuid())
+  name                  String
+  durationMinutes       Int
+  weekdayChildPrice     Decimal  @db.Decimal(10, 2)
+  weekendChildPrice     Decimal  @db.Decimal(10, 2)
+  weekdayCompanionPrice Decimal  @db.Decimal(10, 2)
+  weekendCompanionPrice Decimal  @db.Decimal(10, 2)
+  active                Boolean  @default(true)
+  sort                  Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  ticketChildren   TicketChild[]
+  ticketCompanions TicketCompanion[]
+
+  @@map("passport_types")
+}
+
+model TicketOrder {
+  id        String            @id @default(cuid())
+  shortCode String            @unique
+  status    TicketOrderStatus @default(pending_payment)
+
+  guardianName     String
+  guardianEmail    String
+  guardianPhone    String
+  guardianWhatsapp String
+
+  totalAmount Decimal @db.Decimal(10, 2)
+
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?
+  paidAt                  DateTime?
+
+  contractedDurationMinutes Int?
+  checkedInAt               DateTime?
+  checkedInById             String?
+  checkedInBy               User?     @relation("CheckedInBy", fields: [checkedInById], references: [id])
+  checkedOutAt              DateTime?
+  checkedOutById            String?
+  checkedOutBy              User?     @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
+  overtimeMinutes           Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  children   TicketChild[]
+  companions TicketCompanion[]
+
+  @@map("ticket_orders")
+}
+
+model TicketChild {
+  id             String       @id @default(cuid())
+  orderId        String
+  order          TicketOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name           String
+  birthDate      DateTime
+  passportTypeId String
+  passportType   PassportType @relation(fields: [passportTypeId], references: [id])
+  isPNE          Boolean      @default(false)
+  unitPrice      Decimal      @db.Decimal(10, 2)
+
+  hasCompanion                 Boolean?
+  unaccompaniedTermsAcceptedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  companion TicketCompanion?
+
+  @@map("ticket_children")
+}
+
+model TicketCompanion {
+  id      String      @id @default(cuid())
+  orderId String
+  order   TicketOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name    String
+  phone   String?
+
+  isFree        Boolean      @default(false)
+  linkedChildId String?      @unique
+  linkedChild   TicketChild? @relation(fields: [linkedChildId], references: [id])
+
+  passportTypeId String?
+  passportType   PassportType? @relation(fields: [passportTypeId], references: [id])
+  unitPrice      Decimal       @db.Decimal(10, 2) @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@map("ticket_companions")
+}

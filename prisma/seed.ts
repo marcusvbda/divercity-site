@@ -5,10 +5,104 @@ dotenv.config()
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../src/generated/prisma/client'
+import { createClient } from '@supabase/supabase-js'
 
 const pool = new Pool({ connectionString: process.env.DIRECT_URL, max: 1 })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
+
+/**
+ * Cria (ou garante a role de) um usuário de desenvolvimento/testes no Supabase Auth + Prisma.
+ * Credenciais vêm de env vars — nunca hardcoded. Se as env vars não estiverem
+ * definidas, pula silenciosamente (não bloqueia o resto do seed).
+ */
+async function seedDevUser({
+  role,
+  emailEnv,
+  passwordEnv,
+  nameEnv,
+}: {
+  role: 'admin' | 'operator'
+  emailEnv: string
+  passwordEnv: string
+  nameEnv: string
+}) {
+  const email = process.env[emailEnv]
+  const password = process.env[passwordEnv]
+  const name = process.env[nameEnv] ?? role
+
+  if (!email || !password) {
+    console.log(`- Usuário ${role} de dev não criado (defina ${emailEnv} e ${passwordEnv} no .env.local)`)
+    return
+  }
+
+  const rawUrl = process.env.SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!rawUrl || !serviceRoleKey) {
+    console.log(`- Usuário ${role} de dev não criado (defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY)`)
+    return
+  }
+
+  const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '')
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  const { data: existingList } = await supabaseAdmin.auth.admin.listUsers()
+  let supabaseUser = existingList?.users.find((u) => u.email === email)
+
+  if (!supabaseUser) {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    })
+    if (error || !data.user) {
+      console.error(`Erro ao criar usuário ${role} (${email}):`, error?.message)
+      return
+    }
+    supabaseUser = data.user
+  } else {
+    // Mantém a senha do usuário de dev/teste sincronizada com o .env.local a cada seed.
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(supabaseUser.id, { password })
+    if (error) {
+      console.error(`Erro ao sincronizar senha do usuário ${role} (${email}):`, error.message)
+    }
+  }
+
+  await prisma.user.upsert({
+    where: { id: supabaseUser.id },
+    update: { role },
+    create: { id: supabaseUser.id, email, name, role },
+  })
+
+  console.log(`- Usuário ${role} de dev pronto: ${email}`)
+}
+
+/**
+ * Popula as credenciais do Stripe na tabela `Setting` a partir do .env.local, para
+ * facilitar o setup local. O app em runtime SEMPRE lê do banco (`src/lib/stripe.ts`),
+ * nunca de env var — isto é só um atalho de seed, não uma fonte alternativa de leitura.
+ */
+async function seedStripeSettings() {
+  const entries: Array<[string, string | undefined]> = [
+    ['stripe_secret_key', process.env.SEED_STRIPE_SECRET_KEY],
+    ['stripe_publishable_key', process.env.SEED_STRIPE_PUBLISHABLE_KEY],
+    ['stripe_webhook_secret', process.env.SEED_STRIPE_WEBHOOK_SECRET],
+  ]
+
+  const toSeed = entries.filter((entry): entry is [string, string] => !!entry[1])
+  if (toSeed.length === 0) {
+    console.log('- Credenciais do Stripe não seedadas (defina SEED_STRIPE_* no .env.local)')
+    return
+  }
+
+  for (const [key, value] of toSeed) {
+    await prisma.setting.upsert({ where: { key }, update: { value }, create: { key, value } })
+  }
+  console.log(`- Credenciais do Stripe seedadas em Setting: ${toSeed.map(([k]) => k).join(', ')}`)
+}
 
 type SimpleField = { name: string; type?: 'simple'; value: string }
 type MultipleField = { name: string; type: 'multiple'; value: string[] }
@@ -1567,6 +1661,36 @@ async function main() {
       })
     }
   }
+
+  // Migra os valores já usados no mock de compra antecipada (CMS AdvancePurchaseSection/Tiers)
+  // para o novo model transacional PassportType — mesmos valores reais, não inventados.
+  const passportTypesData = [
+    { name: '30 minutos', durationMinutes: 30, weekdayChildPrice: '45', weekendChildPrice: '50', weekdayCompanionPrice: '10', weekendCompanionPrice: '10', sort: 0 },
+    { name: '1 Hora', durationMinutes: 60, weekdayChildPrice: '55', weekendChildPrice: '65', weekdayCompanionPrice: '15', weekendCompanionPrice: '15', sort: 1 },
+    { name: '2 Horas', durationMinutes: 120, weekdayChildPrice: '70', weekendChildPrice: '80', weekdayCompanionPrice: '20', weekendCompanionPrice: '20', sort: 2 },
+    { name: '3 Horas', durationMinutes: 180, weekdayChildPrice: '80', weekendChildPrice: '100', weekdayCompanionPrice: '30', weekendCompanionPrice: '30', sort: 3 },
+  ]
+  for (const data of passportTypesData) {
+    const existing = await prisma.passportType.findFirst({ where: { name: data.name } })
+    if (!existing) {
+      await prisma.passportType.create({ data })
+      console.log(`- PassportType criado: ${data.name}`)
+    }
+  }
+
+  await seedDevUser({
+    role: 'operator',
+    emailEnv: 'SEED_OPERATOR_EMAIL',
+    passwordEnv: 'SEED_OPERATOR_PASSWORD',
+    nameEnv: 'SEED_OPERATOR_NAME',
+  })
+  await seedDevUser({
+    role: 'admin',
+    emailEnv: 'SEED_ADMIN_EMAIL',
+    passwordEnv: 'SEED_ADMIN_PASSWORD',
+    nameEnv: 'SEED_ADMIN_NAME',
+  })
+  await seedStripeSettings()
 
   console.log('Seed completo')
 }
