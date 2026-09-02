@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { connection } from 'next/server'
 import { ClockIcon, LogInIcon, LogOutIcon, ScanLineIcon, TicketIcon } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ function startOfToday() {
 }
 
 async function getOverview() {
+  await connection()
   const since = startOfToday()
 
   const [currentlyInPark, awaitingEntry, checkedInToday, checkedOutToday] = await Promise.all([
