@@ -7,7 +7,6 @@ import { ScanLineIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AdminDataTable } from '@/components/ui/admin-data-table'
-import { TicketQrPopover } from '@/components/operacao/TicketQrPopover'
 import type { TicketOrderSummary, TicketOrderStatus } from '@/types/tickets'
 import type { Column } from '@/components/ui/admin-data-table'
 import { formatDuration } from '../validar/[shortCode]/format'
@@ -133,11 +132,6 @@ export default function IngressosPage() {
         ]}
         actions={(order) => (
           <div className="flex items-center gap-1">
-            {order.status === 'paid' || order.status === 'checked_in' ? (
-              <TicketQrPopover shortCode={order.shortCode} />
-            ) : (
-              <span className="size-8" aria-hidden />
-            )}
             <Button
               variant="ghost"
               size="icon"
