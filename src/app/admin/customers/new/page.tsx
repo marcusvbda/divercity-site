@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { CustomerForm } from '../CustomerForm'
 import type { CustomerInput } from '@/lib/schemas/parties'
+import { parseCustomerResponse } from '@/lib/customer-errors'
 
 export default function NewCustomerPage() {
   const router = useRouter()
@@ -15,7 +16,7 @@ export default function NewCustomerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      }).then(r => r.json()),
+      }).then(parseCustomerResponse),
     onSuccess: (result) => {
       if (result.id) {
         toast.success('Cliente criado com sucesso')
@@ -24,7 +25,7 @@ export default function NewCustomerPage() {
         toast.error('Erro ao criar cliente')
       }
     },
-    onError: () => toast.error('Erro ao criar cliente'),
+    onError: (err: Error) => toast.error(err.message),
   })
 
   return (

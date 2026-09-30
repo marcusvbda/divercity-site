@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CustomerForm } from '../CustomerForm'
 import type { Customer } from '@/types/parties'
 import type { CustomerInput } from '@/lib/schemas/parties'
+import { parseCustomerResponse } from '@/lib/customer-errors'
 
 export default function EditCustomerPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,7 +25,7 @@ export default function EditCustomerPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      }).then(r => r.json()),
+      }).then(parseCustomerResponse),
     onSuccess: (result) => {
       if (result.id) {
         queryClient.invalidateQueries({ queryKey: ['admin', 'customers'] })
@@ -34,7 +35,7 @@ export default function EditCustomerPage() {
         toast.error('Erro ao atualizar cliente')
       }
     },
-    onError: () => toast.error('Erro ao atualizar cliente'),
+    onError: (err: Error) => toast.error(err.message),
   })
 
   if (isLoading) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { CustomerSchema } from '@/lib/schemas/parties'
+import { customerErrorResponse } from '@/lib/customer-errors'
 
 export async function GET(req: NextRequest) {
   const page = Number(req.nextUrl.searchParams.get('page') ?? '1')
@@ -43,6 +44,10 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
-  const customer = await prisma.customer.create({ data: parsed.data })
-  return NextResponse.json(customer, { status: 201 })
+  try {
+    const customer = await prisma.customer.create({ data: parsed.data })
+    return NextResponse.json(customer, { status: 201 })
+  } catch (err) {
+    return customerErrorResponse(err)
+  }
 }
