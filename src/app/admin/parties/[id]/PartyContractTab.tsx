@@ -31,6 +31,14 @@ const CONTRACT_STATUS_VARIANT: Record<ContractStatus, 'default' | 'secondary' | 
   cancelled: 'destructive',
 }
 
+function handleGeneratePdf(contract: { id: number; docusignEnvelopeId?: string | null }) {
+  if (contract.docusignEnvelopeId) {
+    window.open(`/api/admin/contracts/${contract.id}/pdf`, '_blank')
+  } else {
+    window.print()
+  }
+}
+
 function VariablesEditor({
   contractId,
   variables,
@@ -245,7 +253,7 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
               Copiar link
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Button variant="outline" size="sm" onClick={() => handleGeneratePdf(contract)}>
               <PrinterIcon className="size-4" />
               Gerar PDF
             </Button>

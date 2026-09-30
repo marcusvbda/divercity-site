@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         checkedInAt: true,
         checkedOutAt: true,
+        contractedDurationMinutes: true,
         _count: { select: { children: true } },
       },
     }),
@@ -88,6 +89,7 @@ export async function GET(req: NextRequest) {
       createdAt: o.createdAt.toISOString(),
       checkedInAt: o.checkedInAt?.toISOString() ?? null,
       checkedOutAt: o.checkedOutAt?.toISOString() ?? null,
+      contractedDurationMinutes: o.contractedDurationMinutes,
     })),
     pagination: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
   });

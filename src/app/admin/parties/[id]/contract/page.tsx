@@ -68,7 +68,11 @@ export default function PartyContractPage() {
   })
 
   function handlePrint() {
-    window.print()
+    if (contract?.docusignEnvelopeId) {
+      window.open(`/api/admin/contracts/${contract.id}/pdf`, '_blank')
+    } else {
+      window.print()
+    }
   }
 
   if (isLoading) {

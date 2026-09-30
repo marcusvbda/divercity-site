@@ -123,3 +123,11 @@ export async function getEnvelopeStatus(envelopeId: string): Promise<string> {
   const envelope = await envelopesApi.getEnvelope(process.env.DOCUSIGN_ACCOUNT_ID!, envelopeId)
   return envelope.status ?? 'unknown'
 }
+
+export async function getEnvelopePdf(envelopeId: string): Promise<Buffer> {
+  const { EnvelopesApi } = ds()
+  const client = await getDocuSignClient()
+  const envelopesApi = new EnvelopesApi(client)
+  const pdf = await envelopesApi.getDocument(process.env.DOCUSIGN_ACCOUNT_ID!, envelopeId, 'combined')
+  return Buffer.from(pdf, 'binary')
+}

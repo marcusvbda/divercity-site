@@ -57,6 +57,7 @@ type AdminDataTableProps<T extends { id: number | string }> = {
   columns: Column<T>[]
   filters?: FilterConfig[]
   actions?: (row: T) => React.ReactNode
+  onRowClick?: (row: T) => void
   defaultPerPage?: number
 }
 
@@ -66,6 +67,7 @@ export function AdminDataTable<T extends { id: number | string }>({
   columns,
   filters,
   actions,
+  onRowClick,
   defaultPerPage = 15,
 }: AdminDataTableProps<T>) {
   const searchParams = useSearchParams()
@@ -239,14 +241,18 @@ export function AdminDataTable<T extends { id: number | string }>({
               </TableRow>
             ) : (
               rows.map(row => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  className={onRowClick ? 'cursor-pointer' : undefined}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                >
                   {columns.map(col => (
                     <TableCell key={col.key} className={col.className}>
                       {col.render(row)}
                     </TableCell>
                   ))}
                   {actions && (
-                    <TableCell>
+                    <TableCell onClick={onRowClick ? e => e.stopPropagation() : undefined}>
                       {actions(row)}
                     </TableCell>
                   )}

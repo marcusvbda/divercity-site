@@ -23,6 +23,17 @@ export async function POST(req: NextRequest) {
     throw err;
   }
 
+  let stripe;
+  try {
+    stripe = await getStripeClient();
+  } catch (err) {
+    console.error("[tickets/checkout] Stripe não configurado:", err);
+    return NextResponse.json(
+      { error: "Pagamento indisponível no momento. Tente novamente mais tarde." },
+      { status: 503 }
+    );
+  }
+
   const shortCode = await generateUniqueShortCode();
   const { guardianName, guardianEmail, guardianPhone, guardianWhatsapp } = parsed.data;
 
@@ -75,17 +86,6 @@ export async function POST(req: NextRequest) {
 
     return created;
   });
-
-  let stripe;
-  try {
-    stripe = await getStripeClient();
-  } catch (err) {
-    console.error("[tickets/checkout] Stripe não configurado:", err);
-    return NextResponse.json(
-      { error: "Pagamento indisponível no momento. Tente novamente mais tarde." },
-      { status: 400 }
-    );
-  }
 
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

@@ -62,6 +62,7 @@ export interface Contract {
   status: ContractStatus;
   clientToken?: string | null;
   clientLinkOpen: boolean;
+  docusignEnvelopeId?: string | null;
   sentAt?: string | null;
   createdAt: string;
   updatedAt: string;

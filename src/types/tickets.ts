@@ -31,4 +31,5 @@ export interface TicketOrderSummary {
   createdAt: string;
   checkedInAt: string | null;
   checkedOutAt: string | null;
+  contractedDurationMinutes: number | null;
 }

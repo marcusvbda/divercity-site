@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ScanLineIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +10,7 @@ import { AdminDataTable } from '@/components/ui/admin-data-table'
 import { TicketQrPopover } from '@/components/operacao/TicketQrPopover'
 import type { TicketOrderSummary, TicketOrderStatus } from '@/types/tickets'
 import type { Column } from '@/components/ui/admin-data-table'
+import { formatDuration } from '../validar/[shortCode]/format'
 
 const STATUS_LABEL: Record<TicketOrderStatus, string> = {
   pending_payment: 'Aguardando pagamento',
@@ -35,6 +38,32 @@ function StatusBadge({ status }: { status: TicketOrderStatus }) {
   return <Badge variant="destructive">{label}</Badge>
 }
 
+function ElapsedTime({ order }: { order: TicketOrderSummary }) {
+  const [now, setNow] = useState(() => Date.now())
+  const running = order.status === 'checked_in'
+
+  useEffect(() => {
+    if (!running) return
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [running])
+
+  if (!order.checkedInAt) return <span>—</span>
+
+  const startMs = new Date(order.checkedInAt).getTime()
+  const endMs = order.checkedOutAt ? new Date(order.checkedOutAt).getTime() : now
+  const elapsed = Math.max(0, Math.floor((endMs - startMs) / 1000))
+  const contractedSeconds = (order.contractedDurationMinutes ?? 0) * 60
+  const overtime = contractedSeconds > 0 ? Math.max(0, elapsed - contractedSeconds) : 0
+
+  return (
+    <div className={`flex flex-col font-mono tabular-nums ${overtime > 0 ? 'font-semibold text-red-600' : ''}`}>
+      <span>{formatDuration(elapsed)}</span>
+      {overtime > 0 && <span className="text-xs">+{formatDuration(overtime)} extra</span>}
+    </div>
+  )
+}
+
 const columns: Column<TicketOrderSummary>[] = [
   {
     key: 'shortCode',
@@ -56,11 +85,25 @@ const columns: Column<TicketOrderSummary>[] = [
   { key: 'totalAmount', header: 'Valor', sortable: true, render: (r) => currency(r.totalAmount) },
   { key: 'status', header: 'Status', sortable: true, render: (r) => <StatusBadge status={r.status} /> },
   { key: 'checkedInAt', header: 'Entrada', render: (r) => formatDateTime(r.checkedInAt) },
-  { key: 'checkedOutAt', header: 'Saída', render: (r) => formatDateTime(r.checkedOutAt) },
+  { key: 'elapsed', header: 'Tempo', render: (r) => <ElapsedTime order={r} /> },
+  {
+    key: 'checkedOutAt',
+    header: 'Saída',
+    render: (r) => {
+      if (r.checkedOutAt) return formatDateTime(r.checkedOutAt)
+      if (r.checkedInAt && r.contractedDurationMinutes != null) {
+        const plannedEnd = new Date(new Date(r.checkedInAt).getTime() + r.contractedDurationMinutes * 60000)
+        return <span className="text-muted-foreground" title="Saída prevista">{formatDateTime(plannedEnd.toISOString())}</span>
+      }
+      return '—'
+    },
+  },
   { key: 'createdAt', header: 'Comprado em', sortable: true, render: (r) => formatDateTime(r.createdAt) },
 ]
 
 export default function IngressosPage() {
+  const router = useRouter()
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
@@ -75,6 +118,7 @@ export default function IngressosPage() {
         queryKey={['operacao', 'ingressos']}
         endpoint="/api/tickets/operate"
         columns={columns}
+        onRowClick={(order) => router.push(`/admin/operacao/validar/${order.shortCode}`)}
         filters={[
           { key: 'search', placeholder: 'Buscar por nome, telefone, e-mail ou código...', type: 'search' },
           {
@@ -89,7 +133,11 @@ export default function IngressosPage() {
         ]}
         actions={(order) => (
           <div className="flex items-center gap-1">
-            <TicketQrPopover shortCode={order.shortCode} />
+            {order.status === 'paid' || order.status === 'checked_in' ? (
+              <TicketQrPopover shortCode={order.shortCode} />
+            ) : (
+              <span className="size-8" aria-hidden />
+            )}
             <Button
               variant="ghost"
               size="icon"

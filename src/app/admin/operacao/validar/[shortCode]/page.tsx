@@ -46,14 +46,18 @@ const STATUS_LABEL: Record<OperationalOrder['status'], string> = {
   checked_out: 'Finalizada',
 }
 
-const BLOCKED_STATUS_REASON: Partial<Record<OperationalOrder['status'], string>> = {
+const BLOCKED_STATUS_REASON: Partial<
+  Record<OperationalOrder['status'], string>
+> = {
   pending_payment: 'Esta compra ainda não foi paga.',
   payment_failed: 'O pagamento desta compra falhou.',
   cancelled: 'Esta compra foi cancelada.',
 }
 
 async function fetchOrder(shortCode: string): Promise<OperationalOrder> {
-  const res = await fetch(`/api/tickets/operate/${encodeURIComponent(shortCode)}`)
+  const res = await fetch(
+    `/api/tickets/operate/${encodeURIComponent(shortCode)}`
+  )
   const body = await res.json()
   if (!res.ok) throw new Error(body?.error ?? 'Erro ao buscar compra')
   return body
@@ -62,7 +66,11 @@ async function fetchOrder(shortCode: string): Promise<OperationalOrder> {
 function StatusBadge({ status }: { status: OperationalOrder['status'] }) {
   const label = STATUS_LABEL[status]
   if (status === 'checked_in') {
-    return <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{label}</Badge>
+    return (
+      <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+        {label}
+      </Badge>
+    )
   }
   if (status === 'checked_out') return <Badge variant="outline">{label}</Badge>
   if (status === 'paid') return <Badge variant="secondary">{label}</Badge>
@@ -73,10 +81,12 @@ function OrderHeader({ order }: { order: OperationalOrder }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
-        <Ticket className="size-6 text-muted-foreground" />
+        <Ticket className="text-muted-foreground size-6" />
         <div>
-          <p className="font-mono text-xl font-bold tracking-widest">{order.shortCode}</p>
-          <p className="text-sm text-muted-foreground">{order.guardianName}</p>
+          <p className="font-mono text-xl font-bold tracking-widest">
+            {order.shortCode}
+          </p>
+          <p className="text-muted-foreground text-sm">{order.guardianName}</p>
         </div>
       </div>
       <StatusBadge status={order.status} />
@@ -86,9 +96,13 @@ function OrderHeader({ order }: { order: OperationalOrder }) {
 
 function BackToSearchButton() {
   return (
-    <Button nativeButton={false} render={<Link href="/admin/operacao/validar" />} variant="outline">
+    <Button
+      nativeButton={false}
+      render={<Link href="/admin/operacao/ingressos" />}
+      variant="outline"
+    >
       <ArrowLeft className="size-4" />
-      Voltar para a busca
+      Ver ingressos
     </Button>
   )
 }
@@ -98,8 +112,8 @@ function DocumentWarningBanner() {
     <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40">
       <Info className="size-5 shrink-0 text-amber-700 dark:text-amber-400" />
       <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
-        APRESENTE UM DOCUMENTO COM FOTO DA CRIANÇA NA ENTRADA DO PARQUE PARA UTILIZAR O
-        PASSAPORTE.
+        APRESENTE UM DOCUMENTO COM FOTO DA CRIANÇA NA ENTRADA DO PARQUE PARA
+        UTILIZAR O PASSAPORTE.
       </p>
     </div>
   )
@@ -114,9 +128,9 @@ function ChildrenConference({ order }: { order: OperationalOrder }) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-base font-semibold">{child.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatDateOnly(child.birthDate)} · {formatAge(child.ageMonths)} ·{' '}
-                  {child.passportTypeName}
+                <p className="text-muted-foreground text-sm">
+                  {formatDateOnly(child.birthDate)} ·{' '}
+                  {formatAge(child.ageMonths)} · {child.passportTypeName}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -129,7 +143,9 @@ function ChildrenConference({ order }: { order: OperationalOrder }) {
                     PNE
                   </Badge>
                 )}
-                <span className="text-sm font-medium">{formatCurrency(child.unitPrice)}</span>
+                <span className="text-sm font-medium">
+                  {formatCurrency(child.unitPrice)}
+                </span>
               </div>
             </div>
 
@@ -137,10 +153,14 @@ function ChildrenConference({ order }: { order: OperationalOrder }) {
               <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
                 <Users className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400" />
                 <p className="text-amber-900 dark:text-amber-300">
-                  <span className="font-semibold">Acompanhante: {child.companion?.name ?? '—'}</span>{' '}
+                  <span className="font-semibold">
+                    Acompanhante: {child.companion?.name ?? '—'}
+                  </span>{' '}
                   — confirme que possui mais de 18 anos (documento com foto).
                   {child.companion?.phone && (
-                    <span className="block text-xs">Telefone: {child.companion.phone}</span>
+                    <span className="block text-xs">
+                      Telefone: {child.companion.phone}
+                    </span>
                   )}
                 </p>
               </div>
@@ -153,8 +173,11 @@ function ChildrenConference({ order }: { order: OperationalOrder }) {
                   <p className="font-semibold">
                     Esta criança ficará SEM acompanhante
                     {child.unaccompaniedTermsAcceptedAt && (
-                      <> — Termo de Responsabilidade aceito em{' '}
-                        {formatDateOnly(child.unaccompaniedTermsAcceptedAt)}</>
+                      <>
+                        {' '}
+                        — Termo de Responsabilidade aceito em{' '}
+                        {formatDateOnly(child.unaccompaniedTermsAcceptedAt)}
+                      </>
                     )}
                     .
                   </p>
@@ -207,12 +230,20 @@ type TimeInfo = {
   plannedEndAt: Date
 }
 
-function getTimeInfo(order: OperationalOrder | undefined, now: number): TimeInfo | null {
+function getTimeInfo(
+  order: OperationalOrder | undefined,
+  now: number
+): TimeInfo | null {
   if (!order?.checkedInAt) return null
   const checkedInMs = new Date(order.checkedInAt).getTime()
-  const referenceMs = order.checkedOutAt ? new Date(order.checkedOutAt).getTime() : now
-  const elapsedSeconds = Math.max(0, Math.floor((referenceMs - checkedInMs) / 1000))
+  const referenceMs = order.checkedOutAt
+    ? new Date(order.checkedOutAt).getTime()
+    : now
   const contractedSeconds = (order.contractedDurationMinutes ?? 0) * 60
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((referenceMs - checkedInMs) / 1000)
+  )
   const remainingSeconds = contractedSeconds - elapsedSeconds
   const isOvertime = remainingSeconds < 0
   return {
@@ -234,7 +265,8 @@ export default function OperacaoOrderPage() {
     queryKey: ['operacao', 'order', shortCode],
     queryFn: () => fetchOrder(shortCode),
     retry: false,
-    refetchInterval: (query) => (query.state.data?.status === 'checked_in' ? 30_000 : false),
+    refetchInterval: (query) =>
+      query.state.data?.status === 'checked_in' ? 30_000 : false,
   })
 
   useEffect(() => {
@@ -245,9 +277,12 @@ export default function OperacaoOrderPage() {
 
   const checkInMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/tickets/operate/${encodeURIComponent(shortCode)}/check-in`, {
-        method: 'POST',
-      })
+      const res = await fetch(
+        `/api/tickets/operate/${encodeURIComponent(shortCode)}/check-in`,
+        {
+          method: 'POST',
+        }
+      )
       const body = await res.json()
       if (!res.ok) throw new Error(body?.error ?? 'Erro ao realizar check-in')
       return body as OperationalOrder
@@ -261,9 +296,12 @@ export default function OperacaoOrderPage() {
 
   const checkOutMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/tickets/operate/${encodeURIComponent(shortCode)}/check-out`, {
-        method: 'POST',
-      })
+      const res = await fetch(
+        `/api/tickets/operate/${encodeURIComponent(shortCode)}/check-out`,
+        {
+          method: 'POST',
+        }
+      )
       const body = await res.json()
       if (!res.ok) throw new Error(body?.error ?? 'Erro ao realizar check-out')
       return body as OperationalOrder
@@ -291,10 +329,12 @@ export default function OperacaoOrderPage() {
   if (error || !data) {
     return (
       <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 p-10 text-center">
-        <AlertTriangle className="size-10 text-destructive" />
+        <AlertTriangle className="text-destructive size-10" />
         <h1 className="text-xl font-bold">Compra não encontrada</h1>
-        <p className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : 'Confira o código e tente novamente.'}
+        <p className="text-muted-foreground text-sm">
+          {error instanceof Error
+            ? error.message
+            : 'Confira o código e tente novamente.'}
         </p>
         <BackToSearchButton />
       </div>
@@ -311,9 +351,11 @@ export default function OperacaoOrderPage() {
       {blockedReason && (
         <Card className="border-destructive/40">
           <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
-            <ShieldAlert className="size-10 text-destructive" />
-            <p className="text-lg font-semibold text-destructive">{blockedReason}</p>
-            <p className="text-sm text-muted-foreground">
+            <ShieldAlert className="text-destructive size-10" />
+            <p className="text-destructive text-lg font-semibold">
+              {blockedReason}
+            </p>
+            <p className="text-muted-foreground text-sm">
               Não é possível processar entrada para esta compra.
             </p>
           </CardContent>
@@ -328,7 +370,9 @@ export default function OperacaoOrderPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
               <div>
                 <p className="text-muted-foreground">Valor pago</p>
-                <p className="font-semibold">{formatCurrency(data.totalAmount)}</p>
+                <p className="font-semibold">
+                  {formatCurrency(data.totalAmount)}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground">Tempo contratado</p>
@@ -371,7 +415,13 @@ export default function OperacaoOrderPage() {
 
       {data.status === 'checked_in' && timeInfo && (
         <>
-          <Card className={timeInfo.isOvertime ? 'border-red-400 dark:border-red-800' : undefined}>
+          <Card
+            className={
+              timeInfo.isOvertime
+                ? 'border-red-400 dark:border-red-800'
+                : undefined
+            }
+          >
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
                 <div>
@@ -390,16 +440,20 @@ export default function OperacaoOrderPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Término previsto</p>
-                  <p className="font-semibold">{formatTime(timeInfo.plannedEndAt.toISOString())}</p>
+                  <p className="font-semibold">
+                    {formatTime(timeInfo.plannedEndAt.toISOString())}
+                  </p>
                 </div>
               </div>
 
-              <div className="flex flex-col items-center gap-1 rounded-xl bg-muted py-6">
-                <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <div className="bg-muted flex flex-col items-center gap-1 rounded-xl py-6">
+                <p className="text-muted-foreground flex items-center gap-1.5 text-sm">
                   <Clock className="size-4" />
                   Tempo decorrido
                 </p>
-                <p className="font-mono text-4xl font-bold tabular-nums">
+                <p
+                  className={`font-mono text-4xl font-bold tabular-nums ${timeInfo.isOvertime ? 'text-red-600' : ''}`}
+                >
                   {formatDuration(timeInfo.elapsedSeconds)}
                 </p>
               </div>
@@ -412,13 +466,16 @@ export default function OperacaoOrderPage() {
                   </p>
                 </div>
               ) : (
-                <p className="text-center text-sm text-muted-foreground">
-                  Tempo restante: <span className="font-semibold">{formatDuration(timeInfo.remainingSeconds)}</span>
+                <p className="text-muted-foreground text-center text-sm">
+                  Tempo restante:{' '}
+                  <span className="font-semibold">
+                    {formatDuration(timeInfo.remainingSeconds)}
+                  </span>
                 </p>
               )}
 
               {data.checkedInByName && (
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-center text-xs">
                   Check-in feito por {data.checkedInByName}
                 </p>
               )}
@@ -452,7 +509,9 @@ export default function OperacaoOrderPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Término previsto</p>
-                    <p className="font-medium">{formatTime(timeInfo.plannedEndAt.toISOString())}</p>
+                    <p className="font-medium">
+                      {formatTime(timeInfo.plannedEndAt.toISOString())}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Tempo contratado</p>
@@ -463,17 +522,55 @@ export default function OperacaoOrderPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Tempo utilizado até agora</p>
-                    <p className="font-medium">{formatDuration(timeInfo.elapsedSeconds)}</p>
+                    <p className="text-muted-foreground">
+                      Tempo utilizado até agora
+                    </p>
+                    <p
+                      className={`font-medium ${timeInfo.isOvertime ? 'text-red-600' : ''}`}
+                    >
+                      {formatDuration(timeInfo.elapsedSeconds)}
+                    </p>
                   </div>
                 </div>
 
                 {timeInfo.isOvertime && (
-                  <div className="flex items-center gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
-                    <AlertTriangle className="size-4 shrink-0" />
-                    <span className="font-semibold">
-                      Tempo excedente: {formatDuration(timeInfo.overtimeSeconds)}
-                    </span>
+                  <div className="flex flex-col gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="size-4 shrink-0" />
+                      <span className="font-semibold">
+                        Tempo excedente — cobrar à parte no caixa
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="text-xs opacity-80">Contratado</p>
+                        <p className="font-semibold">
+                          {data.contractedDurationMinutes != null
+                            ? formatMinutes(data.contractedDurationMinutes)
+                            : '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs opacity-80">Utilizado</p>
+                        <p className="font-semibold">
+                          {formatDuration(timeInfo.elapsedSeconds)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs opacity-80">Extra (exato)</p>
+                        <p className="font-mono font-bold">
+                          {formatDuration(timeInfo.overtimeSeconds)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs opacity-80">
+                          Extra (minutos iniciados)
+                        </p>
+                        <p className="font-bold">
+                          {Math.ceil(timeInfo.overtimeSeconds / 60)} min
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -509,11 +606,12 @@ export default function OperacaoOrderPage() {
         <>
           <Card>
             <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-              <CheckCircle2 className="size-8 text-muted-foreground" />
-              <p className="font-semibold">Esta compra já foi finalizada.</p>
-              <p className="text-sm text-muted-foreground">
-                O check-in já ocorreu e o check-out foi confirmado. Não é possível processar uma
-                nova entrada com este código.
+              <CheckCircle2 className="text-muted-foreground size-8" />
+              <p className="font-semibold">Check-out realizado</p>
+              <p className="text-muted-foreground text-sm">
+                {timeInfo?.isOvertime
+                  ? 'Saída registrada com tempo excedente — confira o valor extra a cobrar no caixa.'
+                  : 'Saída registrada dentro do tempo contratado. Nada a cobrar.'}
               </p>
             </CardContent>
           </Card>
@@ -521,7 +619,7 @@ export default function OperacaoOrderPage() {
           <Card>
             <CardContent className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
               <div>
-                <p className="flex items-center gap-1 text-muted-foreground">
+                <p className="text-muted-foreground flex items-center gap-1">
                   <Calendar className="size-3.5" />
                   Entrada
                 </p>
@@ -529,11 +627,13 @@ export default function OperacaoOrderPage() {
                   {data.checkedInAt ? formatTime(data.checkedInAt) : '—'}
                 </p>
                 {data.checkedInByName && (
-                  <p className="text-xs text-muted-foreground">por {data.checkedInByName}</p>
+                  <p className="text-muted-foreground text-xs">
+                    por {data.checkedInByName}
+                  </p>
                 )}
               </div>
               <div>
-                <p className="flex items-center gap-1 text-muted-foreground">
+                <p className="text-muted-foreground flex items-center gap-1">
                   <Calendar className="size-3.5" />
                   Saída
                 </p>
@@ -541,7 +641,9 @@ export default function OperacaoOrderPage() {
                   {data.checkedOutAt ? formatTime(data.checkedOutAt) : '—'}
                 </p>
                 {data.checkedOutByName && (
-                  <p className="text-xs text-muted-foreground">por {data.checkedOutByName}</p>
+                  <p className="text-muted-foreground text-xs">
+                    por {data.checkedOutByName}
+                  </p>
                 )}
               </div>
               <div>
@@ -567,7 +669,9 @@ export default function OperacaoOrderPage() {
                       : 'font-semibold'
                   }
                 >
-                  {data.overtimeMinutes != null ? formatMinutes(data.overtimeMinutes) : '—'}
+                  {data.overtimeMinutes != null
+                    ? formatMinutes(data.overtimeMinutes)
+                    : '—'}
                 </p>
               </div>
             </CardContent>
