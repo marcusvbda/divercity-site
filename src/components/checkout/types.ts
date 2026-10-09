@@ -50,38 +50,49 @@ export type ConfirmationPendingResponse = {
   status: 'pending_payment' | 'payment_failed'
 }
 
+export type TicketPassKind = 'child' | 'group_companion'
+
+export type TicketPassStatus = 'not_used' | 'checked_in' | 'checked_out'
+
+export type ConfirmationTicket = {
+  shortCode: string
+  kind: TicketPassKind
+  holderName: string
+  passportTypeName: string
+  contractedDurationMinutes: number
+  status: TicketPassStatus
+  qrCodeDataUrl: string
+  companionIncluded: { name: string } | null
+  isPNE: boolean
+  unitPrice: string
+}
+
 export type ConfirmationChild = {
-  name?: string
-  passportTypeName?: string
-  ageMonths?: number
-  isPNE?: boolean
-  hasCompanion?: boolean | null
-  companionName?: string | null
-  unaccompanied?: boolean
-  unaccompaniedTermsAccepted?: boolean
-  unitPrice?: string
+  name: string
+  passportTypeName: string
+  isPNE: boolean
+  unitPrice: string
+  hasCompanion: boolean | null
+  companionName: string | null
+  unaccompanied: boolean
 }
 
 export type ConfirmationCompanion = {
-  name?: string
-  phone?: string
-  isFree?: boolean
-  passportTypeName?: string | null
-  unitPrice?: string
-  linkedChildIndex?: number
+  name: string
+  isFree: boolean
+  unitPrice: string
 }
 
 export type ConfirmationPaidResponse = {
-  status: 'paid' | 'checked_in' | 'checked_out'
+  status: 'paid' | 'cancelled'
   shortCode: string
   guardianName: string
-  guardianPhone?: string
-  guardianWhatsapp?: string
+  guardianPhone: string
+  guardianWhatsapp: string
   totalAmount: string
-  contractedDurationMinutes: number
-  qrCodeDataUrl: string
-  children?: ConfirmationChild[]
-  companions?: ConfirmationCompanion[]
+  tickets: ConfirmationTicket[]
+  children: ConfirmationChild[]
+  companions: ConfirmationCompanion[]
 }
 
 export type ConfirmationResponse =

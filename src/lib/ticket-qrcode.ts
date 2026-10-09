@@ -1,7 +1,7 @@
 import QRCode from "qrcode";
 
 /**
- * O QR Code representa exatamente a mesma compra que o código curto (spec seção 8):
+ * O QR Code representa exatamente o mesmo ticket que o código curto dele:
  * codifica apenas o shortCode como texto puro, sem IDs internos nem dados pessoais.
  * O leitor operacional trata o valor lido de forma idêntica à digitação manual do código.
  */

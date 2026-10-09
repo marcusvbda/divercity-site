@@ -9,6 +9,8 @@ const INFANT_MAX_AGE_MONTHS = 12;
 const COMPANION_ELIGIBLE_MAX_AGE_MONTHS = 60;
 const DISCOUNT_RATE = new Prisma.Decimal(0.5);
 
+const GROUP_COMPANION_LIMIT_MESSAGE = "Só é permitido 1 acompanhante do grupo por compra";
+
 export class TicketPricingError extends Error {}
 
 export function getAgeInMonths(birthDate: Date, at: Date = new Date()): number {
@@ -88,6 +90,11 @@ export async function priceOrder(input: TicketQuoteRequest): Promise<PricingResu
     return { ...child, index, passportType, ageMonths, unitPrice };
   });
 
+  const groupCompanions = input.companions.filter((c) => c.linkedChildIndex === undefined);
+  if (groupCompanions.length > 1) {
+    throw new TicketPricingError(GROUP_COMPANION_LIMIT_MESSAGE);
+  }
+
   const pricedCompanions: PricedCompanion[] = input.companions.map((companion) => {
     const linkedChild =
       companion.linkedChildIndex !== undefined ? (pricedChildren[companion.linkedChildIndex] ?? null) : null;
@@ -136,9 +143,4 @@ export async function priceOrder(input: TicketQuoteRequest): Promise<PricingResu
   );
 
   return { children: pricedChildren, companions: pricedCompanions, total };
-}
-
-/** Duração contratada da compra = a maior duração entre os passaportes de criança do pedido. */
-export function getContractedDurationMinutes(children: { passportType: { durationMinutes: number } }[]): number {
-  return Math.max(...children.map((c) => c.passportType.durationMinutes));
 }

@@ -34,7 +34,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const shortCode = await generateUniqueShortCode();
+  const usedCodes = new Set<string>();
+  const nextCode = async () => {
+    const code = await generateUniqueShortCode(usedCodes);
+    usedCodes.add(code);
+    return code;
+  };
+  const shortCode = await nextCode();
+  const childCodes: string[] = [];
+  for (let i = 0; i < priced.children.length; i++) childCodes.push(await nextCode());
+  const groupCompanionCodes = new Map<number, string>();
+  for (let i = 0; i < priced.companions.length; i++) {
+    if (priced.companions[i].linkedChild === null) groupCompanionCodes.set(i, await nextCode());
+  }
   const { guardianName, guardianEmail, guardianPhone, guardianWhatsapp } = parsed.data;
 
   // Criação sequencial (não nested create) para poder mapear com certeza cada
@@ -68,10 +80,20 @@ export async function POST(req: NextRequest) {
         },
       });
       childRecords.push(child);
+
+      await tx.ticketPass.create({
+        data: {
+          orderId: created.id,
+          shortCode: childCodes[childRecords.length - 1],
+          kind: "child",
+          childId: child.id,
+          contractedDurationMinutes: c.passportType.durationMinutes,
+        },
+      });
     }
 
-    for (const companion of priced.companions) {
-      await tx.ticketCompanion.create({
+    for (const [companionIndex, companion] of priced.companions.entries()) {
+      const companionRecord = await tx.ticketCompanion.create({
         data: {
           orderId: created.id,
           name: companion.name,
@@ -82,6 +104,19 @@ export async function POST(req: NextRequest) {
           unitPrice: companion.unitPrice,
         },
       });
+
+      const groupCode = groupCompanionCodes.get(companionIndex);
+      if (groupCode && companion.passportType) {
+        await tx.ticketPass.create({
+          data: {
+            orderId: created.id,
+            shortCode: groupCode,
+            kind: "group_companion",
+            companionId: companionRecord.id,
+            contractedDurationMinutes: companion.passportType.durationMinutes,
+          },
+        });
+      }
     }
 
     return created;

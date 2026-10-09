@@ -27,7 +27,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { OperationalOrder } from '@/lib/tickets/get-operational-order'
+import type { OperationalTicket } from '@/lib/tickets/get-operational-ticket'
+import type { TicketOrderStatus, TicketPassStatus } from '@/types/tickets'
 import {
   formatAge,
   formatCurrency,
@@ -37,33 +38,28 @@ import {
   formatTime,
 } from './format'
 
-const STATUS_LABEL: Record<OperationalOrder['status'], string> = {
-  pending_payment: 'Aguardando pagamento',
-  paid: 'Pago — aguardando entrada',
-  payment_failed: 'Pagamento falhou',
-  cancelled: 'Cancelada',
+const STATUS_LABEL: Record<TicketPassStatus, string> = {
+  not_used: 'Aguardando entrada',
   checked_in: 'Em uso no parque',
-  checked_out: 'Finalizada',
+  checked_out: 'Finalizado',
 }
 
-const BLOCKED_STATUS_REASON: Partial<
-  Record<OperationalOrder['status'], string>
-> = {
-  pending_payment: 'Esta compra ainda não foi paga.',
-  payment_failed: 'O pagamento desta compra falhou.',
-  cancelled: 'Esta compra foi cancelada.',
+const BLOCKED_ORDER_REASON: Partial<Record<TicketOrderStatus, string>> = {
+  pending_payment: 'A compra deste ticket ainda não foi paga.',
+  payment_failed: 'O pagamento da compra deste ticket falhou.',
+  cancelled: 'A compra deste ticket foi cancelada.',
 }
 
-async function fetchOrder(shortCode: string): Promise<OperationalOrder> {
+async function fetchTicket(shortCode: string): Promise<OperationalTicket> {
   const res = await fetch(
     `/api/tickets/operate/${encodeURIComponent(shortCode)}`
   )
   const body = await res.json()
-  if (!res.ok) throw new Error(body?.error ?? 'Erro ao buscar compra')
+  if (!res.ok) throw new Error(body?.error ?? 'Erro ao buscar ticket')
   return body
 }
 
-function StatusBadge({ status }: { status: OperationalOrder['status'] }) {
+function StatusBadge({ status }: { status: TicketPassStatus }) {
   const label = STATUS_LABEL[status]
   if (status === 'checked_in') {
     return (
@@ -73,23 +69,28 @@ function StatusBadge({ status }: { status: OperationalOrder['status'] }) {
     )
   }
   if (status === 'checked_out') return <Badge variant="outline">{label}</Badge>
-  if (status === 'paid') return <Badge variant="secondary">{label}</Badge>
-  return <Badge variant="destructive">{label}</Badge>
+  return <Badge variant="secondary">{label}</Badge>
 }
 
-function OrderHeader({ order }: { order: OperationalOrder }) {
+function TicketHeader({ ticket }: { ticket: OperationalTicket }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <Ticket className="text-muted-foreground size-6" />
         <div>
           <p className="font-mono text-xl font-bold tracking-widest">
-            {order.shortCode}
+            {ticket.shortCode}
           </p>
-          <p className="text-muted-foreground text-sm">{order.guardianName}</p>
+          <p className="text-sm font-medium">{ticket.holder.name}</p>
+          <p className="text-muted-foreground text-xs">
+            {ticket.kind === 'group_companion'
+              ? 'Acompanhante do grupo'
+              : 'Criança'}{' '}
+            · {ticket.holder.passportTypeName}
+          </p>
         </div>
       </div>
-      <StatusBadge status={order.status} />
+      <StatusBadge status={ticket.status} />
     </div>
   )
 }
@@ -109,9 +110,9 @@ function BackToSearchButton() {
 
 function DocumentWarningBanner() {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40">
-      <Info className="size-5 shrink-0 text-amber-700 dark:text-amber-400" />
-      <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
+    <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
+      <Info className="size-5 shrink-0 text-amber-700" />
+      <p className="text-sm font-semibold text-amber-900">
         APRESENTE UM DOCUMENTO COM FOTO DA CRIANÇA NA ENTRADA DO PARQUE PARA
         UTILIZAR O PASSAPORTE.
       </p>
@@ -119,103 +120,118 @@ function DocumentWarningBanner() {
   )
 }
 
-function ChildrenConference({ order }: { order: OperationalOrder }) {
+function HolderConference({ ticket }: { ticket: OperationalTicket }) {
+  const { holder, companionIncluded, order } = ticket
+
   return (
-    <div className="flex flex-col gap-3">
-      {order.children.map((child) => (
-        <Card key={child.id}>
-          <CardContent className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="text-base font-semibold">{child.name}</p>
-                <p className="text-muted-foreground text-sm">
-                  {formatDateOnly(child.birthDate)} ·{' '}
-                  {formatAge(child.ageMonths)} · {child.passportTypeName}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {child.isPNE && (
-                  <Badge
-                    variant="outline"
-                    className="border-blue-300 text-blue-700 dark:border-blue-800 dark:text-blue-300"
-                  >
-                    <Accessibility className="size-3" />
-                    PNE
-                  </Badge>
+    <Card>
+      <CardContent className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-base font-semibold">{holder.name}</p>
+            <p className="text-muted-foreground text-sm">
+              {holder.birthDate && holder.ageMonths != null
+                ? `${formatDateOnly(holder.birthDate)} · ${formatAge(holder.ageMonths)} · `
+                : ''}
+              {holder.passportTypeName}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {holder.isPNE && (
+              <Badge
+                variant="outline"
+                className="border-blue-300 text-blue-700"
+              >
+                <Accessibility className="size-3" />
+                PNE
+              </Badge>
+            )}
+            <span className="text-sm font-medium">
+              {formatCurrency(holder.unitPrice)}
+            </span>
+          </div>
+        </div>
+
+        {ticket.kind === 'group_companion' && holder.phone && (
+          <p className="text-muted-foreground inline-flex items-center gap-1 text-sm">
+            <Phone className="size-3.5" />
+            {holder.phone}
+          </p>
+        )}
+
+        {companionIncluded && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">
+            <Users className="mt-0.5 size-4 shrink-0 text-amber-700" />
+            <p className="text-amber-900">
+              <span className="font-semibold">
+                Este ticket tem 1 acompanhante incluso: {companionIncluded.name}
+              </span>{' '}
+              — confirme que possui mais de 18 anos (documento com foto).
+              {companionIncluded.phone && (
+                <span className="block text-xs">
+                  Telefone: {companionIncluded.phone}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {holder.hasCompanion === false && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm">
+            <UserX className="mt-0.5 size-4 shrink-0 text-red-700" />
+            <div className="text-red-900">
+              <p className="font-semibold">
+                Esta criança ficará SEM acompanhante
+                {holder.unaccompaniedTermsAcceptedAt && (
+                  <>
+                    {' '}
+                    — Termo de Responsabilidade aceito em{' '}
+                    {formatDateOnly(holder.unaccompaniedTermsAcceptedAt)}
+                  </>
                 )}
-                <span className="text-sm font-medium">
-                  {formatCurrency(child.unitPrice)}
+                .
+              </p>
+              <div className="mt-1 flex flex-wrap gap-3 text-xs font-medium">
+                <span className="inline-flex items-center gap-1">
+                  <Phone className="size-3" />
+                  {order.guardianPhone}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MessageCircle className="size-3" />
+                  {order.guardianWhatsapp}
                 </span>
               </div>
             </div>
-
-            {child.hasCompanion === true && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
-                <Users className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400" />
-                <p className="text-amber-900 dark:text-amber-300">
-                  <span className="font-semibold">
-                    Acompanhante: {child.companion?.name ?? '—'}
-                  </span>{' '}
-                  — confirme que possui mais de 18 anos (documento com foto).
-                  {child.companion?.phone && (
-                    <span className="block text-xs">
-                      Telefone: {child.companion.phone}
-                    </span>
-                  )}
-                </p>
-              </div>
-            )}
-
-            {child.hasCompanion === false && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm dark:border-red-900 dark:bg-red-950/40">
-                <UserX className="mt-0.5 size-4 shrink-0 text-red-700 dark:text-red-400" />
-                <div className="text-red-900 dark:text-red-300">
-                  <p className="font-semibold">
-                    Esta criança ficará SEM acompanhante
-                    {child.unaccompaniedTermsAcceptedAt && (
-                      <>
-                        {' '}
-                        — Termo de Responsabilidade aceito em{' '}
-                        {formatDateOnly(child.unaccompaniedTermsAcceptedAt)}
-                      </>
-                    )}
-                    .
-                  </p>
-                  <div className="mt-1 flex flex-wrap gap-3 text-xs font-medium">
-                    <span className="inline-flex items-center gap-1">
-                      <Phone className="size-3" />
-                      {order.guardianPhone}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <MessageCircle className="size-3" />
-                      {order.guardianWhatsapp}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
-function AdditionalCompanions({ order }: { order: OperationalOrder }) {
-  if (order.companions.length === 0) return null
+function OtherTickets({ ticket }: { ticket: OperationalTicket }) {
+  if (ticket.otherTickets.length === 0) return null
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Acompanhantes adicionais</CardTitle>
+        <CardTitle className="text-sm">Outros tickets desta compra</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {order.companions.map((c) => (
-          <div key={c.id} className="flex items-center justify-between text-sm">
-            <span>{c.name}</span>
-            <span className="font-medium">
-              {c.isFree ? 'Gratuito' : formatCurrency(c.unitPrice)}
-            </span>
-          </div>
+        {ticket.otherTickets.map((other) => (
+          <Link
+            key={other.shortCode}
+            href={`/admin/operacao/validar/${other.shortCode}`}
+            className="hover:bg-muted flex min-h-12 flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
+          >
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{other.holderName}</span>
+              <span className="text-muted-foreground font-mono text-xs tracking-widest">
+                {other.shortCode}
+                {other.kind === 'group_companion' && ' · Acompanhante do grupo'}
+              </span>
+            </div>
+            <StatusBadge status={other.status} />
+          </Link>
         ))}
       </CardContent>
     </Card>
@@ -231,15 +247,15 @@ type TimeInfo = {
 }
 
 function getTimeInfo(
-  order: OperationalOrder | undefined,
+  ticket: OperationalTicket | undefined,
   now: number
 ): TimeInfo | null {
-  if (!order?.checkedInAt) return null
-  const checkedInMs = new Date(order.checkedInAt).getTime()
-  const referenceMs = order.checkedOutAt
-    ? new Date(order.checkedOutAt).getTime()
+  if (!ticket?.checkedInAt) return null
+  const checkedInMs = new Date(ticket.checkedInAt).getTime()
+  const referenceMs = ticket.checkedOutAt
+    ? new Date(ticket.checkedOutAt).getTime()
     : now
-  const contractedSeconds = (order.contractedDurationMinutes ?? 0) * 60
+  const contractedSeconds = ticket.contractedDurationMinutes * 60
   const elapsedSeconds = Math.max(
     0,
     Math.floor((referenceMs - checkedInMs) / 1000)
@@ -255,15 +271,16 @@ function getTimeInfo(
   }
 }
 
-export default function OperacaoOrderPage() {
+export default function OperacaoTicketPage() {
   const { shortCode } = useParams<{ shortCode: string }>()
   const queryClient = useQueryClient()
   const [confirmingCheckout, setConfirmingCheckout] = useState(false)
   const [now, setNow] = useState(() => Date.now())
+  const queryKey = ['operacao', 'ticket', shortCode]
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['operacao', 'order', shortCode],
-    queryFn: () => fetchOrder(shortCode),
+    queryKey,
+    queryFn: () => fetchTicket(shortCode),
     retry: false,
     refetchInterval: (query) =>
       query.state.data?.status === 'checked_in' ? 30_000 : false,
@@ -275,6 +292,11 @@ export default function OperacaoOrderPage() {
     return () => clearInterval(id)
   }, [data?.status])
 
+  function afterAction(ticket: OperationalTicket) {
+    queryClient.setQueryData(queryKey, ticket)
+    queryClient.invalidateQueries({ queryKey: ['operacao', 'ingressos'] })
+  }
+
   const checkInMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(
@@ -285,10 +307,10 @@ export default function OperacaoOrderPage() {
       )
       const body = await res.json()
       if (!res.ok) throw new Error(body?.error ?? 'Erro ao realizar check-in')
-      return body as OperationalOrder
+      return body as OperationalTicket
     },
-    onSuccess: (order) => {
-      queryClient.setQueryData(['operacao', 'order', shortCode], order)
+    onSuccess: (ticket) => {
+      afterAction(ticket)
       toast.success('Check-in realizado com sucesso')
     },
     onError: (err: Error) => toast.error(err.message),
@@ -304,10 +326,10 @@ export default function OperacaoOrderPage() {
       )
       const body = await res.json()
       if (!res.ok) throw new Error(body?.error ?? 'Erro ao realizar check-out')
-      return body as OperationalOrder
+      return body as OperationalTicket
     },
-    onSuccess: (order) => {
-      queryClient.setQueryData(['operacao', 'order', shortCode], order)
+    onSuccess: (ticket) => {
+      afterAction(ticket)
       setConfirmingCheckout(false)
       toast.success('Check-out realizado com sucesso')
     },
@@ -330,7 +352,7 @@ export default function OperacaoOrderPage() {
     return (
       <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 p-10 text-center">
         <AlertTriangle className="text-destructive size-10" />
-        <h1 className="text-xl font-bold">Compra não encontrada</h1>
+        <h1 className="text-xl font-bold">Ticket não encontrado</h1>
         <p className="text-muted-foreground text-sm">
           {error instanceof Error
             ? error.message
@@ -341,12 +363,22 @@ export default function OperacaoOrderPage() {
     )
   }
 
-  const blockedReason = BLOCKED_STATUS_REASON[data.status]
+  const blockedReason = BLOCKED_ORDER_REASON[data.order.status]
+  const isPaid = data.order.status === 'paid'
+  const contracted = formatMinutes(data.contractedDurationMinutes)
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-6">
       <BackToSearchButton />
-      <OrderHeader order={data} />
+      <TicketHeader ticket={data} />
+
+      <p className="text-muted-foreground text-sm">
+        Compra{' '}
+        <span className="font-mono tracking-widest">
+          {data.order.shortCode}
+        </span>{' '}
+        · {data.order.guardianName}
+      </p>
 
       {blockedReason && (
         <Card className="border-destructive/40">
@@ -356,41 +388,36 @@ export default function OperacaoOrderPage() {
               {blockedReason}
             </p>
             <p className="text-muted-foreground text-sm">
-              Não é possível processar entrada para esta compra.
+              Não é possível processar entrada para este ticket.
             </p>
           </CardContent>
         </Card>
       )}
 
-      {data.status === 'paid' && (
+      {isPaid && data.status === 'not_used' && (
         <>
           <DocumentWarningBanner />
 
           <Card>
             <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
               <div>
-                <p className="text-muted-foreground">Valor pago</p>
+                <p className="text-muted-foreground">Valor do ticket</p>
                 <p className="font-semibold">
-                  {formatCurrency(data.totalAmount)}
+                  {formatCurrency(data.holder.unitPrice)}
                 </p>
               </div>
               <div>
                 <p className="text-muted-foreground">Tempo contratado</p>
-                <p className="font-semibold">
-                  {data.contractedDurationMinutes != null
-                    ? formatMinutes(data.contractedDurationMinutes)
-                    : '—'}
-                </p>
+                <p className="font-semibold">{contracted}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Telefone / WhatsApp</p>
-                <p className="font-semibold">{data.guardianPhone}</p>
+                <p className="font-semibold">{data.order.guardianPhone}</p>
               </div>
             </CardContent>
           </Card>
 
-          <ChildrenConference order={data} />
-          <AdditionalCompanions order={data} />
+          <HolderConference ticket={data} />
 
           <Button
             size="lg"
@@ -398,7 +425,7 @@ export default function OperacaoOrderPage() {
             disabled={checkInMutation.isPending}
             onClick={() => {
               const confirmed = window.confirm(
-                `Confirmar a entrada de ${data.children.length} criança(s) desta compra? Esta ação registrará o check-in em seu nome e iniciará a contagem do tempo contratado.`
+                `Confirmar a entrada de ${data.holder.name}? Esta ação registrará o check-in em seu nome e iniciará a contagem do tempo contratado deste ticket.`
               )
               if (confirmed) checkInMutation.mutate()
             }}
@@ -415,13 +442,7 @@ export default function OperacaoOrderPage() {
 
       {data.status === 'checked_in' && timeInfo && (
         <>
-          <Card
-            className={
-              timeInfo.isOvertime
-                ? 'border-red-400 dark:border-red-800'
-                : undefined
-            }
-          >
+          <Card className={timeInfo.isOvertime ? 'border-red-400' : undefined}>
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
                 <div>
@@ -432,11 +453,7 @@ export default function OperacaoOrderPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Tempo contratado</p>
-                  <p className="font-semibold">
-                    {data.contractedDurationMinutes != null
-                      ? formatMinutes(data.contractedDurationMinutes)
-                      : '—'}
-                  </p>
+                  <p className="font-semibold">{contracted}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Término previsto</p>
@@ -459,7 +476,7 @@ export default function OperacaoOrderPage() {
               </div>
 
               {timeInfo.isOvertime ? (
-                <div className="flex items-center justify-center gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                <div className="flex items-center justify-center gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-red-800">
                   <AlertTriangle className="size-5" />
                   <p className="font-semibold">
                     Tempo excedente: {formatDuration(timeInfo.overtimeSeconds)}
@@ -482,7 +499,7 @@ export default function OperacaoOrderPage() {
             </CardContent>
           </Card>
 
-          <ChildrenConference order={data} />
+          <HolderConference ticket={data} />
 
           {!confirmingCheckout ? (
             <Button
@@ -515,11 +532,7 @@ export default function OperacaoOrderPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Tempo contratado</p>
-                    <p className="font-medium">
-                      {data.contractedDurationMinutes != null
-                        ? formatMinutes(data.contractedDurationMinutes)
-                        : '—'}
-                    </p>
+                    <p className="font-medium">{contracted}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">
@@ -534,7 +547,7 @@ export default function OperacaoOrderPage() {
                 </div>
 
                 {timeInfo.isOvertime && (
-                  <div className="flex flex-col gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                  <div className="flex flex-col gap-2 rounded-lg border border-red-400 bg-red-50 p-3 text-sm text-red-800">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="size-4 shrink-0" />
                       <span className="font-semibold">
@@ -544,11 +557,7 @@ export default function OperacaoOrderPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-xs opacity-80">Contratado</p>
-                        <p className="font-semibold">
-                          {data.contractedDurationMinutes != null
-                            ? formatMinutes(data.contractedDurationMinutes)
-                            : '—'}
-                        </p>
+                        <p className="font-semibold">{contracted}</p>
                       </div>
                       <div>
                         <p className="text-xs opacity-80">Utilizado</p>
@@ -577,14 +586,14 @@ export default function OperacaoOrderPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="ghost"
-                    className="flex-1"
+                    className="h-12 flex-1"
                     onClick={() => setConfirmingCheckout(false)}
                     disabled={checkOutMutation.isPending}
                   >
                     Cancelar
                   </Button>
                   <Button
-                    className="flex-1"
+                    className="h-12 flex-1"
                     onClick={() => checkOutMutation.mutate()}
                     disabled={checkOutMutation.isPending}
                   >
@@ -609,7 +618,7 @@ export default function OperacaoOrderPage() {
               <CheckCircle2 className="text-muted-foreground size-8" />
               <p className="font-semibold">Check-out realizado</p>
               <p className="text-muted-foreground text-sm">
-                {timeInfo?.isOvertime
+                {data.overtimeMinutes && data.overtimeMinutes > 0
                   ? 'Saída registrada com tempo excedente — confira o valor extra a cobrar no caixa.'
                   : 'Saída registrada dentro do tempo contratado. Nada a cobrar.'}
               </p>
@@ -648,11 +657,7 @@ export default function OperacaoOrderPage() {
               </div>
               <div>
                 <p className="text-muted-foreground">Tempo contratado</p>
-                <p className="font-semibold">
-                  {data.contractedDurationMinutes != null
-                    ? formatMinutes(data.contractedDurationMinutes)
-                    : '—'}
-                </p>
+                <p className="font-semibold">{contracted}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Tempo total utilizado</p>
@@ -665,7 +670,7 @@ export default function OperacaoOrderPage() {
                 <p
                   className={
                     data.overtimeMinutes && data.overtimeMinutes > 0
-                      ? 'font-semibold text-red-700 dark:text-red-400'
+                      ? 'font-semibold text-red-700'
                       : 'font-semibold'
                   }
                 >
@@ -677,9 +682,15 @@ export default function OperacaoOrderPage() {
             </CardContent>
           </Card>
 
-          <ChildrenConference order={data} />
+          <HolderConference ticket={data} />
         </>
       )}
+
+      {!isPaid && data.status === 'not_used' && (
+        <HolderConference ticket={data} />
+      )}
+
+      <OtherTickets ticket={data} />
     </div>
   )
 }

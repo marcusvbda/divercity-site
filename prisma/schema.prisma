@@ -213,8 +213,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  checkedInOrders  TicketOrder[] @relation("CheckedInBy")
-  checkedOutOrders TicketOrder[] @relation("CheckedOutBy")
+  checkedInPasses  TicketPass[] @relation("CheckedInBy")
+  checkedOutPasses TicketPass[] @relation("CheckedOutBy")
 
   @@map("users")
 }
@@ -224,6 +224,15 @@ enum TicketOrderStatus {
   paid
   payment_failed
   cancelled
+}
+
+enum TicketPassKind {
+  child
+  group_companion
+}
+
+enum TicketPassStatus {
+  not_used
   checked_in
   checked_out
 }
@@ -263,22 +272,44 @@ model TicketOrder {
   stripePaymentIntentId   String?
   paidAt                  DateTime?
 
-  contractedDurationMinutes Int?
-  checkedInAt               DateTime?
-  checkedInById             String?
-  checkedInBy               User?     @relation("CheckedInBy", fields: [checkedInById], references: [id])
-  checkedOutAt              DateTime?
-  checkedOutById            String?
-  checkedOutBy              User?     @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
-  overtimeMinutes           Int?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   children   TicketChild[]
   companions TicketCompanion[]
+  passes     TicketPass[]
 
   @@map("ticket_orders")
+}
+
+model TicketPass {
+  id        String           @id @default(cuid())
+  orderId   String
+  order     TicketOrder      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shortCode String           @unique
+  kind      TicketPassKind
+  status    TicketPassStatus @default(not_used)
+
+  childId     String?          @unique
+  child       TicketChild?     @relation(fields: [childId], references: [id])
+  companionId String?          @unique
+  companion   TicketCompanion? @relation(fields: [companionId], references: [id])
+
+  contractedDurationMinutes Int
+
+  checkedInAt     DateTime?
+  checkedInById   String?
+  checkedInBy     User?     @relation("CheckedInBy", fields: [checkedInById], references: [id])
+  checkedOutAt    DateTime?
+  checkedOutById  String?
+  checkedOutBy    User?     @relation("CheckedOutBy", fields: [checkedOutById], references: [id])
+  overtimeMinutes Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@map("ticket_passes")
 }
 
 model TicketChild {
@@ -298,6 +329,7 @@ model TicketChild {
   createdAt DateTime @default(now())
 
   companion TicketCompanion?
+  pass      TicketPass?
 
   @@map("ticket_children")
 }
@@ -318,6 +350,8 @@ model TicketCompanion {
   unitPrice      Decimal       @db.Decimal(10, 2) @default(0)
 
   createdAt DateTime @default(now())
+
+  pass TicketPass?
 
   @@map("ticket_companions")
 }

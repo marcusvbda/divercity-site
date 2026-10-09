@@ -32,7 +32,12 @@ export const TicketCompanionInputSchema = z.object({
 export const TicketQuoteRequestSchema = z.object({
   visitDayType: VisitDayTypeSchema,
   children: z.array(TicketChildInputSchema).min(1, "Inclua ao menos uma criança"),
-  companions: z.array(TicketCompanionInputSchema).default([]),
+  companions: z
+    .array(TicketCompanionInputSchema)
+    .default([])
+    .refine((list) => list.filter((c) => c.linkedChildIndex === undefined).length <= 1, {
+      message: "Só é permitido 1 acompanhante do grupo por compra",
+    }),
 });
 
 export const TicketOrderCreateSchema = TicketQuoteRequestSchema.extend({

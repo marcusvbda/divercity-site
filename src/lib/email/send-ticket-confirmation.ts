@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
-import { generateTicketQrCodeDataUrl } from "@/lib/ticket-qrcode";
+import { getOrderTickets, type ConfirmationTicket } from "@/lib/tickets/order-tickets";
 
 const currency = (value: unknown) =>
   Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -11,9 +11,8 @@ function buildEmailHtml(params: {
   guardianWhatsapp: string;
   shortCode: string;
   totalAmount: string;
-  contractedDurationMinutes: number | null;
   confirmationUrl: string;
-  qrCodeCid: string;
+  tickets: (Omit<ConfirmationTicket, "qrCodeDataUrl"> & { qrCodeCid: string })[];
   children: {
     name: string;
     passportTypeName: string;
@@ -52,17 +51,27 @@ function buildEmailHtml(params: {
     )
     .join("");
 
+  const ticketBlocks = params.tickets
+    .map(
+      (t) => `
+    <div style="background:#fafafa;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
+      <p style="font-size:16px;font-weight:bold;margin:0;">${t.holderName}${t.isPNE ? " <span style=\"color:#888;font-size:12px;\">(PNE)</span>" : ""}</p>
+      <p style="font-size:13px;color:#888;margin:4px 0 12px;">${t.kind === "group_companion" ? "Acompanhante do grupo — " : ""}${t.passportTypeName} — ${t.contractedDurationMinutes} minutos, contados a partir do check-in na entrada</p>
+      ${t.companionIncluded ? `<p style="font-size:13px;color:#555;margin:0 0 12px;">1 acompanhante incluso: ${t.companionIncluded.name}</p>` : ""}
+      <img src="cid:${t.qrCodeCid}" alt="QR Code de acesso de ${t.holderName}" width="220" height="220" />
+      <p style="font-size:13px;color:#888;margin-top:8px;">Apresente este QR Code na entrada do parque</p>
+      <p style="font-size:22px;font-weight:bold;letter-spacing:2px;margin:8px 0;">${t.shortCode}</p>
+      <p style="font-size:12px;color:#888;">Ou informe este código curto ao operador</p>
+    </div>`
+    )
+    .join("");
+
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#333;">
     <h1 style="color:#e6007a;font-size:20px;">Compra confirmada — Divercity Park</h1>
     <p>Olá, ${params.guardianName}! Seu pagamento foi confirmado com sucesso.</p>
 
-    <div style="background:#fafafa;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
-      <img src="cid:${params.qrCodeCid}" alt="QR Code de acesso" width="220" height="220" />
-      <p style="font-size:13px;color:#888;margin-top:8px;">Apresente este QR Code na entrada do parque</p>
-      <p style="font-size:22px;font-weight:bold;letter-spacing:2px;margin:8px 0;">${params.shortCode}</p>
-      <p style="font-size:12px;color:#888;">Ou informe este código curto ao operador</p>
-    </div>
+    ${ticketBlocks}
 
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
       ${childRows}
@@ -72,12 +81,6 @@ function buildEmailHtml(params: {
         <td style="padding:12px 0;font-weight:bold;text-align:right;">${currency(params.totalAmount)}</td>
       </tr>
     </table>
-
-    ${
-      params.contractedDurationMinutes
-        ? `<p style="font-size:13px;color:#555;">Tempo de permanência contratado: ${params.contractedDurationMinutes} minutos, contados a partir do check-in na entrada.</p>`
-        : ""
-    }
 
     <div style="background:#fff6e5;border-radius:12px;padding:16px;margin:20px 0;font-size:13px;">
       <strong>IMPORTANTE:</strong> apresente um documento com foto da criança na entrada do parque para utilizar o passaporte.
@@ -92,7 +95,7 @@ function buildEmailHtml(params: {
 }
 
 /**
- * Envia o e-mail de confirmação com QR Code e código curto.
+ * Envia o e-mail de confirmação com um QR Code e código curto por ticket.
  * Deve ser chamada somente após confirmação efetiva do pagamento (spec seção 10).
  */
 export async function sendTicketConfirmationEmail(orderId: string): Promise<void> {
@@ -111,9 +114,7 @@ export async function sendTicketConfirmationEmail(orderId: string): Promise<void
     return;
   }
 
-  const qrDataUrl = await generateTicketQrCodeDataUrl(order.shortCode);
-  const qrBase64 = qrDataUrl.split(",")[1];
-  const qrCid = "ticket-qrcode";
+  const tickets = await getOrderTickets(order.id);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const confirmationUrl = `${appUrl}/compra-antecipada/confirmacao/${order.shortCode}`;
@@ -124,9 +125,8 @@ export async function sendTicketConfirmationEmail(orderId: string): Promise<void
     guardianWhatsapp: order.guardianWhatsapp,
     shortCode: order.shortCode,
     totalAmount: order.totalAmount.toString(),
-    contractedDurationMinutes: order.contractedDurationMinutes,
     confirmationUrl,
-    qrCodeCid: qrCid,
+    tickets: tickets.map((t) => ({ ...t, qrCodeCid: `ticket-qrcode-${t.shortCode}` })),
     children: order.children.map((c) => ({
       name: c.name,
       passportTypeName: c.passportType.name,
@@ -147,12 +147,10 @@ export async function sendTicketConfirmationEmail(orderId: string): Promise<void
     to: order.guardianEmail,
     subject: `Sua compra Divercity Park — código ${order.shortCode}`,
     html,
-    attachments: [
-      {
-        filename: `qrcode-${order.shortCode}.png`,
-        content: qrBase64,
-        contentId: qrCid,
-      },
-    ],
+    attachments: tickets.map((t) => ({
+      filename: `qrcode-${t.shortCode}.png`,
+      content: t.qrCodeDataUrl.split(",")[1],
+      contentId: `ticket-qrcode-${t.shortCode}`,
+    })),
   });
 }

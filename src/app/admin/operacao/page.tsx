@@ -15,10 +15,10 @@ async function getOverview() {
   const since = startOfToday()
 
   const [currentlyInPark, awaitingEntry, checkedInToday, checkedOutToday] = await Promise.all([
-    prisma.ticketOrder.count({ where: { status: 'checked_in' } }),
-    prisma.ticketOrder.count({ where: { status: 'paid' } }),
-    prisma.ticketOrder.count({ where: { checkedInAt: { gte: since } } }),
-    prisma.ticketOrder.count({ where: { checkedOutAt: { gte: since } } }),
+    prisma.ticketPass.count({ where: { status: 'checked_in' } }),
+    prisma.ticketPass.count({ where: { status: 'not_used', order: { status: 'paid' } } }),
+    prisma.ticketPass.count({ where: { checkedInAt: { gte: since } } }),
+    prisma.ticketPass.count({ where: { checkedOutAt: { gte: since } } }),
   ])
 
   return { currentlyInPark, awaitingEntry, checkedInToday, checkedOutToday }
@@ -66,7 +66,7 @@ export default async function OperacaoOverviewPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={ClockIcon} label="No parque agora" value={currentlyInPark} />
-        <StatCard icon={TicketIcon} label="Pagos aguardando entrada" value={awaitingEntry} />
+        <StatCard icon={TicketIcon} label="Aguardando entrada" value={awaitingEntry} />
         <StatCard icon={LogInIcon} label="Check-ins hoje" value={checkedInToday} />
         <StatCard icon={LogOutIcon} label="Check-outs hoje" value={checkedOutToday} />
       </div>
@@ -76,9 +76,9 @@ export default async function OperacaoOverviewPage() {
           <CardTitle className="text-base">Como usar</CardTitle>
         </CardHeader>
         <CardContent className="text-muted-foreground flex flex-col gap-1.5 text-sm">
-          <p>Use <strong>Validar ticket</strong> para ler o QR Code do cliente ou digitar o código curto da compra.</p>
+          <p>Use <strong>Validar ticket</strong> para ler o QR Code do cliente ou digitar o código do ticket.</p>
           <p>Confira os dados e alertas exibidos antes de aprovar a entrada.</p>
-          <p>O mesmo código é usado novamente na saída para registrar o check-out.</p>
+          <p>O mesmo código do ticket é usado novamente na saída para registrar o check-out.</p>
         </CardContent>
       </Card>
     </div>

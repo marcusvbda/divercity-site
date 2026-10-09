@@ -12,13 +12,22 @@ export interface PassportType {
   updatedAt: string;
 }
 
-export type TicketOrderStatus =
-  | "pending_payment"
-  | "paid"
-  | "payment_failed"
-  | "cancelled"
-  | "checked_in"
-  | "checked_out";
+export type TicketOrderStatus = "pending_payment" | "paid" | "payment_failed" | "cancelled";
+
+export type TicketPassKind = "child" | "group_companion";
+export type TicketPassStatus = "not_used" | "checked_in" | "checked_out";
+
+export interface TicketSummary {
+  shortCode: string;
+  kind: TicketPassKind;
+  holderName: string;
+  status: TicketPassStatus;
+  contractedDurationMinutes: number;
+  checkedInAt: string | null;
+  checkedOutAt: string | null;
+  plannedEndAt: string | null;
+  overtimeMinutes: number | null;
+}
 
 export interface TicketOrderSummary {
   id: string;
@@ -27,9 +36,7 @@ export interface TicketOrderSummary {
   guardianName: string;
   guardianPhone: string;
   totalAmount: string;
-  childrenCount: number;
+  ticketsCount: number;
   createdAt: string;
-  checkedInAt: string | null;
-  checkedOutAt: string | null;
-  contractedDurationMinutes: number | null;
+  tickets: TicketSummary[];
 }

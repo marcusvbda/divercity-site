@@ -183,8 +183,10 @@ export function useTicketCart() {
   )
 
   const addExtraCompanion = useCallback(() => {
+    const companions = getValues('companions') ?? []
+    if (companions.some((c) => c.linkedChildIndex === undefined)) return
     companionsArray.append({ name: '', phone: '', passportTypeId: '' })
-  }, [companionsArray])
+  }, [companionsArray, getValues])
 
   const removeExtraCompanionAt = useCallback(
     (index: number) => {

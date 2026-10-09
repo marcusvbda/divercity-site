@@ -2,18 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/authz";
 import {
-  findOperationalOrderRecord,
+  findOperationalTicketRecord,
   normalizeShortCode,
-  operationalOrderInclude,
-  serializeOperationalOrder,
-} from "@/lib/tickets/get-operational-order";
+  operationalTicketInclude,
+  serializeOperationalTicket,
+} from "@/lib/tickets/get-operational-ticket";
 
-const INVALID_STATUS_MESSAGES: Record<string, string> = {
-  pending_payment: "Esta compra ainda não foi paga.",
-  payment_failed: "Esta compra ainda não foi paga.",
-  cancelled: "Esta compra foi cancelada.",
-  checked_in: "Check-in já realizado para esta compra.",
-  checked_out: "Esta compra já foi finalizada (check-out já realizado).",
+const UNPAID_MESSAGES: Record<string, string> = {
+  pending_payment: "A compra deste ticket ainda não foi paga.",
+  payment_failed: "A compra deste ticket ainda não foi paga.",
+  cancelled: "A compra deste ticket foi cancelada.",
+};
+
+const PASS_STATUS_MESSAGES: Record<string, string> = {
+  checked_in: "Check-in já realizado para este ticket.",
+  checked_out: "Este ticket já foi finalizado (check-out já realizado).",
 };
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ shortCode: string }> }) {
@@ -23,15 +26,13 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ sh
   const { shortCode } = await params;
   const normalized = normalizeShortCode(shortCode);
 
-  const order = await findOperationalOrderRecord(shortCode);
-  if (!order) {
-    return NextResponse.json({ error: "Compra não encontrada. Confira o código." }, { status: 404 });
+  const pass = await findOperationalTicketRecord(shortCode);
+  if (!pass) {
+    return NextResponse.json({ error: "Ticket não encontrado. Confira o código." }, { status: 404 });
   }
 
-  // Update condicionado ao status atual no WHERE — atômico no banco, evita que
-  // duas requisições concorrentes (duplo toque, dois operadores) ambas passem.
-  const result = await prisma.ticketOrder.updateMany({
-    where: { shortCode: normalized, status: "paid" },
+  const result = await prisma.ticketPass.updateMany({
+    where: { shortCode: normalized, status: "not_used", order: { status: "paid" } },
     data: {
       status: "checked_in",
       checkedInAt: new Date(),
@@ -40,16 +41,21 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ sh
   });
 
   if (result.count === 0) {
-    const current = await prisma.ticketOrder.findUnique({ where: { shortCode: normalized } });
+    const current = await prisma.ticketPass.findUnique({
+      where: { shortCode: normalized },
+      select: { status: true, order: { select: { status: true } } },
+    });
     const message =
-      (current && INVALID_STATUS_MESSAGES[current.status]) ?? "Esta compra não pode receber check-in.";
+      (current && current.order.status !== "paid" && UNPAID_MESSAGES[current.order.status]) ||
+      (current && PASS_STATUS_MESSAGES[current.status]) ||
+      "Este ticket não pode receber check-in.";
     return NextResponse.json({ error: message }, { status: 409 });
   }
 
-  const updated = await prisma.ticketOrder.findUniqueOrThrow({
+  const updated = await prisma.ticketPass.findUniqueOrThrow({
     where: { shortCode: normalized },
-    include: operationalOrderInclude,
+    include: operationalTicketInclude,
   });
 
-  return NextResponse.json(serializeOperationalOrder(updated));
+  return NextResponse.json(serializeOperationalTicket(updated));
 }

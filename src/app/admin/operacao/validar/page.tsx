@@ -19,7 +19,7 @@ export default function OperacaoSearchPage() {
   const [scannerOpen, setScannerOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  function goToOrder(rawCode: string) {
+  function goToTicket(rawCode: string) {
     const trimmed = rawCode.trim().toUpperCase()
     if (!trimmed) return
     router.push(`/admin/operacao/validar/${encodeURIComponent(trimmed)}`)
@@ -30,20 +30,20 @@ export default function OperacaoSearchPage() {
       <div className="w-full max-w-md text-center">
         <h1 className="text-2xl font-bold">Operação — Entrada e Saída</h1>
         <p className="text-sm text-muted-foreground">
-          Escaneie o QR Code do cliente ou digite o código da compra
+          Escaneie o QR Code do cliente ou digite o código do ticket
         </p>
       </div>
 
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Código curto</CardTitle>
+          <CardTitle>Código do ticket</CardTitle>
           <CardDescription>Ex: XYZ123</CardDescription>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              goToOrder(code)
+              goToTicket(code)
             }}
             className="flex gap-2"
           >
@@ -94,7 +94,7 @@ export default function OperacaoSearchPage() {
                 <XIcon className="size-4" />
                 Fechar câmera
               </Button>
-              <QrScanner active={scannerOpen} onScan={goToOrder} />
+              <QrScanner active={scannerOpen} onScan={goToTicket} />
             </>
           )}
         </CardContent>

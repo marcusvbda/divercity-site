@@ -15,11 +15,15 @@ function randomCode(): string {
 }
 
 /** Gera um código curto público (ex: "XYZ123"), garantindo unicidade no banco. */
-export async function generateUniqueShortCode(): Promise<string> {
+export async function generateUniqueShortCode(exclude: ReadonlySet<string> = new Set()): Promise<string> {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const code = randomCode();
-    const existing = await prisma.ticketOrder.findUnique({ where: { shortCode: code } });
-    if (!existing) return code;
+    if (exclude.has(code)) continue;
+    const [order, pass] = await Promise.all([
+      prisma.ticketOrder.findUnique({ where: { shortCode: code }, select: { id: true } }),
+      prisma.ticketPass.findUnique({ where: { shortCode: code }, select: { id: true } }),
+    ]);
+    if (!order && !pass) return code;
   }
   throw new Error("Não foi possível gerar um código curto único após várias tentativas");
 }

@@ -315,14 +315,16 @@ export default function CompraAntecipadaCheckout({
                   />
                 ))}
 
-                <button
-                  type="button"
-                  onClick={addExtraCompanion}
-                  className="font-body flex min-h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 transition-colors hover:border-brand-cyan hover:text-brand-cyan"
-                >
-                  <Plus size={16} />
-                  Adicionar acompanhante pago
-                </button>
+                {extraCompanionEntries.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={addExtraCompanion}
+                    className="font-body flex min-h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 transition-colors hover:border-brand-cyan hover:text-brand-cyan"
+                  >
+                    <Plus size={16} />
+                    Adicionar acompanhante pago
+                  </button>
+                )}
 
                 <GuardianFields control={control} errors={errors} />
 

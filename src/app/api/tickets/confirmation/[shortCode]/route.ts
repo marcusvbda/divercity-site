@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateTicketQrCodeDataUrl } from "@/lib/ticket-qrcode";
+import { getOrderTickets } from "@/lib/tickets/order-tickets";
 import { getStripeClient } from "@/lib/stripe";
 import { finalizeOrderPayment } from "@/lib/tickets/finalize-payment";
 
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shor
     return NextResponse.json({ status: order.status });
   }
 
-  const qrCodeDataUrl = await generateTicketQrCodeDataUrl(order.shortCode);
+  const tickets = await getOrderTickets(order.id);
 
   return NextResponse.json({
     status: order.status,
@@ -53,8 +53,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ shor
     guardianPhone: order.guardianPhone,
     guardianWhatsapp: order.guardianWhatsapp,
     totalAmount: order.totalAmount.toFixed(2),
-    contractedDurationMinutes: order.contractedDurationMinutes,
-    qrCodeDataUrl,
+    tickets,
     children: order.children.map((c) => ({
       name: c.name,
       passportTypeName: c.passportType.name,

@@ -18,8 +18,8 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import type { ConfirmationPaidResponse, ConfirmationResponse } from './types'
-import { currency, formatAge } from './utils'
+import type { ConfirmationPaidResponse, ConfirmationResponse, ConfirmationTicket } from './types'
+import { currency } from './utils'
 
 const POLL_INTERVAL_MS = 2000
 const LONG_WAIT_MS = 60000
@@ -58,17 +58,84 @@ function StatusCard({
   )
 }
 
-function PaidConfirmation({
-  data,
+function TicketCard({
+  ticket,
   copied,
   onCopy,
 }: {
-  data: ConfirmationPaidResponse
+  ticket: ConfirmationTicket
   copied: boolean
   onCopy: () => void
 }) {
-  const hasFreeCompanionChild = (data.children ?? []).some((c) => c.hasCompanion === true)
-  const hasUnaccompaniedChild = (data.children ?? []).some((c) => c.hasCompanion === false)
+  return (
+    <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-5 shadow-sm md:p-8">
+      <div className="flex w-full flex-col items-center gap-1 text-center">
+        <h2 className="font-heading text-lg font-bold text-gray-800">{ticket.holderName}</h2>
+        <div className="font-body flex flex-wrap items-center justify-center gap-x-2 text-xs text-gray-500">
+          <span>{ticket.passportTypeName}</span>
+          <span className="inline-flex items-center gap-1">
+            <Clock size={12} />
+            {ticket.contractedDurationMinutes} min
+          </span>
+          {ticket.isPNE && (
+            <span className="text-brand-purple inline-flex items-center gap-0.5 font-semibold">
+              <Sparkles size={10} /> PNE
+            </span>
+          )}
+        </div>
+        {ticket.companionIncluded && (
+          <p className="font-body mt-1 flex items-start gap-1.5 text-xs text-gray-600">
+            <Users size={13} className="mt-0.5 shrink-0 text-brand-cyan" />
+            1 acompanhante incluso: {ticket.companionIncluded.name}
+          </p>
+        )}
+      </div>
+
+      {ticket.qrCodeDataUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={ticket.qrCodeDataUrl}
+          alt={`QR Code de acesso do ingresso ${ticket.shortCode}`}
+          className="h-52 w-52 rounded-xl border border-gray-100"
+        />
+      )}
+
+      <div className="flex flex-col items-center gap-1.5">
+        <span className="font-body text-xs text-gray-400">Código do ticket</span>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="font-heading flex min-h-11 items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-2xl font-bold tracking-widest text-gray-800 transition-colors hover:border-brand-pink"
+          aria-label={`Copiar código ${ticket.shortCode}`}
+        >
+          {ticket.shortCode}
+          {copied ? <Check size={18} className="text-brand-lime" /> : <Copy size={18} className="text-gray-400" />}
+        </button>
+      </div>
+
+      {ticket.qrCodeDataUrl && (
+        <a href={ticket.qrCodeDataUrl} download={`ingresso-${ticket.shortCode}.png`}>
+          <Button type="button" className="bg-brand-pink hover:bg-brand-pink/90 rounded-full text-white">
+            <Download size={16} />
+            Salvar QR Code
+          </Button>
+        </a>
+      )}
+    </div>
+  )
+}
+
+function PaidConfirmation({
+  data,
+  copiedCode,
+  onCopy,
+}: {
+  data: ConfirmationPaidResponse
+  copiedCode: string | null
+  onCopy: (code: string) => void
+}) {
+  const hasFreeCompanionChild = data.children.some((c) => c.hasCompanion === true)
+  const hasUnaccompaniedChild = data.children.some((c) => c.hasCompanion === false || c.unaccompanied)
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -78,49 +145,24 @@ function PaidConfirmation({
         </div>
         <h1 className="font-heading text-2xl font-bold text-gray-800 md:text-3xl">Pagamento confirmado!</h1>
         <p className="font-body max-w-md text-sm text-gray-500">
-          Obrigado, {data.guardianName}. Seu ingresso já está pronto — mostre o QR Code ou o código abaixo
-          na entrada do parque.
+          Obrigado, {data.guardianName}. Seus ingressos já estão prontos — mostre o QR Code ou o código de
+          cada ticket na entrada do parque.
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-8 shadow-sm">
-        {data.qrCodeDataUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={data.qrCodeDataUrl}
-            alt={`QR Code de acesso do ingresso ${data.shortCode}`}
-            className="h-52 w-52 rounded-xl border border-gray-100"
-          />
-        )}
+      {data.tickets.map((ticket) => (
+        <TicketCard
+          key={ticket.shortCode}
+          ticket={ticket}
+          copied={copiedCode === ticket.shortCode}
+          onCopy={() => onCopy(ticket.shortCode)}
+        />
+      ))}
 
-        <div className="flex flex-col items-center gap-1.5">
-          <span className="font-body text-xs text-gray-400">Código de acesso</span>
-          <button
-            type="button"
-            onClick={onCopy}
-            className="font-heading flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-2xl font-bold tracking-widest text-gray-800 transition-colors hover:border-brand-pink"
-          >
-            {data.shortCode}
-            {copied ? <Check size={18} className="text-brand-lime" /> : <Copy size={18} className="text-gray-400" />}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {data.qrCodeDataUrl && (
-            <a href={data.qrCodeDataUrl} download={`ingresso-${data.shortCode}.png`}>
-              <Button type="button" className="bg-brand-pink hover:bg-brand-pink/90 rounded-full text-white">
-                <Download size={16} />
-                Salvar QR Code
-              </Button>
-            </a>
-          )}
-        </div>
-
-        <p className="font-body flex items-center gap-1.5 text-xs text-gray-400">
-          <Camera size={13} />
-          Você também pode tirar um print desta tela.
-        </p>
-      </div>
+      <p className="font-body flex items-center justify-center gap-1.5 text-xs text-gray-400">
+        <Camera size={13} />
+        Você também pode tirar um print desta tela.
+      </p>
 
       <div className="font-body flex items-start gap-3 rounded-2xl border-2 border-brand-yellow bg-brand-yellow/10 p-4 text-sm text-gray-700">
         <ShieldAlert size={20} className="mt-0.5 shrink-0 text-brand-yellow" />
@@ -133,34 +175,22 @@ function PaidConfirmation({
       <div className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm md:p-6">
         <h2 className="font-heading text-sm font-bold text-gray-800">Resumo da compra</h2>
 
-        <div className="flex flex-col gap-2 border-b border-gray-100 pb-3 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-body text-gray-500">Duração contratada</span>
-            <span className="font-body flex items-center gap-1 font-semibold text-gray-800">
-              <Clock size={14} />
-              {data.contractedDurationMinutes} min
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="font-body text-gray-500">Valor total</span>
-            <span className="font-heading text-brand-pink text-lg font-bold">{currency(data.totalAmount)}</span>
-          </div>
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-sm">
+          <span className="font-body text-gray-500">Valor total</span>
+          <span className="font-heading text-brand-pink text-lg font-bold">{currency(data.totalAmount)}</span>
         </div>
 
-        {(data.children ?? []).length > 0 && (
+        {data.children.length > 0 && (
           <div className="flex flex-col gap-2 border-b border-gray-100 pb-3">
             <span className="font-body text-xs font-semibold text-gray-400">Crianças</span>
-            {(data.children ?? []).map((child, idx) => (
+            {data.children.map((child, idx) => (
               <div key={`conf-child-${idx}`} className="flex flex-col gap-1 rounded-xl bg-gray-50 p-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-body text-sm font-medium text-gray-700">{child.name ?? `Criança ${idx + 1}`}</span>
-                  {child.unitPrice !== undefined && (
-                    <span className="font-body text-sm font-semibold text-gray-800">{currency(child.unitPrice)}</span>
-                  )}
+                  <span className="font-body text-sm font-medium text-gray-700">{child.name}</span>
+                  <span className="font-body text-sm font-semibold text-gray-800">{currency(child.unitPrice)}</span>
                 </div>
                 <div className="font-body flex flex-wrap items-center gap-1.5 text-[11px] text-gray-400">
-                  {child.passportTypeName && <span>{child.passportTypeName}</span>}
-                  {typeof child.ageMonths === 'number' && <span>· {formatAge(child.ageMonths)}</span>}
+                  <span>{child.passportTypeName}</span>
                   {child.isPNE && (
                     <span className="text-brand-purple inline-flex items-center gap-0.5 font-semibold">
                       <Sparkles size={10} /> PNE
@@ -178,7 +208,7 @@ function PaidConfirmation({
                   <p className="font-body mt-1 flex items-start gap-1.5 text-xs text-amber-700">
                     <AlertCircle size={13} className="mt-0.5 shrink-0" />
                     Sem acompanhante — Termo de Responsabilidade aceito. Contato do responsável:{' '}
-                    {data.guardianPhone ?? data.guardianWhatsapp ?? 'registrado na compra'}
+                    {data.guardianPhone || data.guardianWhatsapp || 'registrado na compra'}
                     {data.guardianPhone && data.guardianWhatsapp && data.guardianPhone !== data.guardianWhatsapp
                       ? ` / WhatsApp ${data.guardianWhatsapp}`
                       : ''}
@@ -190,17 +220,12 @@ function PaidConfirmation({
           </div>
         )}
 
-        {(data.companions ?? []).length > 0 && (
+        {data.companions.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="font-body text-xs font-semibold text-gray-400">Acompanhantes</span>
-            {(data.companions ?? []).map((companion, idx) => (
+            {data.companions.map((companion, idx) => (
               <div key={`conf-companion-${idx}`} className="flex items-center justify-between rounded-xl bg-gray-50 p-3">
-                <div className="flex flex-col">
-                  <span className="font-body text-sm font-medium text-gray-700">{companion.name ?? `Acompanhante ${idx + 1}`}</span>
-                  {companion.passportTypeName && (
-                    <span className="font-body text-[11px] text-gray-400">{companion.passportTypeName}</span>
-                  )}
-                </div>
+                <span className="font-body text-sm font-medium text-gray-700">{companion.name}</span>
                 <span
                   className={
                     companion.isFree
@@ -208,7 +233,7 @@ function PaidConfirmation({
                       : 'font-body text-sm font-semibold text-gray-800'
                   }
                 >
-                  {companion.isFree ? 'Gratuito' : companion.unitPrice ? currency(companion.unitPrice) : ''}
+                  {companion.isFree ? 'Gratuito' : currency(companion.unitPrice)}
                 </span>
               </div>
             ))}
@@ -224,8 +249,8 @@ function PaidConfirmation({
       </div>
 
       <p className="font-body text-center text-xs text-gray-400">
-        Enviamos uma cópia deste comprovante para o seu e-mail. Guarde o código{' '}
-        <strong>{data.shortCode}</strong> — ele também será usado na saída do parque.
+        Enviamos uma cópia deste comprovante para o seu e-mail. Guarde o código de cada ticket — ele também
+        será usado na saída do parque.
       </p>
 
       <div className="flex justify-center">
@@ -238,7 +263,7 @@ function PaidConfirmation({
 }
 
 export default function ConfirmationView({ shortCode }: { shortCode: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [longWait, setLongWait] = useState(false)
 
   const query = useQuery<ConfirmationResponse, Error>({
@@ -257,11 +282,11 @@ export default function ConfirmationView({ shortCode }: { shortCode: string }) {
     return () => clearTimeout(timer)
   }, [])
 
-  function handleCopy() {
+  function handleCopy(code: string) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return
-    navigator.clipboard.writeText(shortCode).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedCode(code)
+      setTimeout(() => setCopiedCode(null), 2000)
     })
   }
 
@@ -321,8 +346,8 @@ export default function ConfirmationView({ shortCode }: { shortCode: string }) {
     )
   }
 
-  if (data.status === 'paid' || data.status === 'checked_in' || data.status === 'checked_out') {
-    return <PaidConfirmation data={data} copied={copied} onCopy={handleCopy} />
+  if (data.status === 'paid') {
+    return <PaidConfirmation data={data} copiedCode={copiedCode} onCopy={handleCopy} />
   }
 
   return null
