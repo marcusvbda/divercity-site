@@ -19,7 +19,7 @@ import {
   FieldLabel,
 } from "@/components/admin/ui/field";
 
-export default function ResetPasswordForm({ logoUrl }: { logoUrl?: string }) {
+export default function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [code] = useState(() => searchParams.get("code"));
@@ -65,7 +65,6 @@ export default function ResetPasswordForm({ logoUrl }: { logoUrl?: string }) {
   if (done) {
     return (
       <AuthCard
-        logoUrl={logoUrl}
         title="Senha redefinida!"
         description="Sua senha foi atualizada. Redirecionando para o login..."
       />
@@ -75,7 +74,6 @@ export default function ResetPasswordForm({ logoUrl }: { logoUrl?: string }) {
   if (exchangeFailed) {
     return (
       <AuthCard
-        logoUrl={logoUrl}
         title="Link inválido"
         description="Link inválido ou expirado."
       >
@@ -92,7 +90,6 @@ export default function ResetPasswordForm({ logoUrl }: { logoUrl?: string }) {
   if (verifying) {
     return (
       <AuthCard
-        logoUrl={logoUrl}
         title="Redefinir senha"
         description="Verificando link..."
       >
@@ -105,7 +102,6 @@ export default function ResetPasswordForm({ logoUrl }: { logoUrl?: string }) {
 
   return (
     <AuthCard
-      logoUrl={logoUrl}
       title="Redefinir senha"
       description="Escolha uma nova senha para sua conta"
     >

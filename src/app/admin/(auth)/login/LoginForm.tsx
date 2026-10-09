@@ -1,29 +1,29 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
-import { AuthCard } from "@/components/admin/auth-card";
-import { AuthPasswordInput } from "@/components/admin/auth-password-input";
-import { Button } from "@/components/admin/ui/button";
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useMutation } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
+import { loginSchema, type LoginFormData } from '@/lib/schemas/auth'
+import { AuthCard } from '@/components/admin/auth-card'
+import { AuthPasswordInput } from '@/components/admin/auth-password-input'
+import { Button } from '@/components/admin/ui/button'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/admin/ui/field";
-import { Input } from "@/components/admin/ui/input";
+} from '@/components/admin/ui/field'
+import { Input } from '@/components/admin/ui/input'
 
-export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/admin";
-  const [serverError, setServerError] = useState<string | null>(null);
+export default function LoginForm() {
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/admin'
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const {
     register,
@@ -31,28 +31,26 @@ export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  });
+  })
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         identifier: data.identifier,
         password: data.password,
         redirect: false,
-      });
-      if (result?.error) throw new Error("E-mail ou senha inválidos");
-      return result;
+      })
+      if (result?.error) throw new Error('E-mail ou senha inválidos')
+      return result
     },
-    onSuccess: () => { window.location.href = callbackUrl },
+    onSuccess: () => {
+      window.location.href = callbackUrl
+    },
     onError: (err: Error) => setServerError(err.message),
-  });
+  })
 
   return (
-    <AuthCard
-      logoUrl={logoUrl}
-      title="Entrar"
-      description="Acesse o painel do Divercity Park"
-    >
+    <AuthCard title="Entrar" description="Acesse o painel do Divercity Park">
       <form onSubmit={handleSubmit((data) => mutate(data))}>
         <FieldGroup className="gap-4">
           <Field data-invalid={!!errors.identifier}>
@@ -66,7 +64,7 @@ export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
               autoComplete="email"
               disabled={isPending}
               aria-invalid={!!errors.identifier}
-              {...register("identifier")}
+              {...register('identifier')}
             />
             <FieldError errors={[errors.identifier]} />
           </Field>
@@ -81,7 +79,7 @@ export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
               autoComplete="current-password"
               disabled={isPending}
               aria-invalid={!!errors.password}
-              {...register("password")}
+              {...register('password')}
             />
             <FieldError errors={[errors.password]} />
           </Field>
@@ -109,12 +107,12 @@ export default function LoginForm({ logoUrl }: { logoUrl?: string }) {
                   Entrando...
                 </>
               ) : (
-                "Entrar"
+                'Entrar'
               )}
             </Button>
           </Field>
         </FieldGroup>
       </form>
     </AuthCard>
-  );
+  )
 }

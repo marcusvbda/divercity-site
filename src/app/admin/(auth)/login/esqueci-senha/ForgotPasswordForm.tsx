@@ -1,25 +1,28 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase-browser";
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/schemas/auth";
-import { AuthCard } from "@/components/admin/auth-card";
-import { Button } from "@/components/admin/ui/button";
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import Link from 'next/link'
+import { useMutation } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
+import { supabaseBrowser } from '@/lib/supabase-browser'
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormData,
+} from '@/lib/schemas/auth'
+import { AuthCard } from '@/components/admin/auth-card'
+import { Button } from '@/components/admin/ui/button'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/admin/ui/field";
-import { Input } from "@/components/admin/ui/input";
+} from '@/components/admin/ui/field'
+import { Input } from '@/components/admin/ui/input'
 
-export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
-  const [sent, setSent] = useState(false);
+export default function ForgotPasswordForm() {
+  const [sent, setSent] = useState(false)
 
   const {
     register,
@@ -27,23 +30,23 @@ export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-  });
+  })
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: async (data: ForgotPasswordFormData) => {
       const { error } = await supabaseBrowser.auth.resetPasswordForEmail(
         data.email,
         { redirectTo: `${window.location.origin}/admin/login/redefinir-senha` }
-      );
-      if (error) throw new Error("Não foi possível enviar o e-mail. Tente novamente.");
+      )
+      if (error)
+        throw new Error('Não foi possível enviar o e-mail. Tente novamente.')
     },
     onSuccess: () => setSent(true),
-  });
+  })
 
   if (sent) {
     return (
       <AuthCard
-        logoUrl={logoUrl}
         title="E-mail enviado"
         description="Verifique sua caixa de entrada e clique no link para redefinir sua senha. O link expira em 1 hora."
       >
@@ -54,12 +57,11 @@ export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
           Voltar ao login
         </Link>
       </AuthCard>
-    );
+    )
   }
 
   return (
     <AuthCard
-      logoUrl={logoUrl}
       title="Esqueci minha senha"
       description="Insira seu e-mail para receber um link de recuperação"
     >
@@ -76,13 +78,15 @@ export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
               autoComplete="email"
               disabled={isPending}
               aria-invalid={!!errors.email}
-              {...register("email")}
+              {...register('email')}
             />
             <FieldError errors={[errors.email]} />
           </Field>
 
           {error && (
-            <p className="text-destructive text-center text-sm">{error.message}</p>
+            <p className="text-destructive text-center text-sm">
+              {error.message}
+            </p>
           )}
 
           <Field>
@@ -93,7 +97,7 @@ export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
                   Enviando...
                 </>
               ) : (
-                "Enviar link de recuperação"
+                'Enviar link de recuperação'
               )}
             </Button>
           </Field>
@@ -109,5 +113,5 @@ export default function ForgotPasswordForm({ logoUrl }: { logoUrl?: string }) {
         </FieldGroup>
       </form>
     </AuthCard>
-  );
+  )
 }
