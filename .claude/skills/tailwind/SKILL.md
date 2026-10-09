@@ -12,9 +12,10 @@ user-invocable: false
 
 ## Design Tokens
 
-- Brand colors: `brand-cyan` (#12C7C8), `brand-purple` (#8E4CCF), `brand-pink` (#FF4F8A), `brand-lime` (#9AD94B), `brand-yellow` (#FFD23F) — e.g. `bg-brand-cyan`, `text-brand-pink`
-- Fonts: `font-heading` (Fredoka), `font-body` (Poppins, default on `<body>`)
+- Public site only — brand colors: `brand-cyan` (#12C7C8), `brand-purple` (#8E4CCF), `brand-pink` (#FF4F8A), `brand-lime` (#9AD94B), `brand-yellow` (#FFD23F) — e.g. `bg-brand-cyan`, `text-brand-pink`
+- Public site fonts: `font-heading` (Fredoka), `font-body` (Poppins, default on `<body>`)
 - shadcn semantic tokens: `background`, `foreground`, `primary`, `muted`, `accent`, `destructive`, `border`, `ring`, `sidebar-*`, `chart-1..5`
+- Logged-in screens (`/admin/**`): Geist font and the template's semantic tokens only; no `brand-*`, `font-heading`, `gray-*` or framer-motion there
 - Utilities: `section-padding`, `container-max` (public site sections)
 
 ## Rules

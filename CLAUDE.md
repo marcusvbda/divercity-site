@@ -185,6 +185,12 @@ src/
     sections/
       Hero, PorQueEscolher, Atracoes, Festas,
       Precos, Galeria, Depoimentos, Contato, Footer
+    admin/              — kit do admin (template AdminCN, estilo base-vega)
+      ui/               — primitivos do admin (button, card, field, sidebar, select…)
+      layout/           — Sidebar, Header, Footer, ProfileDropdown, nav-config
+      calendar/         — calendário de festas
+      data-table.tsx    — listagens do admin
+      tiptap-editor.tsx — editor de modelos de contrato
   lib/
     cms.ts      — getContentType() — leitura do CMS
     prisma.ts   — instância do PrismaClient
@@ -256,7 +262,7 @@ O `ReactQueryProvider` já está configurado em `src/providers/ReactQueryProvide
 
 **Antes de criar qualquer componente de UI, verificar se o shadcn/ui já tem um equivalente.**
 
-Os componentes instalados estão em `src/components/ui/`. Consultar também a [documentação do shadcn](https://ui.shadcn.com/docs/components) para componentes disponíveis mas não instalados (instalar via `npx shadcn@latest add <componente>`).
+Os componentes do site público/portal ficam em `src/components/ui/`; o admin usa o kit próprio em `src/components/admin/ui/` (não importar `@/components/ui/*` no admin, exceto `contract-preview`). Consultar também a [documentação do shadcn](https://ui.shadcn.com/docs/components) para componentes disponíveis mas não instalados (instalar via `npx shadcn@latest add <componente>`).
 
 Exemplos do que já existe e **não deve ser recriado**:
 
@@ -264,13 +270,13 @@ Exemplos do que já existe e **não deve ser recriado**:
 | ------------------------ | ----------------------------- |
 | Botão                    | `Button` de `ui/button`       |
 | Input / Textarea         | `Input`, `Textarea`           |
-| Loading / pulse          | `Skeleton` de `ui/skeleton`   |
-| Badge / tag              | `Badge` de `ui/badge`         |
-| Modal / drawer           | `Sheet`, `Drawer`             |
-| Dropdown                 | `DropdownMenu`                |
-| Tooltip                  | `Tooltip`                     |
-| Select / Combobox        | `Select`                      |
-| Tabs                     | `Tabs`                        |
+| Loading / pulse          | `Skeleton` (`admin/ui`)       |
+| Badge / tag              | `Badge` (`admin/ui`)          |
+| Modal / drawer           | `Dialog`, `Sheet` (`admin/ui`)|
+| Dropdown                 | `DropdownMenu` (`admin/ui`)   |
+| Tooltip                  | `Tooltip` (`admin/ui`)        |
+| Select / Combobox        | `Select` (`admin/ui`)         |
+| Tabs                     | `Tabs` (`admin/ui`)           |
 
 ---
 

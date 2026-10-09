@@ -15,17 +15,17 @@ user-invocable: false
 
 - `@/components`, `@/components/ui`, `@/lib`, `@/lib/utils`, `@/hooks`
 
-## Installed in `src/components/ui/`
+## Installed
 
-avatar, badge, breadcrumb, button, card, chart, checkbox, drawer, dropdown-menu, field, input, label, popover, select, separator, sheet, sidebar, skeleton, sonner, table, tabs, textarea, toggle, toggle-group, tooltip.
+Public site / portal, in `src/components/ui/`: button, checkbox, input, label, plus project-specific `contract-preview` (also used by the admin), `cta` (CMS CTA), `Navbar`, `ImageModal`.
 
-Project-specific: `admin-data-table` (admin listings), `admin-sub-sidebar`, `sortable-table-head`, `contract-preview`, `tiptap-editor`, `cta` (CMS CTA), `Navbar`, `ImageModal`, `nav-skeleton`.
+Admin kit, in `src/components/admin/ui/` (AdminCN template, style `base-vega`, Base UI): alert, avatar, badge, breadcrumb, button, button-group, card, checkbox, collapsible, combobox, command, dialog, dropdown-menu, field, input, input-group, label, pagination, popover, scroll-area, select, separator, sheet, sidebar, skeleton, sonner, switch, table, tabs, textarea, toggle, toggle-group, tooltip. Admin-specific: `src/components/admin/data-table.tsx`, `tiptap-editor.tsx`, `calendar/`, `layout/`.
 
 ## Rules
 
-- Check `src/components/ui/` first; if shadcn has the component but it is not installed, `npx shadcn@latest add <component>` — never hand-roll it
+- Public site: check `src/components/ui/` first; admin: check `src/components/admin/ui/` first and never import `@/components/ui/*` there (except `contract-preview`); if shadcn has the component but it is not installed, `npx shadcn@latest add <component>` — never hand-roll it
 - Base UI composition uses the `render` prop, not `asChild`. Read the local component file for its API before using it
 - Use `cn()` from `@/lib/utils` and `cva()` for variants
 - Icons only from `lucide-react`; confirm the icon exists in the installed version
-- Admin listings use `AdminDataTable`; admin areas follow the sidebar + sub-sidebar layout
+- Admin listings use `src/components/admin/data-table.tsx`; admin navigation is the sidebar with submenus (`admin/layout/nav-config.ts`)
 - Do not edit generated shadcn components or `components.json` unless the task requires it

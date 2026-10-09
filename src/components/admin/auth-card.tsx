@@ -30,13 +30,13 @@ export function AuthCard({
 
       <Card className="z-1 w-full gap-6 py-6 sm:max-w-lg">
         <CardHeader className="gap-6 px-6">
-          <Link href="/" className="w-fit">
+          <Link href="/" className="flex w-fit items-center justify-center">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={logoUrl}
                 alt="Divercity Park"
-                className="h-10 w-auto max-w-full object-contain"
+                className="size-12 w-auto max-w-full object-contain"
               />
             ) : (
               <span className="text-xl font-semibold">Divercity Park</span>
