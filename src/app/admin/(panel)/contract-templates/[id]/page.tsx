@@ -54,7 +54,12 @@ export default function EditTemplatePage() {
         description={template?.name}
         defaultValues={
           template
-            ? { name: template.name, body: template.body, isDefault: template.isDefault }
+            ? {
+                name: template.name,
+                body: template.body,
+                isDefault: template.isDefault,
+                variableTypes: template.variableTypes ?? {},
+              }
             : undefined
         }
         onSubmit={mutation.mutate}

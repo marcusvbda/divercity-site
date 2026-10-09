@@ -7,6 +7,9 @@ export type ContractStatus =
   | "completed"
   | "cancelled";
 
+export type ContractPaymentStatus = "unpaid" | "partial" | "paid";
+export type ContractVariableType = "text" | "time" | "number" | "date";
+
 export interface Customer {
   id: number;
   cpf: string;
@@ -22,6 +25,7 @@ export interface ContractTemplate {
   name: string;
   body: string;
   variables: string[];
+  variableTypes: Record<string, ContractVariableType>;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
@@ -63,6 +67,10 @@ export interface Contract {
   clientToken?: string | null;
   clientLinkOpen: boolean;
   docusignEnvelopeId?: string | null;
+  value?: string | null;
+  additionalInfo?: string | null;
+  paymentStatus: ContractPaymentStatus;
+  clientFilledKeys: string[];
   sentAt?: string | null;
   createdAt: string;
   updatedAt: string;

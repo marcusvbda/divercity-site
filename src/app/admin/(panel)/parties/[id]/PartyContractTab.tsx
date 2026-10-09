@@ -13,6 +13,14 @@ import { Button } from '@/components/admin/ui/button'
 import { Badge } from '@/components/admin/ui/badge'
 import { Input } from '@/components/admin/ui/input'
 import { Label } from '@/components/admin/ui/label'
+import { Textarea } from '@/components/admin/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/admin/ui/select'
 import { Skeleton } from '@/components/admin/ui/skeleton'
 import {
   Card,
@@ -21,8 +29,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/admin/ui/card'
-import type { Party, ContractStatus } from '@/types/parties'
-import { buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
+import type {
+  Party,
+  Contract,
+  ContractStatus,
+  ContractPaymentStatus,
+  ContractVariableType,
+} from '@/types/parties'
+import {
+  buildContractValues,
+  buildDefaultValues,
+  isDefaultVariable,
+  CONTRACT_PAYMENT_STATUS_LABELS,
+} from '@/lib/contract-defaults'
+import { getVariableInputProps, renderContractBody } from '@/lib/contract-render'
 import { ContractPreview } from '@/components/ui/contract-preview'
 
 const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
@@ -60,11 +80,13 @@ function handleGeneratePdf(contract: {
 function VariablesEditor({
   contractId,
   variables,
+  types,
   initialValues,
   onSaved,
 }: {
   contractId: number
   variables: string[]
+  types: Record<string, ContractVariableType>
   initialValues: Record<string, string>
   onSaved: () => void
 }) {
@@ -102,6 +124,7 @@ function VariablesEditor({
             <div key={variable} className="flex flex-col gap-1.5">
               <Label className="font-mono text-xs">{`{{${variable}}}`}</Label>
               <Input
+                {...getVariableInputProps(values[variable] ?? '', types[variable])}
                 value={values[variable] ?? ''}
                 onChange={(e) =>
                   setValues((prev) => ({ ...prev, [variable]: e.target.value }))
@@ -118,6 +141,190 @@ function VariablesEditor({
           onClick={() => mutation.mutate(values)}
         >
           {mutation.isPending ? 'Salvando...' : 'Salvar variáveis'}
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
+function PaymentCard({
+  contract,
+  partyId,
+  partyDate,
+  locked,
+}: {
+  contract: Contract
+  partyId: string
+  partyDate: string
+  locked: boolean
+}) {
+  const queryClient = useQueryClient()
+  const hasStoredValue = contract.value != null && contract.value !== ''
+  const [valueText, setValueText] = useState(
+    hasStoredValue ? String(Number(contract.value)) : ''
+  )
+  const [valueEdited, setValueEdited] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<ContractPaymentStatus>(
+    contract.paymentStatus
+  )
+  const [additionalInfo, setAdditionalInfo] = useState(contract.additionalInfo ?? '')
+  const [errors, setErrors] = useState<{ value?: string; additionalInfo?: string }>({})
+
+  const { data: quoteData, isError: quoteError } = useQuery<{ salonPrice: number }>({
+    queryKey: ['party-budget-quote', 'salon_only', partyDate],
+    queryFn: () =>
+      fetch(
+        `/api/party-budget/quote?date=${encodeURIComponent(partyDate)}&paymentOption=salon_only`
+      ).then(async (r) => {
+        if (!r.ok) throw new Error('quote_failed')
+        return r.json()
+      }),
+    enabled: !hasStoredValue && !locked,
+    retry: false,
+  })
+  const suggestedValue =
+    typeof quoteData?.salonPrice === 'number' ? String(quoteData.salonPrice) : ''
+  const valueInput = hasStoredValue || valueEdited ? valueText : suggestedValue
+
+  const mutation = useMutation({
+    mutationFn: (payload: {
+      value: number | null
+      paymentStatus: ContractPaymentStatus
+      additionalInfo: string | null
+    }) =>
+      fetch(`/api/admin/contracts/${contract.id}/payment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).then(async (r) => ({ ok: r.ok, body: await r.json() })),
+    onSuccess: ({ ok, body }) => {
+      if (ok) {
+        toast.success('Pagamento salvo')
+        queryClient.invalidateQueries({ queryKey: ['admin', 'parties', partyId] })
+        queryClient.invalidateQueries({ queryKey: ['admin', 'parties'] })
+      } else {
+        const apiError = body?.error
+        toast.error(
+          typeof apiError === 'string'
+            ? apiError
+            : (apiError?.fieldErrors?.additionalInfo?.[0] ??
+                apiError?.fieldErrors?.value?.[0] ??
+                'Erro ao salvar pagamento')
+        )
+      }
+    },
+    onError: () => toast.error('Erro ao salvar pagamento'),
+  })
+
+  function handleSave() {
+    if (locked) {
+      mutation.mutate({
+        value: hasStoredValue ? Number(contract.value) : null,
+        paymentStatus,
+        additionalInfo: contract.additionalInfo ?? null,
+      })
+      return
+    }
+
+    const next: typeof errors = {}
+    const numeric = valueInput.trim() === '' ? null : Number(valueInput)
+    if (numeric !== null && (!Number.isFinite(numeric) || numeric < 0)) {
+      next.value = 'Valor inválido'
+    }
+    if (paymentStatus === 'partial' && !additionalInfo.trim()) {
+      next.additionalInfo = 'Descreva a negociação do pagamento parcial'
+    }
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
+
+    mutation.mutate({
+      value: numeric,
+      paymentStatus,
+      additionalInfo: additionalInfo.trim() || null,
+    })
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Valor e pagamento</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="payment-value">Valor do contrato</Label>
+            <div className="relative">
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
+                R$
+              </span>
+              <Input
+                id="payment-value"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                className="pl-9"
+                value={valueInput}
+                placeholder="0,00"
+                disabled={locked}
+                onChange={(e) => {
+                  setValueText(e.target.value)
+                  setValueEdited(true)
+                }}
+                aria-invalid={!!errors.value}
+              />
+            </div>
+            {quoteError && !hasStoredValue && !valueEdited && !locked && (
+              <p className="text-muted-foreground text-xs">
+                Não foi possível obter o preço do salão; informe o valor.
+              </p>
+            )}
+            {errors.value && <p className="text-destructive text-xs">{errors.value}</p>}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="payment-status">Status de pagamento</Label>
+            <Select
+              value={paymentStatus}
+              onValueChange={(v) => v && setPaymentStatus(v as ContractPaymentStatus)}
+            >
+              <SelectTrigger id="payment-status" className="w-full">
+                <SelectValue>{CONTRACT_PAYMENT_STATUS_LABELS[paymentStatus]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(CONTRACT_PAYMENT_STATUS_LABELS) as ContractPaymentStatus[]).map(
+                  (s) => (
+                    <SelectItem key={s} value={s}>
+                      {CONTRACT_PAYMENT_STATUS_LABELS[s]}
+                    </SelectItem>
+                  )
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="payment-info">
+            Informações adicionais{paymentStatus === 'partial' && !locked ? ' *' : ''}
+          </Label>
+          <Textarea
+            id="payment-info"
+            value={additionalInfo}
+            onChange={(e) => setAdditionalInfo(e.target.value)}
+            placeholder="Negociação, formas de pagamento, observações..."
+            disabled={locked}
+            aria-invalid={!!errors.additionalInfo}
+          />
+          {errors.additionalInfo && (
+            <p className="text-destructive text-xs">{errors.additionalInfo}</p>
+          )}
+        </div>
+        <Button
+          type="button"
+          className="w-fit"
+          disabled={mutation.isPending}
+          onClick={handleSave}
+        >
+          {mutation.isPending ? 'Salvando...' : 'Salvar pagamento'}
         </Button>
       </CardContent>
     </Card>
@@ -210,7 +417,11 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
   }
 
   const partyWithTemplate = party as Party & {
-    contractTemplate?: { variables?: string[]; body?: string }
+    contractTemplate?: {
+      variables?: string[]
+      body?: string
+      variableTypes?: Record<string, ContractVariableType>
+    }
   }
 
   const allVars: string[] = (
@@ -230,16 +441,16 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
     party as unknown as Parameters<typeof buildDefaultValues>[0]
   )
   const userValues = contract.fieldValues as Record<string, string>
-  const mergedValues = { ...defaultValues, ...userValues }
+  const mergedValues = {
+    ...defaultValues,
+    ...buildContractValues(contract),
+    ...userValues,
+  }
 
-  const renderedBody = bodyToRender.replace(
-    /\{\{(\w+)\}\}/g,
-    (_match: string, key: string) => {
-      if (mergedValues[key]) return mergedValues[key]
-      if (isDefaultVariable(key)) return ''
-      return `<span class="bg-amber-100 text-amber-700 rounded px-1 font-mono text-sm">${_match}</span>`
-    }
-  )
+  const variableTypes = partyWithTemplate?.contractTemplate?.variableTypes ?? {}
+  const renderedBody = renderContractBody(bodyToRender, mergedValues, variableTypes, {
+    highlightMissing: true,
+  })
 
   return (
     <>
@@ -314,11 +525,20 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
           </div>
         </div>
 
+        <PaymentCard
+          key={`${contract.id}-${contract.paymentStatus}-${contract.value}-${contract.additionalInfo}`}
+          contract={contract}
+          partyId={partyId}
+          partyDate={party!.date}
+          locked={isLocked}
+        />
+
         {allVars.length > 0 && (
           <VariablesEditor
             key={contract.id}
             contractId={contract.id}
             variables={allVars}
+            types={variableTypes}
             initialValues={contract.fieldValues as Record<string, string>}
             onSaved={() =>
               queryClient.invalidateQueries({

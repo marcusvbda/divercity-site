@@ -28,11 +28,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/admin/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/admin/ui/select'
+import { CONTRACT_VARIABLE_TYPE_LABELS } from '@/lib/contract-render'
+import type { ContractVariableType } from '@/types/parties'
 import { cn } from '@/lib/utils'
 
 type Props = {
   content: string
   onChange: (html: string) => void
+  onInsertVariable?: (name: string, type: ContractVariableType) => void
 }
 
 function ToolbarBtn({
@@ -62,8 +66,9 @@ function ToolbarBtn({
   )
 }
 
-export function TipTapEditor({ content, onChange }: Props) {
+export function TipTapEditor({ content, onChange, onInsertVariable }: Props) {
   const [varName, setVarName] = useState('')
+  const [varType, setVarType] = useState<ContractVariableType>('text')
   const [popoverOpen, setPopoverOpen] = useState(false)
 
   const editor = useEditor({
@@ -84,7 +89,9 @@ export function TipTapEditor({ content, onChange }: Props) {
     const name = varName.trim().replace(/\s+/g, '_')
     if (!name) return
     editor.chain().focus().insertContent(`{{${name}}}`).run()
+    onInsertVariable?.(name, varType)
     setVarName('')
+    setVarType('text')
     setPopoverOpen(false)
   }
 
@@ -213,6 +220,19 @@ export function TipTapEditor({ content, onChange }: Props) {
                 OK
               </Button>
             </div>
+            <p className="text-muted-foreground mt-3 mb-2 text-xs">Tipo</p>
+            <Select value={varType} onValueChange={(v) => v && setVarType(v as ContractVariableType)}>
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue>{CONTRACT_VARIABLE_TYPE_LABELS[varType]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(CONTRACT_VARIABLE_TYPE_LABELS) as ContractVariableType[]).map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {CONTRACT_VARIABLE_TYPE_LABELS[t]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </PopoverContent>
         </Popover>
       </div>

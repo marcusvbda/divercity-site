@@ -43,6 +43,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
   const variables = extractVariables(parsed.data.body)
+  const variableTypes = Object.fromEntries(
+    Object.entries(parsed.data.variableTypes ?? {}).filter(([key]) => variables.includes(key)),
+  )
 
   const template = await prisma.$transaction(async (tx) => {
     if (parsed.data.isDefault) {
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest) {
       })
     }
     return tx.contractTemplate.create({
-      data: { ...parsed.data, variables },
+      data: { ...parsed.data, variables, variableTypes },
     })
   })
 

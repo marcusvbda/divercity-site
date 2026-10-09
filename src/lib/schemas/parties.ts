@@ -10,10 +10,14 @@ export const CustomerSchema = z.object({
   phone: z.string().optional(),
 });
 
+export const ContractPaymentStatusSchema = z.enum(["unpaid", "partial", "paid"]);
+export const ContractVariableTypeSchema = z.enum(["text", "time", "number", "date"]);
+
 export const ContractTemplateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   body: z.string().min(1, "Conteúdo é obrigatório"),
   isDefault: z.boolean().optional(),
+  variableTypes: z.record(z.string(), ContractVariableTypeSchema).optional(),
 });
 
 export const PartySchema = z.object({
@@ -22,6 +26,31 @@ export const PartySchema = z.object({
   date: z.string().datetime(),
   dateEnd: z.string().datetime().optional().nullable(),
   status: z.enum(["pending", "confirmed", "cancelled"]).default("pending"),
+});
+
+const PARTIAL_PAYMENT_INFO_MESSAGE = "Descreva a negociação do pagamento parcial";
+
+const ContractPaymentBaseSchema = z.object({
+  paymentStatus: ContractPaymentStatusSchema,
+  additionalInfo: z.string().trim().optional().nullable(),
+});
+
+export const ContractPaymentSchema = ContractPaymentBaseSchema.extend({
+  value: z.number().min(0, "Valor inválido"),
+}).refine((data) => data.paymentStatus !== "partial" || !!data.additionalInfo, {
+  message: PARTIAL_PAYMENT_INFO_MESSAGE,
+  path: ["additionalInfo"],
+});
+
+export const UpdateContractPaymentSchema = ContractPaymentBaseSchema.extend({
+  value: z.number().min(0, "Valor inválido").nullable(),
+}).refine((data) => data.paymentStatus !== "partial" || !!data.additionalInfo, {
+  message: PARTIAL_PAYMENT_INFO_MESSAGE,
+  path: ["additionalInfo"],
+});
+
+export const CreatePartySchema = PartySchema.extend({
+  contract: ContractPaymentSchema,
 });
 
 export const ContractFieldValuesSchema = z.record(z.string(), z.string());
@@ -72,8 +101,13 @@ export const ServiceSchema = z.object({
   weekendPrice: z.number().min(0, "Valor inválido"),
 });
 
+export type ContractPaymentStatusInput = z.infer<typeof ContractPaymentStatusSchema>;
+export type ContractVariableTypeInput = z.infer<typeof ContractVariableTypeSchema>;
 export type CustomerInput = z.infer<typeof CustomerSchema>;
 export type ContractTemplateInput = z.infer<typeof ContractTemplateSchema>;
+export type ContractPaymentInput = z.infer<typeof ContractPaymentSchema>;
+export type CreatePartyInput = z.infer<typeof CreatePartySchema>;
+export type UpdateContractPaymentInput = z.infer<typeof UpdateContractPaymentSchema>;
 export type PartyInput = z.infer<typeof PartySchema>;
 export type ContractFieldValues = z.infer<typeof ContractFieldValuesSchema>;
 export type UpdateContractInput = z.infer<typeof UpdateContractSchema>;

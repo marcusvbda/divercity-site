@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { Contract, Party } from '@/types/parties'
-import { buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
+import type { Contract, ContractVariableType, Party } from '@/types/parties'
+import { buildContractValues, buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
+import { getVariableInputProps, renderContractBody } from '@/lib/contract-render'
 import { ContractPreview } from '@/components/ui/contract-preview'
 import { GuestList } from './GuestList'
 
@@ -17,7 +18,9 @@ export function ClientPortal({ hash }: Props) {
   const searchParams = useSearchParams()
   const dsEvent = searchParams.get('ds_event')
 
-  const [step, setStep] = useState(dsEvent === 'signing_complete' ? 4 : 1)
+  const queryClient = useQueryClient()
+
+  const [stepOverride, setStepOverride] = useState<number | null>(null)
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
 
   const {
@@ -40,7 +43,17 @@ export function ClientPortal({ hash }: Props) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fieldValues: values }),
-      }).then((r) => r.json()),
+      }).then(async (r) => {
+        if (!r.ok) {
+          const body = await r.json().catch(() => null)
+          throw new Error(typeof body?.error === 'string' ? body.error : 'Erro ao salvar seus dados')
+        }
+        return r.json()
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['client', 'contract', hash] })
+      setStepOverride(2)
+    },
   })
 
   const signMutation = useMutation({
@@ -56,24 +69,26 @@ export function ClientPortal({ hash }: Props) {
 
   // Derived values computed unconditionally (safe before hooks)
   const existingValues = (contract?.fieldValues as Record<string, string>) ?? {}
-  const contractParty = (contract as Contract & { party?: Party & { contractTemplate?: { variables?: string[]; body?: string } } })?.party
+  const contractParty = (contract as Contract & { party?: Party & { contractTemplate?: { variables?: string[]; body?: string; variableTypes?: Record<string, ContractVariableType> } } })?.party
   const template = contractParty?.contractTemplate
   const defaultValues = contractParty ? buildDefaultValues(contractParty as unknown as Parameters<typeof buildDefaultValues>[0]) : {}
-  const mergedValues = { ...defaultValues, ...existingValues }
+  const mergedValues = { ...defaultValues, ...(contract ? buildContractValues(contract) : {}), ...existingValues }
 
   const allVars: string[] = (template?.variables ?? Object.keys(existingValues)).filter(v => !isDefaultVariable(v))
-  const unfilledVars = allVars.filter((v) => !existingValues[v])
+  const variableTypes = template?.variableTypes ?? {}
+  const filledKeys = contract?.clientFilledKeys ?? []
+  const editableVars = allVars.filter((v) => !existingValues[v] || filledKeys.includes(v))
+  const hasEditable = editableVars.length > 0
+  const defaultStep = dsEvent === 'signing_complete' ? 4 : hasEditable ? 1 : 2
+  const step = stepOverride ?? defaultStep
+  const totalSteps = hasEditable ? 3 : 2
+  const stepNumber = (n: number) => (hasEditable ? n : n - 1)
+  const inputValue = (v: string) => fieldValues[v] ?? existingValues[v] ?? ''
 
   const completeMutation = useMutation({
     mutationFn: () =>
       fetch(`/api/client/contract/${hash}/complete`, { method: 'POST' }).then((r) => r.json()),
   })
-
-  // ALL hooks must be before early returns — skip step 1 if all variables are already filled
-  useEffect(() => {
-    if (!contract || isLoading) return
-    if (step === 1 && unfilledVars.length === 0) setStep(2)
-  }, [step, unfilledVars.length, contract, isLoading])
 
   // Quando volta do DocuSign, confirma assinatura e atualiza contrato + festa
   useEffect(() => {
@@ -120,7 +135,7 @@ export function ClientPortal({ hash }: Props) {
   }
 
   if (contract.status === 'signed' || contract.status === 'completed') {
-    const renderedBody = renderBody(contract.body, mergedValues)
+    const renderedBody = renderContractBody(contract.body, mergedValues, variableTypes, { highlightMissing: true })
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-6 rounded-lg bg-green-50 p-4 text-center dark:bg-green-950/20">
@@ -133,12 +148,10 @@ export function ClientPortal({ hash }: Props) {
   }
 
   if (step === 1) {
-    if (unfilledVars.length === 0) return null
-
     return (
       <div className="mx-auto max-w-xl px-4 py-12">
         <div className="mb-8">
-          <div className="text-muted-foreground mb-2 text-xs">Passo 1 de 3</div>
+          <div className="text-muted-foreground mb-2 text-xs">Passo {stepNumber(1)} de {totalSteps}</div>
           <h1 className="text-xl font-bold">Preencha seus dados</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Complete as informações do seu contrato.
@@ -146,11 +159,12 @@ export function ClientPortal({ hash }: Props) {
         </div>
 
         <div className="flex flex-col gap-4">
-          {unfilledVars.map((variable) => (
+          {editableVars.map((variable) => (
             <div key={variable} className="flex flex-col gap-1.5">
               <Label>{variable.replace(/_/g, ' ')}</Label>
               <Input
-                value={fieldValues[variable] ?? ''}
+                {...getVariableInputProps(inputValue(variable), variableTypes[variable])}
+                value={inputValue(variable)}
                 onChange={(e) =>
                   setFieldValues((prev) => ({ ...prev, [variable]: e.target.value }))
                 }
@@ -163,26 +177,32 @@ export function ClientPortal({ hash }: Props) {
             className="mt-2"
             onClick={() => {
               saveMutation.mutate(
-                { ...existingValues, ...fieldValues },
-                { onSuccess: () => setStep(2) },
+                Object.fromEntries(editableVars.map((v) => [v, inputValue(v)])),
               )
             }}
             disabled={saveMutation.isPending}
           >
             {saveMutation.isPending ? 'Salvando...' : 'Continuar'}
           </Button>
+          {saveMutation.error && (
+            <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+              {(saveMutation.error as Error).message}
+            </p>
+          )}
         </div>
       </div>
     )
   }
 
   if (step === 2) {
-    const renderedBody = renderBody(contract.body, { ...mergedValues, ...fieldValues })
+    const renderedBody = renderContractBody(contract.body, { ...mergedValues, ...fieldValues }, variableTypes, {
+      highlightMissing: true,
+    })
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-8">
-          <div className="text-muted-foreground mb-2 text-xs">Passo 2 de 3</div>
+          <div className="text-muted-foreground mb-2 text-xs">Passo {stepNumber(2)} de {totalSteps}</div>
           <h1 className="text-xl font-bold">Revise seu contrato</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Leia o contrato antes de prosseguir.
@@ -194,12 +214,12 @@ export function ClientPortal({ hash }: Props) {
         </div>
 
         <div className="flex gap-3">
-          {unfilledVars.length > 0 && (
-            <Button variant="outline" onClick={() => setStep(1)}>
+          {hasEditable && (
+            <Button variant="outline" onClick={() => setStepOverride(1)}>
               Voltar
             </Button>
           )}
-          <Button onClick={() => setStep(3)}>Continuar</Button>
+          <Button onClick={() => setStepOverride(3)}>Continuar</Button>
         </div>
       </div>
     )
@@ -235,7 +255,7 @@ export function ClientPortal({ hash }: Props) {
   return (
     <div className="mx-auto max-w-xl px-4 py-12">
       <div className="mb-8">
-        <div className="text-muted-foreground mb-2 text-xs">Passo 3 de 3</div>
+        <div className="text-muted-foreground mb-2 text-xs">Passo {stepNumber(3)} de {totalSteps}</div>
         <h1 className="text-xl font-bold">Assinar contrato</h1>
         <p className="text-muted-foreground mt-1 text-sm">
           Assine digitalmente para confirmar o seu contrato.
@@ -289,7 +309,7 @@ export function ClientPortal({ hash }: Props) {
       )}
 
       <div className="flex gap-3">
-        <Button variant="outline" onClick={() => setStep(2)}>
+        <Button variant="outline" onClick={() => setStepOverride(2)}>
           Voltar
         </Button>
         <Button onClick={() => signMutation.mutate()} disabled={signMutation.isPending} className="flex-1">
@@ -298,12 +318,4 @@ export function ClientPortal({ hash }: Props) {
       </div>
     </div>
   )
-}
-
-function renderBody(body: string, values: Record<string, string>): string {
-  return body.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    if (values[key]) return values[key]
-    if (key.startsWith('cliente_') || key.startsWith('festa_')) return ''
-    return `<span class="bg-amber-100 text-amber-700 rounded px-1 font-mono text-xs">${match}</span>`
-  })
 }

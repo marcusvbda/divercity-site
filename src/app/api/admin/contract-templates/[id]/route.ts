@@ -23,6 +23,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
   const variables = extractVariables(parsed.data.body)
+  const variableTypes = parsed.data.variableTypes
+    ? Object.fromEntries(
+        Object.entries(parsed.data.variableTypes).filter(([key]) => variables.includes(key)),
+      )
+    : undefined
 
   const template = await prisma.$transaction(async (tx) => {
     if (parsed.data.isDefault) {
@@ -34,7 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const updated = await tx.contractTemplate.update({
       where: { id: Number(id) },
-      data: { ...parsed.data, variables },
+      data: { ...parsed.data, variables, variableTypes },
     })
 
     const nonSignedContracts = await tx.contract.findMany({

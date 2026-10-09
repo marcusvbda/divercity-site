@@ -120,6 +120,7 @@ export default function EditPartyPage() {
 
         <TabsContent value="dados" className="mt-4">
           <PartyForm
+            mode="edit"
             defaultValues={party}
             onSubmit={mutation.mutate}
             isLoading={mutation.isPending}

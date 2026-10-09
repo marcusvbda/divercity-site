@@ -50,5 +50,30 @@ export function buildDefaultValues(party: PartyLike): Record<string, string> {
 }
 
 export function isDefaultVariable(key: string): boolean {
-  return key.startsWith('cliente_') || key.startsWith('festa_')
+  return key.startsWith('cliente_') || key.startsWith('festa_') || key.startsWith('contrato_')
+}
+
+export const CONTRACT_PAYMENT_STATUS_LABELS: Record<'unpaid' | 'partial' | 'paid', string> = {
+  unpaid: 'Não pago',
+  partial: 'Parcial',
+  paid: 'Pago',
+}
+
+type ContractLike = {
+  value?: { toString(): string } | string | number | null
+  paymentStatus?: 'unpaid' | 'partial' | 'paid' | null
+  additionalInfo?: string | null
+}
+
+const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
+export function buildContractValues(contract: ContractLike): Record<string, string> {
+  const amount = contract.value == null ? NaN : Number(String(contract.value))
+  return {
+    contrato_valor: Number.isFinite(amount) ? BRL.format(amount) : '',
+    contrato_status_pagamento: contract.paymentStatus
+      ? CONTRACT_PAYMENT_STATUS_LABELS[contract.paymentStatus]
+      : '',
+    contrato_informacoes_adicionais: contract.additionalInfo ?? '',
+  }
 }

@@ -89,6 +89,12 @@ enum ContractStatus {
   cancelled
 }
 
+enum ContractPaymentStatus {
+  unpaid
+  partial
+  paid
+}
+
 enum PartyPaymentOption {
   salon_only
   salon_and_passports
@@ -117,6 +123,7 @@ model ContractTemplate {
   name      String
   body      String
   variables String[]
+  variableTypes Json @default("{}")
   isDefault Boolean  @default(false)
   parties   Party[]
   createdAt DateTime @default(now())
@@ -173,6 +180,10 @@ model Contract {
   clientToken         String?        @unique
   clientLinkOpen      Boolean        @default(false)
   docusignEnvelopeId  String?
+  value               Decimal?       @db.Decimal(10, 2)
+  additionalInfo      String?
+  paymentStatus       ContractPaymentStatus @default(unpaid)
+  clientFilledKeys    String[]       @default([])
   sentAt              DateTime?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt

@@ -26,6 +26,12 @@ function isSkipColumn(col: string): boolean {
   return false
 }
 
+const CONTRATO_VARIABLES = [
+  { key: 'contrato_valor', label: 'Valor do contrato' },
+  { key: 'contrato_status_pagamento', label: 'Status de pagamento' },
+  { key: 'contrato_informacoes_adicionais', label: 'Informações adicionais' },
+]
+
 export async function GET() {
   const [customerCols, partyCols] = await Promise.all([
     prisma.$queryRaw<ColRow[]>`
@@ -53,6 +59,11 @@ export async function GET() {
       key:      `festa_${column_name}`,
       variable: `{{festa_${column_name}}}`,
       label:    humanize(column_name),
+    })),
+    contrato: CONTRATO_VARIABLES.map(({ key, label }) => ({
+      key,
+      variable: `{{${key}}}`,
+      label,
     })),
   })
 }

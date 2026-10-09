@@ -11,14 +11,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from '@/components/admin/ui/checkbox'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/admin/ui/field'
 import { Input } from '@/components/admin/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/admin/ui/select'
 import { Skeleton } from '@/components/admin/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/admin/ui/tabs'
 import { TipTapEditor } from '@/components/admin/tiptap-editor'
 import type { ContractTemplateInput } from '@/lib/schemas/parties'
 import { isDefaultVariable } from '@/lib/contract-defaults'
+import { CONTRACT_VARIABLE_TYPE_LABELS } from '@/lib/contract-render'
+import type { ContractVariableType } from '@/types/parties'
 
 type VariableItem = { key: string; variable: string; label: string }
-type ContractVariables = { cliente: VariableItem[]; festa: VariableItem[] }
+type ContractVariables = { cliente: VariableItem[]; festa: VariableItem[]; contrato: VariableItem[] }
 
 type Props = {
   title: string
@@ -32,6 +35,9 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
   const [name, setName] = useState(defaultValues?.name ?? '')
   const [body, setBody] = useState(defaultValues?.body ?? '')
   const [isDefault, setIsDefault] = useState(defaultValues?.isDefault ?? false)
+  const [variableTypes, setVariableTypes] = useState<Record<string, ContractVariableType>>(
+    defaultValues?.variableTypes ?? {}
+  )
   const [errors, setErrors] = useState<{ name?: string; body?: string }>({})
 
   const { data: contractVars, isLoading: varsLoading } = useQuery<ContractVariables>({
@@ -39,6 +45,9 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
     queryFn: () => fetch('/api/admin/contract-variables').then(r => r.json()),
     staleTime: Infinity,
   })
+
+  const allDetected = [...new Set((body.match(/\{\{(\w+)\}\}/g) ?? []).map(m => m.replace(/[{}]/g, '')))]
+  const customVariables = allDetected.filter(v => !isDefaultVariable(v))
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,16 +59,16 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
       return
     }
     setErrors({})
-    onSubmit({ name: name.trim(), body, isDefault })
+    const usedTypes = Object.fromEntries(
+      customVariables.map(v => [v, variableTypes[v] ?? 'text'] as const)
+    )
+    onSubmit({ name: name.trim(), body, isDefault, variableTypes: usedTypes })
   }
 
   function copyVariable(variable: string) {
     navigator.clipboard.writeText(variable)
     toast.success(`${variable} copiado!`)
   }
-
-  const allDetected = [...new Set((body.match(/\{\{(\w+)\}\}/g) ?? []).map(m => m.replace(/[{}]/g, '')))]
-  const customVariables = allDetected.filter(v => !isDefaultVariable(v))
 
   function renderVariables(items: VariableItem[]) {
     return (
@@ -125,16 +134,24 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
                   <TabsList className="mb-3">
                     <TabsTrigger value="cliente">Cliente</TabsTrigger>
                     <TabsTrigger value="festa">Festa</TabsTrigger>
+                    <TabsTrigger value="contrato">Contrato</TabsTrigger>
                   </TabsList>
                   <TabsContent value="cliente">{renderVariables(contractVars.cliente)}</TabsContent>
                   <TabsContent value="festa">{renderVariables(contractVars.festa)}</TabsContent>
+                  <TabsContent value="contrato">{renderVariables(contractVars.contrato ?? [])}</TabsContent>
                 </Tabs>
               ) : null}
             </Field>
 
             <Field data-invalid={!!errors.body}>
               <FieldLabel>Conteúdo *</FieldLabel>
-              <TipTapEditor content={body} onChange={setBody} />
+              <TipTapEditor
+                content={body}
+                onChange={setBody}
+                onInsertVariable={(varName, type) =>
+                  setVariableTypes(prev => ({ ...prev, [varName]: type }))
+                }
+              />
               {errors.body && <FieldError>{errors.body}</FieldError>}
             </Field>
 
@@ -144,11 +161,30 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
                   Variáveis extras detectadas ({customVariables.length}) — serão preenchidas manualmente:
                 </AlertTitle>
                 <AlertDescription>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="mt-2 flex flex-col gap-2">
                     {customVariables.map(v => (
-                      <Badge key={v} variant="secondary" className="font-mono">
-                        {`{{${v}}}`}
-                      </Badge>
+                      <div key={v} className="flex items-center justify-between gap-3">
+                        <Badge variant="secondary" className="font-mono">
+                          {`{{${v}}}`}
+                        </Badge>
+                        <Select
+                          value={variableTypes[v] ?? 'text'}
+                          onValueChange={t =>
+                            t && setVariableTypes(prev => ({ ...prev, [v]: t as ContractVariableType }))
+                          }
+                        >
+                          <SelectTrigger size="sm" className="w-32" aria-label={`Tipo de ${v}`}>
+                            <SelectValue>{CONTRACT_VARIABLE_TYPE_LABELS[variableTypes[v] ?? 'text']}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(Object.keys(CONTRACT_VARIABLE_TYPE_LABELS) as ContractVariableType[]).map(t => (
+                              <SelectItem key={t} value={t}>
+                                {CONTRACT_VARIABLE_TYPE_LABELS[t]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     ))}
                   </div>
                 </AlertDescription>

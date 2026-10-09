@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { PartySchema } from '@/lib/schemas/parties'
+import { CreatePartySchema } from '@/lib/schemas/parties'
 
 export async function GET(req: NextRequest) {
   const page = Number(req.nextUrl.searchParams.get('page') ?? '1')
@@ -46,10 +46,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const parsed = PartySchema.safeParse(body)
+  const parsed = CreatePartySchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
+
+  const { contract: contractInput, ...partyData } = parsed.data
 
   const newStart = new Date(parsed.data.date)
   const newEnd = parsed.data.dateEnd
@@ -80,13 +82,16 @@ export async function POST(req: NextRequest) {
   })
 
   const party = await prisma.$transaction(async (tx) => {
-    const newParty = await tx.party.create({ data: parsed.data })
+    const newParty = await tx.party.create({ data: partyData })
     await tx.contract.create({
       data: {
         partyId: newParty.id,
         body: template.body,
         fieldValues,
         status: 'draft',
+        value: contractInput.value,
+        paymentStatus: contractInput.paymentStatus,
+        additionalInfo: contractInput.additionalInfo || null,
       },
     })
     return tx.party.findUnique({

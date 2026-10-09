@@ -22,7 +22,11 @@ export default function NewPartyPage() {
         toast.success('Festa criada com sucesso')
         router.push(`/admin/parties/${result.id}`)
       } else {
-        toast.error(result?.error ?? 'Erro ao criar festa')
+        toast.error(
+          typeof result?.error === 'string'
+            ? result.error
+            : (result?.error?.fieldErrors?.contract?.[0] ?? 'Erro ao criar festa')
+        )
       }
     },
     onError: () => toast.error('Erro ao criar festa'),
@@ -34,7 +38,7 @@ export default function NewPartyPage() {
         <h1 className="text-2xl font-bold">Nova Festa</h1>
         <p className="text-muted-foreground text-sm">Cadastre uma nova festa com contrato</p>
       </div>
-      <PartyForm onSubmit={mutation.mutate} isLoading={mutation.isPending} />
+      <PartyForm mode="create" onSubmit={mutation.mutate} isLoading={mutation.isPending} />
     </div>
   )
 }

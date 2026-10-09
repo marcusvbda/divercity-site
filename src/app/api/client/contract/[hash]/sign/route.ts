@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createSigningSession } from '@/lib/docusign'
-import { buildDefaultValues } from '@/lib/contract-defaults'
+import { renderContractBody } from '@/lib/contract-render'
+import type { ContractVariableType } from '@/types/parties'
+import { buildContractValues, buildDefaultValues } from '@/lib/contract-defaults'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ hash: string }> }) {
   const { hash } = await params
@@ -29,9 +31,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ has
 
   const defaultValues = buildDefaultValues(party as unknown as Parameters<typeof buildDefaultValues>[0])
   const userValues = contract.fieldValues as Record<string, string>
-  const mergedValues = { ...defaultValues, ...userValues }
+  const mergedValues = { ...defaultValues, ...buildContractValues(contract), ...userValues }
 
-  const contractHtml = contract.body.replace(/\{\{(\w+)\}\}/g, (_m, key) => mergedValues[key] ?? '')
+  const contractHtml = renderContractBody(
+    contract.body,
+    mergedValues,
+    party.contractTemplate.variableTypes as Record<string, ContractVariableType>,
+    { highlightMissing: false },
+  )
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
   const returnUrl = `${appUrl}/c/${hash}?ds_event=signing_complete`

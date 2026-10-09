@@ -11,7 +11,8 @@ import { Skeleton } from '@/components/admin/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/admin/ui/tabs'
 import { EventCalendar } from '@/components/admin/calendar/event-calendar'
 import type { CalendarEvent, CalendarEventColor } from '@/components/admin/calendar/calendar-types'
-import type { Party, PartyStatus, ContractStatus } from '@/types/parties'
+import type { Party, PartyStatus, ContractStatus, ContractPaymentStatus } from '@/types/parties'
+import { CONTRACT_PAYMENT_STATUS_LABELS } from '@/lib/contract-defaults'
 import type { Column } from '@/components/admin/data-table'
 
 const STATUS_LABELS: Record<PartyStatus, string> = {
@@ -66,6 +67,14 @@ const CONTRACT_STATUS_VARIANT: Record<ContractStatus, 'default' | 'secondary' | 
   cancelled: 'destructive',
 }
 
+const PAYMENT_STATUS_VARIANT: Record<ContractPaymentStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  unpaid: 'outline',
+  partial: 'secondary',
+  paid: 'default',
+}
+
+const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+
 const columns: Column<Party>[] = [
   {
     key: 'date',
@@ -92,6 +101,28 @@ const columns: Column<Party>[] = [
     ) : (
       <span className="text-muted-foreground text-xs">Sem contrato</span>
     ),
+  },
+  {
+    key: 'value',
+    header: 'Valor',
+    render: r =>
+      r.contract?.value != null ? (
+        <span className="whitespace-nowrap">{BRL.format(Number(r.contract.value))}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+  },
+  {
+    key: 'payment',
+    header: 'Pagamento',
+    render: r =>
+      r.contract ? (
+        <Badge variant={PAYMENT_STATUS_VARIANT[r.contract.paymentStatus]}>
+          {CONTRACT_PAYMENT_STATUS_LABELS[r.contract.paymentStatus]}
+        </Badge>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
   },
   {
     key: 'status',

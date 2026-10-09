@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/admin/ui/button'
 import { Input } from '@/components/admin/ui/input'
 import { Label } from '@/components/admin/ui/label'
+import { Textarea } from '@/components/admin/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/admin/ui/card'
 import {
   Combobox,
@@ -23,22 +24,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/admin/ui/select'
-import type { Customer, ContractTemplate, Party } from '@/types/parties'
+import { CONTRACT_PAYMENT_STATUS_LABELS } from '@/lib/contract-defaults'
+import type { Customer, ContractTemplate, ContractPaymentStatus, Party } from '@/types/parties'
 
 export type PartyFormData = {
   customerId: number
   contractTemplateId: number
   date: string
   dateEnd: string
+  contract?: {
+    value: number
+    paymentStatus: ContractPaymentStatus
+    additionalInfo: string | null
+  }
 }
 
 type Props = {
+  mode: 'create' | 'edit'
   defaultValues?: Partial<Party>
   onSubmit: (data: PartyFormData) => void
   isLoading?: boolean
 }
 
-export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
+export function PartyForm({ mode, defaultValues, onSubmit, isLoading }: Props) {
   const [foundCustomer, setFoundCustomer] = useState<Customer | null>(
     defaultValues?.customer ?? null
   )
@@ -74,6 +82,10 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
   const [dateConflict, setDateConflict] = useState(false)
   const [checkingConflict, setCheckingConflict] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [contractValue, setContractValue] = useState('')
+  const [valueEdited, setValueEdited] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<ContractPaymentStatus>('unpaid')
+  const [additionalInfo, setAdditionalInfo] = useState('')
 
   const { data: searchData, isFetching: isSearching } = useQuery<{ data: Customer[] }>({
     queryKey: ['customer-search', customerSearch],
@@ -89,6 +101,27 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
   })
   const templates = templatesData?.data ?? []
   const selectedTemplate = templates.find(t => t.id.toString() === templateId)
+
+  const quoteEnabled = mode === 'create' && !!date && !!startTime
+  const {
+    data: quoteData,
+    isError: quoteError,
+    isFetching: quoteFetching,
+  } = useQuery<{ salonPrice: number }>({
+    queryKey: ['party-budget-quote', 'salon_only', date, startTime],
+    queryFn: () =>
+      fetch(
+        `/api/party-budget/quote?date=${encodeURIComponent(`${date}T${startTime}:00.000Z`)}&paymentOption=salon_only`
+      ).then(async r => {
+        if (!r.ok) throw new Error('quote_failed')
+        return r.json()
+      }),
+    enabled: quoteEnabled,
+    retry: false,
+  })
+  const suggestedValue =
+    typeof quoteData?.salonPrice === 'number' ? String(quoteData.salonPrice) : ''
+  const valueInput = valueEdited ? contractValue : suggestedValue
 
   function handleTemplateChange(value: string | null) {
     if (!value) return
@@ -127,6 +160,16 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
     if (endTime <= startTime) newErrors.date = 'Horário de fim deve ser após o início'
     if (dateConflict) newErrors.date = 'Conflito com festa já confirmada neste horário'
 
+    const numericValue = valueInput.trim() === '' ? NaN : Number(valueInput)
+    if (mode === 'create') {
+      if (!Number.isFinite(numericValue) || numericValue < 0) {
+        newErrors.value = 'Informe um valor válido'
+      }
+      if (paymentStatus === 'partial' && !additionalInfo.trim()) {
+        newErrors.additionalInfo = 'Descreva a negociação do pagamento parcial'
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
@@ -137,6 +180,13 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
       contractTemplateId: Number(templateId),
       date: `${date}T${startTime}:00.000Z`,
       dateEnd: `${date}T${endTime}:00.000Z`,
+      ...(mode === 'create' && {
+        contract: {
+          value: numericValue,
+          paymentStatus,
+          additionalInfo: additionalInfo.trim() || null,
+        },
+      }),
     })
   }
 
@@ -329,6 +379,80 @@ export function PartyForm({ defaultValues, onSubmit, isLoading }: Props) {
           )}
         </CardContent>
       </Card>
+
+      {mode === 'create' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>4. Valor e pagamento</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              <div className="flex min-w-40 flex-1 flex-col gap-1.5">
+                <Label htmlFor="contract-value">Valor do contrato *</Label>
+                <div className="relative">
+                  <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
+                    R$
+                  </span>
+                  <Input
+                    id="contract-value"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.01"
+                    className="pl-9"
+                    value={valueInput}
+                    placeholder={quoteFetching ? 'Calculando...' : '0,00'}
+                    onChange={e => {
+                      setContractValue(e.target.value)
+                      setValueEdited(true)
+                    }}
+                    aria-invalid={!!errors.value}
+                  />
+                </div>
+                {quoteError && !valueEdited && (
+                  <p className="text-muted-foreground text-xs">
+                    Não foi possível obter o preço do salão; informe o valor.
+                  </p>
+                )}
+                {errors.value && <p className="text-destructive text-xs">{errors.value}</p>}
+              </div>
+              <div className="flex min-w-40 flex-1 flex-col gap-1.5">
+                <Label htmlFor="contract-payment-status">Status de pagamento</Label>
+                <Select
+                  value={paymentStatus}
+                  onValueChange={v => v && setPaymentStatus(v as ContractPaymentStatus)}
+                >
+                  <SelectTrigger id="contract-payment-status" className="w-full">
+                    <SelectValue>{CONTRACT_PAYMENT_STATUS_LABELS[paymentStatus]}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(CONTRACT_PAYMENT_STATUS_LABELS) as ContractPaymentStatus[]).map(s => (
+                      <SelectItem key={s} value={s}>
+                        {CONTRACT_PAYMENT_STATUS_LABELS[s]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="contract-additional-info">
+                Informações adicionais{paymentStatus === 'partial' ? ' *' : ''}
+              </Label>
+              <Textarea
+                id="contract-additional-info"
+                value={additionalInfo}
+                onChange={e => setAdditionalInfo(e.target.value)}
+                placeholder="Negociação, formas de pagamento, observações..."
+                aria-invalid={!!errors.additionalInfo}
+              />
+              {errors.additionalInfo && (
+                <p className="text-destructive text-xs">{errors.additionalInfo}</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Button
         type="submit"
