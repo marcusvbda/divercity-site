@@ -1,14 +1,15 @@
 -- Remove CMS price tiers (PriceSection/Tiers, AdvancePurchaseSection/Tiers, General/Tier) and unused service party_companion.
 -- Data-only migration; ordered by FK (only component_instance_field_values -> component_instances cascades).
 
--- 1. Field values pointing at the Tiers fields (references to tier instances)
+-- 1. Field values pointing at the Tiers fields (references to tier instances) and at the General/Tier fields
 DELETE FROM "component_field_values"
 WHERE "componentFieldId" IN (
   SELECT cf."id"
   FROM "component_fields" cf
   JOIN "content_components" cc ON cc."id" = cf."contentComponentId"
   JOIN "content_types" ct ON ct."id" = cc."contentTypeId"
-  WHERE cc."name" = 'Tiers' AND ct."name" IN ('PriceSection', 'AdvancePurchaseSection')
+  WHERE (cc."name" = 'Tiers' AND ct."name" IN ('PriceSection', 'AdvancePurchaseSection'))
+     OR (cc."name" = 'Tier' AND ct."name" = 'General')
 );
 
 -- 2. Tier instances (cascades to component_instance_field_values)
