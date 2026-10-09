@@ -1,6 +1,6 @@
 # Party Contracts
 
-> Estado atual, verificado no código. O que o usuário quiser mudar entra somente em `## Mudanças pendentes` (ainda não existe).
+> Estado atual, verificado no código. O que o usuário quiser mudar entra somente em `## Mudanças pendentes` (seção abaixo da 2.9).
 
 ## 1. O que é
 
@@ -115,12 +115,54 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 
 - `/admin/customers`: lista com busca "Buscar por nome ou CPF...", colunas Nome, CPF, Email, Telefone; `CustomerForm` (react-hook-form + `CustomerSchema`); erro 409 "Já existe um cliente cadastrado com este CPF."; ao salvar volta para `/admin/customers` (não retorna à festa).
 
+## Mudanças pendentes
+
+### Valor, informações adicionais e status de pagamento no contrato (admin)
+
+- Ao criar um contrato no admin, o usuário deve informar o **valor do contrato**.
+- O valor é **configurável pelo admin que está criando o contrato**, pois pode ter havido uma negociação antes (o valor final pode diferir do preço padrão/calculado da festa).
+- Deve haver um campo de texto longo (textarea) **"Informações adicionais"**, onde o usuário descreve detalhes da negociação, por exemplo as formas de pagamento.
+- Deve haver um **status de pagamento** selecionável, indicando se o contrato **já foi pago ou não**.
+
+### Tipo de input por variável extra nos modelos de contrato
+
+- No modelo de contrato, cada variável adicional (extra) deve permitir escolher o **tipo de input** que aparece no link de preenchimento de dados (portal do cliente).
+- A escolha do tipo é feita no formulário do modelo e no popover "Variável extra" do editor.
+- Os tipos devem ser bem básicos: **input text**, **input time**, **input number** e **input date**.
+- O tipo vale para o portal do cliente e também para o editor de variáveis na aba "Contrato" do admin.
+- Formato no documento do contrato: date `dd/mm/aaaa`, number como número inteiro, time `HH:mm`.
+- Trocar o tipo de uma variável não altera valores já salvos: depois de salvo, o valor permanece como está.
+
+### Navegação entre steps no portal do cliente (`/c/[hash]`)
+
+- Na tela de preenchimento dos dados do contrato, o cliente deve conseguir **navegar entre os steps**.
+- Hoje, estando na revisão do contrato (step 2), se notar algo errado ele não consegue voltar ao step 1 para ajustar; deve conseguir voltar.
+
 ## 3. Anexos e referências
 
 - Spec relacionado: [admin-interface/spec.md](../admin-interface/spec.md) (seções 2.9 e 2.10 descrevem parte do admin de festas e contratos).
 - Pontos desta feature fora de escopo: pagamento (Stripe) e Resend não são usados na reserva de festa.
 
 ## 4. Pontos em aberto
+
+**Mudanças pendentes: navegação entre steps**
+- Navegação livre entre todos os steps (inclusive avançar) ou só voltar do step 2 para o 1? Há mais steps além dos dois?
+- Os valores já preenchidos no step 1 são mantidos ao voltar e ao avançar de novo?
+- Vale também depois que o envelope DocuSign já foi criado (assinatura em andamento)? Até que ponto pode voltar?
+
+**Mudanças pendentes: tipo de input das variáveis extras**
+- Tipo padrão para modelos e variáveis já existentes (sem tipo escolhido): text? (não respondido)
+- Escolha do tipo: a resposta "sim" foi dada à pergunta "formulário do modelo ou popover"; registrado como nos dois lugares. Confirmar se é isso.
+- Onde persiste o tipo: hoje `variables` é `String[]` extraído do corpo; precisa de estrutura nova no modelo?
+
+
+**Mudanças pendentes: valor, informações adicionais e pagamento**
+- "Criando um contrato" no admin: hoje o contrato nasce junto com a festa (admin em `/admin/parties` ou reserva pública). Os campos entram no formulário da festa, na aba "Contrato" ou em outro lugar?
+- Valor do contrato: o admin define o valor livremente (negociação prévia). Ele substitui/preenche o `totalPrice` da festa ou é um campo separado? (o "sim" não deixou claro). Obrigatório? Editável depois de criado?
+- Status de pagamento: só dois estados (pago / não pago) ou também parcial? Rótulos exatos? Valor padrão ao criar? Quem pode alterar e quando (inclusive após assinatura)?
+- Informações adicionais: obrigatório ou opcional? Limite de tamanho? Texto puro ou formatado?
+- Esses três dados aparecem no contrato (variáveis disponíveis nos modelos), no portal do cliente (`/c/[hash]`), na listagem de festas/contratos, ou só no admin?
+- Reserva pública (`/orcamento`): os campos se aplicam a esse fluxo ou só ao cadastro pelo admin? Festas/contratos já existentes ficam com quais valores?
 
 Itens marcados "parece bug" são comportamento observado no código, não registrado como esperado.
 

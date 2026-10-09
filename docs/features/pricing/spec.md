@@ -76,9 +76,22 @@ Em `src/lib/party-budget.ts`.
 - O preço cobrado e gravado é sempre o calculado no servidor; o cliente só envia escolhas (passaporte, dia, contagens).
 - Preços dos ingressos vêm de `PassportType`; os da festa vêm de `Service` por `key`; a vitrine do site é independente de ambos.
 
+## Mudanças pendentes
+
+- **Cadastro de preços no admin:** o admin precisa ter um cadastro de preços, e esses preços devem ser usados no sistema e no site.
+- **Preços fixos:** alguns preços precisam ser fixos (não podem ser excluídos), como os que aparecem nos prints.
+  - Vitrine de preços da home (Segunda a Quinta-feira, exceto feriados; Sexta a Sábado, Domingo e feriados; 30min, 1 Hora, 2 Horas, 3 Horas, com valor e "Acompanhante"):
+    ![Vitrine de preços da home](assets/vitrine-precos-home.png)
+  - Seleção de "Tipo de passaporte" na compra antecipada (30 minutos, 1 Hora, 2 Horas, 3 Horas):
+    ![Tipo de passaporte no checkout](assets/checkout-tipo-passaporte.png)
+- **Trocar a origem dos preços:** os preços hoje vêm de outros lugares; devem passar a vir dessa entidade de preços configurável do admin.
+- **Limpar o que sobrar:** os lugares de onde os preços vinham antes (lixo que sobrar) podem ser removidos.
+
 ## 3. Anexos e referências
 
 - Compra de ingressos (fluxo, regras de elegibilidade, Stripe, tickets): [`../ticket-in-advance/spec.md`](../ticket-in-advance/spec.md).
+- [Vitrine de preços da home](assets/vitrine-precos-home.png): print da seção de preços do site (2 grupos de dia × 4 durações, com valor e acompanhante).
+- [Tipo de passaporte no checkout](assets/checkout-tipo-passaporte.png): print do seletor de passaporte da compra antecipada (4 durações com preço).
 - Telas admin de Preços e Serviços e Passaportes: [`../admin-interface/spec.md`](../admin-interface/spec.md) (seções 2.7 e 2.8).
 
 ## 4. Pontos em aberto
@@ -88,3 +101,8 @@ Em `src/lib/party-budget.ts`.
 - Duas fontes de preço público sem sincronização (vitrine do CMS × bancos de passaporte e serviço).
 - Conteúdo não verificável pelo código: valores cadastrados em `PassportType`, `Service` (o seed cria os serviços do sistema com valores iniciais) e no CMS `PriceSection` (`Tiers`, `prices`, `disclaimers`).
 - Desconto de 50% por idade e PNE, limites de 12 e 60 meses, tamanho do pacote (10) e duração da festa (3 h) são constantes no código, não configuráveis pelo admin.
+- **(Mudanças pendentes)** Quais preços são fixos? Só os passaportes dos prints (30min, 1h, 2h, 3h × semana e fim de semana/feriado, criança e acompanhante) ou também os `Service` de festa (salão, pacote, avulso)?
+- **(Mudanças pendentes)** "Fixo" significa só não poder excluir (valor continua editável pelo admin)? E pode criar preços novos além dos fixos?
+- **(Mudanças pendentes)** A "entidade de preços" nova substitui `PassportType` e/ou `Service`, ou é uma terceira tabela? O que acontece com os registros existentes e com `TicketChild`/`Party` já gravados?
+- **(Mudanças pendentes)** A vitrine da home passa a ler do cadastro de preços (removendo `Tiers`/`prices` do CMS `PriceSection`)? Os títulos dos grupos, o subtítulo "exceto feriados" e os disclaimers continuam no CMS?
+- **(Mudanças pendentes)** O print do checkout mostra só preço de criança; o de acompanhante também vem do cadastro? Feriado continua escolha do comprador?
