@@ -123,6 +123,13 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 - O valor é **configurável pelo admin que está criando o contrato**, pois pode ter havido uma negociação antes (o valor final pode diferir do preço padrão/calculado da festa).
 - Deve haver um campo de texto longo (textarea) **"Informações adicionais"**, onde o usuário descreve detalhes da negociação, por exemplo as formas de pagamento.
 - Deve haver um **status de pagamento** selecionável, indicando se o contrato **já foi pago ou não**.
+- Os três dados ficam no **contrato** (campos novos em `Contract`), separados do `Party.totalPrice` do orçamento, que é preservado.
+- São informados no formulário **"Nova festa"** (`/admin/parties/new`) e editáveis depois na **aba "Contrato"** da festa.
+- **Valor do contrato:** obrigatório em "Nova festa". O campo já vem preenchido com o **preço do salão** cadastrado em Preços (`/admin/services`, serviço `party_salon`, dia útil ou fim de semana conforme a data da festa), e o admin pode alterá-lo manualmente.
+- **Status de pagamento:** três estados, **Não pago** (padrão), **Parcial** e **Pago**.
+- **Informações adicionais:** um único textarea, sempre visível e opcional; com status **Parcial** passa a ser **obrigatório** (descrição da negociação).
+- Os três dados viram **variáveis padrão** disponíveis nos modelos de contrato (valor, informações adicionais e status de pagamento).
+- Valor e status de pagamento aparecem como **colunas na Agenda** (lista de `/admin/parties`).
 
 ### Tipo de input por variável extra nos modelos de contrato
 
@@ -137,6 +144,7 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 
 - Na tela de preenchimento dos dados do contrato, o cliente deve conseguir **navegar entre os steps**.
 - Hoje, estando na revisão do contrato (step 2), se notar algo errado ele não consegue voltar ao step 1 para ajustar; deve conseguir voltar.
+- No step 1 o cliente pode editar **somente as variáveis extras que ele mesmo preencheu** (mais as que ainda estão vazias). Valores preenchidos pelo admin continuam protegidos e não aparecem para edição.
 
 ## 3. Anexos e referências
 
@@ -145,24 +153,16 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 
 ## 4. Pontos em aberto
 
-**Mudanças pendentes: navegação entre steps**
-- Navegação livre entre todos os steps (inclusive avançar) ou só voltar do step 2 para o 1? Há mais steps além dos dois?
-- Os valores já preenchidos no step 1 são mantidos ao voltar e ao avançar de novo?
-- Vale também depois que o envelope DocuSign já foi criado (assinatura em andamento)? Até que ponto pode voltar?
+**Mudanças pendentes: navegação entre steps** (assumido no plan.md como premissa)
+- Vale também depois que o envelope DocuSign já foi criado (`in_review`)? Premissa: sim, até a assinatura; o próximo "Assinar" cria um envelope novo com os valores atualizados.
 
-**Mudanças pendentes: tipo de input das variáveis extras**
-- Tipo padrão para modelos e variáveis já existentes (sem tipo escolhido): text? (não respondido)
-- Escolha do tipo: a resposta "sim" foi dada à pergunta "formulário do modelo ou popover"; registrado como nos dois lugares. Confirmar se é isso.
-- Onde persiste o tipo: hoje `variables` é `String[]` extraído do corpo; precisa de estrutura nova no modelo?
+**Mudanças pendentes: tipo de input das variáveis extras** (assumido no plan.md como premissa)
+- Tipo padrão para modelos e variáveis já existentes (sem tipo escolhido): premissa `text`.
+- Onde persiste o tipo: premissa `ContractTemplate.variableTypes` (JSON `{ variavel: tipo }`).
 
-
-**Mudanças pendentes: valor, informações adicionais e pagamento**
-- "Criando um contrato" no admin: hoje o contrato nasce junto com a festa (admin em `/admin/parties` ou reserva pública). Os campos entram no formulário da festa, na aba "Contrato" ou em outro lugar?
-- Valor do contrato: o admin define o valor livremente (negociação prévia). Ele substitui/preenche o `totalPrice` da festa ou é um campo separado? (o "sim" não deixou claro). Obrigatório? Editável depois de criado?
-- Status de pagamento: só dois estados (pago / não pago) ou também parcial? Rótulos exatos? Valor padrão ao criar? Quem pode alterar e quando (inclusive após assinatura)?
-- Informações adicionais: obrigatório ou opcional? Limite de tamanho? Texto puro ou formatado?
-- Esses três dados aparecem no contrato (variáveis disponíveis nos modelos), no portal do cliente (`/c/[hash]`), na listagem de festas/contratos, ou só no admin?
-- Reserva pública (`/orcamento`): os campos se aplicam a esse fluxo ou só ao cadastro pelo admin? Festas/contratos já existentes ficam com quais valores?
+**Mudanças pendentes: valor, informações adicionais e pagamento** (assumido no plan.md como premissa)
+- Reserva pública (`/orcamento`) e contratos existentes: premissa valor vazio, "Não pago", sem informações adicionais; na aba "Contrato" o campo de valor vem sugerido com o preço do salão até o admin salvar.
+- Edição após assinatura: premissa valor e informações adicionais travam em `signed`/`completed`/`cancelled`; status de pagamento continua editável.
 
 Itens marcados "parece bug" são comportamento observado no código, não registrado como esperado.
 
