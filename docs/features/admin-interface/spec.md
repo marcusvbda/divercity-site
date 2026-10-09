@@ -7,35 +7,36 @@ Interface administrativa do sistema Divercity Park, em `/admin`. Este corpo desc
 Acesso por role (`UserRole`: `admin`, `operator`; novo usuário entra como `operator`, a promoção é por banco ou script, não há UI):
 
 - `admin`: todas as telas.
-- `operator`: somente `/admin/login` e `/admin/operacao*`. Qualquer outra rota de página redireciona para `/admin/operacao` (`src/proxy.ts`). O proxy cobre só `/admin` e `/admin/:path*`, **não `/api/*`**.
+- `operator`: somente `/admin/login` e `/admin/operacao*`. Qualquer outra rota de página redireciona para `/admin/operacao` (`src/proxy.ts`). O proxy cobre só `/admin` e `/admin/:path*`, **não `/api/*`**. Rotas fora de `/admin/login*` só passam com sessão válida: token sem `error` e com `exp` do access token do Supabase no futuro; caso contrário o proxy redireciona para `/admin/login?callbackUrl=…` antes de qualquer render. `/admin/login*` sempre passa pelo proxy.
 
 ## 2. Estado atual
 
 ### 2.1 Casca (layout, navegação, sessão)
 
-- `layout.tsx`: sem sessão renderiza só o conteúdo (telas de login). Com sessão monta `SessionGuard`, `Toaster` (sonner, `richColors`, `top-right`), `SidebarProvider`, `AppSidebar` (`variant="inset"`, `collapsible="offcanvas"`), `SiteHeader` e o conteúdo. O logo da sidebar vem de `getContentType('NavBar').Logo.url.value`; sem logo, mostra ícone + "Divercity Park".
-- `SessionGuard`: se `session.error`, faz `signOut` para `/admin/login`.
-- Menu `admin` (ordem): Ver site (`/`, nova aba), Dashboard, CMS, Clientes, Salão de Festas (badge destrutivo com nº de festas `pending`), Preços e Serviços, Passaportes, Operação, Configurações.
-- Menu `operator`: Ver site e Operação.
-- Badge de pendentes: `GET /api/admin/parties?status=pending&perPage=1`, `queryKey ['admin','parties','pending-count']`, desabilitada para `operator`.
-- Menu do usuário (`nav-user`): avatar com iniciais, nome, e-mail e um único item "Sair" (`signOut` para `/admin/login`).
-- `SiteHeader`: `SidebarTrigger` + `<h1>` com título por rota: `/admin/cms/component-types` "Tipos de Conteúdo", `/admin/cms` "CMS", `/admin/settings` "Configurações", `/admin` "Dashboard", fallback "Admin".
-- Sub-sidebars (`AdminSubSidebar`): desktop (`md`+) `aside` de `w-52`; abaixo de `md`, barra horizontal com scroll-x e borda `brand-cyan` no item ativo. Existem em Operação, CMS, Festas/Modelos de contrato e Configurações ("Integrações").
-- Listagens usam `AdminDataTable` (exceto `parties/contracts`): busca por texto sem debounce, filtros `search`/`select`/`date` (valor inicial lido da URL, URL não é atualizada), ordenação por coluna `sortable` (1º clique asc, 2º desc), paginação 15 (opções 10/15/25/50), rodapé "Mostrando X–Y de N", loading com 5 linhas de Skeleton, vazio "Nenhum item encontrado". Sem estado de erro; tabela rola na horizontal no mobile.
+- Tema/kit (AdminCN, template `shadcn-nextjs-admincn-admin-template-free`, estilo `base-vega`): componentes do template, sem customização estética, em `src/components/admin/ui/` (isolados; o site público e `src/components/ui` não mudam), com `use-mobile` em `src/components/admin/hooks/`. Somente tema light (sem dark mode; `Toaster` do kit com `theme='light'`). Fonte Geist (`next/font`, `src/app/admin/admin-font.ts`) e tokens extras em `src/app/admin/admin-theme.css`, escopados por `body:has([data-admin-theme])` (cobre portais de Sheet, Dropdown, Select e Toaster); os layouts `(panel)` e `(auth)` renderizam o wrapper `<div data-admin-theme>`. Telas migram do kit antigo para o novo nas fases seguintes.
+- Route groups (URLs inalteradas): `src/app/admin/(auth)/` (login, esqueci e redefinir senha) tem layout só com `NextAuthProvider` (sem casca); `src/app/admin/(panel)/` contém todas as demais telas. O `layout.tsx` do painel faz `redirect('/admin/login')` no servidor quando não há sessão ou a sessão tem `error`, antes de renderizar qualquer casca ou conteúdo. Com sessão válida monta `NextAuthProvider`, `SessionGuard`, `TooltipProvider`, `SidebarProvider` e a casca do template em `src/components/admin/layout/`: `Sidebar` (`collapsible='icon'`; vira Sheet no mobile), `SidebarInset` com `Header`, conteúdo em `px-4 py-6 sm:px-6`, `Toaster` do kit admin e `Footer` (`©<ano> Divercity Park`, sem links). O logo da sidebar vem de `getContentType('NavBar').Logo.url.value`; sem logo, mostra o texto "Divercity Park".
+- `SessionGuard`: se `session.error` surgir com a página já aberta (expiração em uso), faz `signOut` para `/admin/login`.
+- Menu `admin` (ordem, sidebar principal com submenus colapsáveis; no modo ícone, flyout): Ver site (`/`, nova aba, nunca ativo), Dashboard, CMS (Visão geral + um subitem por tipo `editable=true`, `GET /api/admin/content-types?limit=100&sort=name&editable=true`, `queryKey ['admin','content-types','sidebar']`), Clientes, Salão de Festas (Agenda, Modelos de contrato; badge com nº de festas `pending`), Preços e Serviços, Passaportes, Operação (Visão geral, Validar ticket, Ingressos), Configurações (Integrações). Item ativo por prefixo (`activePath`); Dashboard, "Visão geral" e subitens do CMS usam match exato.
+- Menu `operator`: Ver site e Operação (mesmos subitens).
+- Badge de pendentes: `GET /api/admin/parties?status=pending&perPage=1`, `queryKey ['admin','parties','pending-count']`, habilitada só com sessão autenticada e role `admin`; `SidebarMenuBadge` do kit, exibido só com contagem maior que 0.
+- Menu do usuário (`ProfileDropdown` no `Header`): avatar com iniciais, nome (`username`), e-mail e um único item "Sair" (`signOut` para `/admin/login`).
+- `Header`: `SidebarTrigger` + `Separator` + `Breadcrumb` em pt-BR derivado do pathname (rótulos: Dashboard, CMS, Tipos de conteúdo, Clientes, Preços e Serviços, Passaportes, Modelos de contrato, Salão de Festas, Contratos, Contrato, Operação, Validar, Ingressos, Configurações, Novo; segmento dinâmico mostra o próprio valor; intermediários são links, exceto `/admin/cms/component-types`, que não tem página) + `ProfileDropdown`. O título fica na página (sem `<h1>` no header).
+- Listagens usam `DataTable` (`src/components/admin/data-table.tsx`, visual do template: `Card`, faixa de filtros, toolbar com busca em `InputGroup` e `Select` de linhas por página, cabeçalho com chevrons de ordenação, rodapé com `Pagination` do kit; exceto `parties/contracts`, que usa `Card` + `Table`): busca por texto sem debounce, filtros `search`/`select`/`date` (valor inicial lido da URL, URL não é atualizada), ordenação por coluna `sortable` (1º clique asc, 2º desc), paginação 15 (opções 10/15/25/50), rodapé "Mostrando X–Y de N", loading com 5 linhas de Skeleton, vazio "Nenhum item encontrado". Sem estado de erro; tabela rola na horizontal no mobile.
 - Listas retornam `{ data, pagination: { page, perPage, total, totalPages } }`; `perPage` com teto de 100.
 
 ### 2.2 Autenticação
 
 - NextAuth (`CredentialsProvider` "Supabase", sessão JWT) com `supabase.auth.signInWithPassword`; faz `upsert` em `users` (role default `operator`). A role é relida do banco no callback `jwt`. Só o access token do Supabase é guardado: quando expira, a sessão recebe `error: "InvalidToken"` e o `SessionGuard` faz o logout.
-- `/admin/login`: campos e-mail e senha; erro único "E-mail ou senha inválidos"; sucesso vai para `callbackUrl` (padrão `/admin`). Já autenticado: `operator` vai para `/admin/operacao`, `admin` para `/admin`. Link "Esqueci minha senha".
-- `/admin/login/esqueci-senha`: envia link via `supabase.auth.resetPasswordForEmail` (direto do browser), com `redirectTo` para `/admin/login/redefinir-senha`. Sucesso: "E-mail enviado… O link expira em 1 hora."
-- `/admin/login/redefinir-senha`: fluxo PKCE (`?code=`). Estados: verificando, link inválido/expirado (com "Solicitar novo link"), formulário, concluído (redireciona ao login após 3 s). Nova senha: mínimo 8 caracteres, 1 maiúscula, 1 número, confirmação igual.
+- `/admin/login`, `/admin/login/esqueci-senha` e `/admin/login/redefinir-senha` usam o layout de auth do template (`AuthCard` em `src/components/admin/auth-card.tsx`: tela centralizada com `AuthBackgroundShape`, `Card` `sm:max-w-lg`, logo do CMS `NavBar.Logo.url` com fallback para o texto "Divercity Park", `Field`/`FieldGroup`, senha com `InputGroup` e botão mostrar/ocultar). Sem magic link, cadastro, login social nem "Remember me".
+- `/admin/login` (título "Entrar"): campos e-mail e senha; erro único "E-mail ou senha inválidos"; sucesso vai para `callbackUrl` (padrão `/admin`). Já autenticado (sessão válida, sem `error`, verificada no servidor em `page.tsx`): `operator` vai para `/admin/operacao`, `admin` para `/admin`. Link "Esqueci minha senha".
+- `/admin/login/esqueci-senha`: envia link via `supabase.auth.resetPasswordForEmail` (direto do browser), com `redirectTo` para `/admin/login/redefinir-senha`. Sucesso: "E-mail enviado… O link expira em 1 hora."; link "Voltar ao login".
+- `/admin/login/redefinir-senha`: fluxo PKCE (`?code=`, trocado por `exchangeCodeForSession` uma única vez via `useQuery`). Estados: verificando, link inválido/expirado (com "Solicitar novo link"), formulário, concluído (redireciona ao login após 3 s). Nova senha: mínimo 8 caracteres, 1 maiúscula, 1 número, confirmação igual.
 - Autorização nas APIs: `requireRole` (`src/lib/authz.ts`) responde 401 `{error:"Não autenticado"}` e 403 `{error:"Acesso negado"}`. Hoje é usado em `passport-types` (`admin`) e em `/api/tickets/operate/*` (`admin`, `operator`). As APIs do CMS exigem apenas sessão (qualquer role). As demais APIs de `/api/admin/*` não exigem nada (ver seção 4).
 
 ### 2.3 Dashboard (`/admin`)
 
-- Banner com data por extenso (pt-BR), saudação por hora ("Bom dia" < 12h, "Boa tarde" < 18h, senão "Boa noite") com nome do usuário, e texto de boas-vindas.
-- Card de festas pendentes: mostra `N pendente(s)` e link para `/admin/parties?status=pending`; sem pendentes, "Em dia" e link para `/admin/parties`. Loading: "Carregando...".
+- Cabeçalho de página simples (sem banner colorido) com data por extenso (pt-BR), saudação por hora ("Bom dia" < 12h, "Boa tarde" < 18h, senão "Boa noite") com nome do usuário, e texto de boas-vindas.
+- Cards do kit admin (`Card` com ícone em quadrado `bg-primary/10` e `Badge` em `CardAction`). Card de festas pendentes: mostra `N pendente(s)` e link para `/admin/parties?status=pending`; sem pendentes, "Em dia" e link para `/admin/parties`. Loading: "Carregando...".
 - Card "Gerenciador de Conteúdo" com link para `/admin/cms`.
 
 ### 2.4 Configurações (`/admin/settings`)
@@ -81,7 +82,6 @@ Acesso por role (`UserRole`: `admin`, `operator`; novo usuário entra como `oper
 - Formulário: Nome, checkbox "Definir como modelo padrão (usado no orçamento/reserva pelo site)", painel de variáveis padrão (abas Cliente/Festa, copia `{{...}}`), editor TipTap, aviso "Variáveis extras detectadas (N) — serão preenchidas manualmente".
 - Variáveis padrão: prefixos `cliente_` e `festa_`, geradas de `GET /api/admin/contract-variables` a partir das colunas das tabelas `customers` e `parties`. As demais são extras, preenchidas por festa.
 - Marcar como padrão desmarca os outros (transação). Editar um modelo atualiza o `body` e `fieldValues` dos contratos não `signed`/`completed`/`cancelled` das festas que o usam.
-- Esta área reaproveita a `PartiesSidebar`.
 
 ### 2.10 Festas (`/admin/parties`)
 
@@ -112,21 +112,15 @@ Acessível a `admin` e `operator`.
 
 ## Mudanças pendentes
 
-### M1. Sem flash da área logada para usuário deslogado ou com sessão expirada
-
-- Hoje, ao acessar uma página da área logada (admin) sem estar logado ou com o acesso expirado, aparece na tela a tela inicial do admin, como se o usuário estivesse logado, e só segundos depois ele é redirecionado para o login. Isso não deve acontecer.
-- Vale para todas as rotas da área logada (`/admin/*`, `/operacao`, `/ingressos` e demais).
-- Deslogado ou com sessão expirada: o usuário vai direto para o login, sem mostrar nada da área logada (nem layout, nem navegação, nem conteúdo de página).
-
 ### M2. Adotar o tema admin do shadcn (AdminCN) em toda a interface
 
 - Não gostei do design atual nem de termos "reinventado a roda" no tema, nos componentes e nas funcionalidades do admin.
-- Instalar e usar o template admin do shadcn: https://github.com/shadcnstudio/shadcn-nextjs-admincn-admin-template-free (detalhes de referência em https://shadcnstudio.com/templates/admin-dashboard/admincn-free).
-- Usar o tema **sem customização estética**: os componentes como o template os entrega, apenas adaptados ao nosso uso.
 - Adaptar tudo ao tema: login, páginas, navbar, sidebar, inputs, CRUDs, listas e o restante, seguindo o que o template traz.
-- Somente tema **light**; sem dark mode.
 - Escopo: tudo o que exige login (`/admin/*`, `/operacao`, `/ingressos` e demais rotas logadas) e os respectivos logins.
 - O tema tem prioridade sobre as cores da marca Divercity nas telas logadas.
+- Decisões (2026-10-09):
+  - CRUDs (Clientes, Preços e Serviços, Passaportes, Modelos de contrato) mantêm as páginas `/new` e `/[id]`, com formulários no layout do template.
+  - O calendário de festas passa a usar o Calendar do template (visões mês, semana e dia), substituindo o calendário próprio.
 
 ## 3. Anexos e referências
 
@@ -138,6 +132,7 @@ Acessível a `admin` e `operator`.
 Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacunas**, não comportamento esperado. Servem de insumo para a refatoração.
 
 **Segurança**
+
 - APIs `/api/admin/{customers,services,contract-templates,contract-variables,contracts,parties}` não checam sessão nem role. Isso inclui `GET /api/admin/contracts` (traz CPF dos clientes) e o PDF do DocuSign.
 - APIs do CMS e as actions `revalidateCMS*` aceitam qualquer role autenticada (um `operator` consegue editar o CMS chamando a API).
 - `updateSettings` (settings) não checa sessão nem role e não valida chaves. `settings/page.tsx` envia ao client os valores dos segredos (Stripe, Google, Instagram), guardados em texto puro.
@@ -146,6 +141,7 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - `LoginForm` usa `callbackUrl` sem validar (possível redirecionamento externo).
 
 **Casca e navegação**
+
 - `SiteHeader`: `/admin` casa por prefixo com todas as rotas, então Clientes, Festas, Operação etc. mostram "Dashboard"; há dois `<h1>` em algumas telas.
 - `nav-main`: o item "Ver site" (`/`) fica sempre ativo; itens usam `<a>` (recarrega a página).
 - `nav-secondary.tsx` e três formulários de login/senha em `src/components/` (`login-form`, `esqueci-senha-form`, `redefinir-senha-form`) não são importados em lugar nenhum.
@@ -157,6 +153,7 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - Não há UI para criar usuários nem promover roles.
 
 **Listagens e erros**
+
 - `AdminDataTable`: sem estado de erro (401/403/500 viram "Nenhum item encontrado"), busca sem debounce, filtros não vão para a URL. Telas de detalhe da Operação tratam qualquer erro como "Compra não encontrada".
 - `page`, `perPage`, `status`, `dir` não são validados nas APIs (valores inválidos geram 500).
 - Erros Zod chegam como objeto; `parties/new` e `parties/[id]` passam esse objeto ao `toast.error`.
@@ -165,6 +162,7 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - Busca de cliente por CPF com pontuação não encontra (banco guarda só dígitos).
 
 **CMS**
+
 - `POST`/`DELETE` de `component-field-values` e `PUT` de `component-instance-field-values` não chamam `revalidateTag`; só o `PUT` de valor simples revalida.
 - `SimpleFieldEditor` e `InstanceFieldEditor` não checam `res.ok` (mostram "Salvo com sucesso" mesmo com erro) e não ressincronizam após salvar (linhas novas podem duplicar).
 - Campo `multiple` sem nenhuma instância não mostra input nem "Adicionar".
@@ -175,6 +173,7 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - Não há upload de imagem (regra do projeto manda imagens no Supabase Storage).
 
 **Festas e contratos**
+
 - `PUT /api/admin/parties/[id]` reverte `status` para `pending` (default do schema) porque o formulário não envia `status`.
 - Fuso: o form envia hora como UTC (`…Z`) mas lê em hora local; em UTC-3 a hora desloca 3 h a cada edição. Filtro de data da API usa UTC.
 - Conflito de horário: `POST` e `PUT` usam regras diferentes; o checador do front vê só as 15 primeiras festas; duração padrão 4 h (admin) vs 3 h (público). Sem constraint no banco.
@@ -182,12 +181,12 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - `contract-variables` lista chaves camelCase (ex.: `festa_dateEnd`) e `buildDefaultValues` preenche snake_case (`festa_date_end`); confirmar no banco. Valores monetários saem sem formatação e `status` sem tradução.
 - Trocar o modelo da festa não altera o corpo do contrato. Editar um modelo altera contratos `in_review` já enviados ao DocuSign.
 - `mark-sent` e `toggle-link` não checam o status do contrato.
-- `PartiesSidebar` usa `useParams().id` nas rotas de modelos e busca uma festa com o id do modelo.
 - `/admin/parties/contracts` não tem link de acesso; rótulos de status de contrato diferem entre telas.
 - Rota de contratos do cliente exige e-mail, mas e-mail é opcional no cadastro e na reserva pública.
 - `DELETE /api/admin/parties/[id]` existe sem uso na UI e falha por FK se houver contrato ou convidado.
 
 **Operação**
+
 - "Check-ins hoje" e "Check-outs hoje" usam o fuso do servidor; "No parque agora" conta compras, não pessoas.
 - "Extra (minutos iniciados)" na tela usa `ceil` dos segundos e o servidor grava `round` dos minutos.
 - Rótulo "Telefone / WhatsApp" mostra só `guardianPhone`.
@@ -197,5 +196,6 @@ Itens abaixo vieram do levantamento do código. São **possíveis bugs ou lacuna
 - Datas: `formatDateOnly` em UTC, `formatTime` no fuso do navegador.
 
 **Em andamento fora desta feature**
+
 - O working tree tem mudanças não commitadas em `prisma/schema.prisma` (modelos `TicketPass`, `TicketPassKind`, `TicketPassStatus`) e nos fluxos de checkout e finalização de pagamento, ligadas a `docs/features/ticket-in-advance/`. A seção 2.11 foi levantada com os models `TicketOrder`/`TicketChild`/`TicketCompanion` e pode mudar quando essa feature for concluída; reconciliar com `/update-feature-spec`.
 - Não verificado: tempo de expiração do access token (config do Supabase) e se as colunas reais do banco batem com os nomes de `contract-variables`.

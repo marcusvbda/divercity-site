@@ -1,5 +1,6 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import type { JWT } from 'next-auth/jwt'
 
 // Rotas do admin que a role `operator` pode acessar. Qualquer outra rota
 // sob /admin é restrita à role `admin` (CMS, preços, clientes, configurações etc).
@@ -11,19 +12,25 @@ function isOperatorAllowed(pathname: string) {
   )
 }
 
+function isSessionValid(token: JWT | null) {
+  if (!token || token.error || !token.supabaseAccessToken) return false
+  try {
+    const payload = token.supabaseAccessToken.split('.')[1]
+    if (!payload) return false
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const { exp } = JSON.parse(atob(base64)) as { exp?: number }
+    return typeof exp === 'number' && exp * 1000 > Date.now()
+  } catch {
+    return false
+  }
+}
+
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
-    const isLoginPage = pathname === '/admin/login'
-    const isAuthenticated = !!token && !token.error
 
-    if (isLoginPage && isAuthenticated) {
-      const destination = token?.role === 'operator' ? '/admin/operacao' : '/admin'
-      return NextResponse.redirect(new URL(destination, req.url))
-    }
-
-    if (isAuthenticated && token?.role === 'operator' && !isOperatorAllowed(pathname)) {
+    if (token?.role === 'operator' && !isOperatorAllowed(pathname)) {
       return NextResponse.redirect(new URL('/admin/operacao', req.url))
     }
 
@@ -33,10 +40,8 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
-        const isPublicLoginRoute =
-          pathname.startsWith('/admin/login')
-        if (isPublicLoginRoute) return true
-        return !!token
+        if (pathname.startsWith('/admin/login')) return true
+        return isSessionValid(token)
       },
     },
     pages: {
