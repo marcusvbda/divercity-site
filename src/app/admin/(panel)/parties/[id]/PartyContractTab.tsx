@@ -39,10 +39,11 @@ import type {
 import {
   buildContractValues,
   buildDefaultValues,
+  getDefaultVariableLabel,
   isDefaultVariable,
   CONTRACT_PAYMENT_STATUS_LABELS,
 } from '@/lib/contract-defaults'
-import { getVariableInputProps, renderContractBody } from '@/lib/contract-render'
+import { extractBodyVariables, getVariableInputProps, renderContractBody } from '@/lib/contract-render'
 import { ContractPreview } from '@/components/ui/contract-preview'
 
 const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
@@ -81,12 +82,16 @@ function VariablesEditor({
   contractId,
   variables,
   types,
+  labels,
+  defaultValues,
   initialValues,
   onSaved,
 }: {
   contractId: number
   variables: string[]
   types: Record<string, ContractVariableType>
+  labels: Record<string, string>
+  defaultValues: Record<string, string>
   initialValues: Record<string, string>
   onSaved: () => void
 }) {
@@ -120,25 +125,45 @@ function VariablesEditor({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          {variables.map((variable) => (
-            <div key={variable} className="flex flex-col gap-1.5">
-              <Label className="font-mono text-xs">{`{{${variable}}}`}</Label>
-              <Input
-                {...getVariableInputProps(values[variable] ?? '', types[variable])}
-                value={values[variable] ?? ''}
-                onChange={(e) =>
-                  setValues((prev) => ({ ...prev, [variable]: e.target.value }))
-                }
-                placeholder={`Valor para ${variable}...`}
-              />
-            </div>
-          ))}
+          {variables.map((variable) => {
+            const label = labels[variable] || getDefaultVariableLabel(variable)
+            if (isDefaultVariable(variable)) {
+              return (
+                <div key={variable} className="flex flex-col gap-1.5">
+                  <Label>{label}</Label>
+                  <Input value={defaultValues[variable] ?? ''} disabled readOnly />
+                  <p className="text-muted-foreground text-xs">
+                    Editado em Dados / Valor e pagamento
+                  </p>
+                </div>
+              )
+            }
+            return (
+              <div key={variable} className="flex flex-col gap-1.5">
+                <Label>{label}</Label>
+                <Input
+                  {...getVariableInputProps(values[variable] ?? '', types[variable])}
+                  value={values[variable] ?? ''}
+                  onChange={(e) =>
+                    setValues((prev) => ({ ...prev, [variable]: e.target.value }))
+                  }
+                  placeholder={label}
+                />
+              </div>
+            )
+          })}
         </div>
         <Button
           type="button"
           className="w-fit"
           disabled={mutation.isPending}
-          onClick={() => mutation.mutate(values)}
+          onClick={() =>
+            mutation.mutate(
+              Object.fromEntries(
+                Object.entries(values).filter(([key]) => !isDefaultVariable(key))
+              )
+            )
+          }
         >
           {mutation.isPending ? 'Salvando...' : 'Salvar variáveis'}
         </Button>
@@ -421,13 +446,9 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
       variables?: string[]
       body?: string
       variableTypes?: Record<string, ContractVariableType>
+      variableLabels?: Record<string, string>
     }
   }
-
-  const allVars: string[] = (
-    partyWithTemplate?.contractTemplate?.variables ??
-    Object.keys(contract.fieldValues as Record<string, string>)
-  ).filter((v) => !isDefaultVariable(v))
 
   const isLocked =
     contract.status === 'signed' ||
@@ -446,6 +467,8 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
     ...buildContractValues(contract),
     ...userValues,
   }
+
+  const allVars = extractBodyVariables(bodyToRender)
 
   const variableTypes = partyWithTemplate?.contractTemplate?.variableTypes ?? {}
   const renderedBody = renderContractBody(bodyToRender, mergedValues, variableTypes, {
@@ -539,6 +562,8 @@ export function PartyContractTab({ partyId }: { partyId: string }) {
             contractId={contract.id}
             variables={allVars}
             types={variableTypes}
+            defaultValues={mergedValues}
+            labels={partyWithTemplate?.contractTemplate?.variableLabels ?? {}}
             initialValues={contract.fieldValues as Record<string, string>}
             onSaved={() =>
               queryClient.invalidateQueries({

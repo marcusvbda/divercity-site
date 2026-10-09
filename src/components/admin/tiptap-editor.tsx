@@ -80,6 +80,9 @@ export function TipTapEditor({ content, onChange, onInsertVariable }: Props) {
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
     content,
+    editorProps: {
+      attributes: { class: 'min-h-64 px-4 py-3 outline-none' },
+    },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
 
@@ -240,7 +243,7 @@ export function TipTapEditor({ content, onChange, onInsertVariable }: Props) {
       {/* Editor content */}
       <EditorContent
         editor={editor}
-        className="tiptap-editor min-h-64 px-4 py-3 text-sm focus-within:outline-none"
+        className="tiptap-editor text-sm"
       />
     </div>
   )

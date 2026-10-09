@@ -18,6 +18,7 @@ export const ContractTemplateSchema = z.object({
   body: z.string().min(1, "Conteúdo é obrigatório"),
   isDefault: z.boolean().optional(),
   variableTypes: z.record(z.string(), ContractVariableTypeSchema).optional(),
+  variableLabels: z.record(z.string(), z.string().trim().max(80)).optional(),
 });
 
 export const PartySchema = z.object({

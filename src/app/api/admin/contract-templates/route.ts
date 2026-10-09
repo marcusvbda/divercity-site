@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ContractTemplateSchema } from '@/lib/schemas/parties'
 import { isDefaultVariable } from '@/lib/contract-defaults'
+import { extractBodyVariables } from '@/lib/contract-render'
 
 function extractVariables(body: string): string[] {
   const matches = body.match(/\{\{(\w+)\}\}/g) ?? []
   return [...new Set(matches.map((m) => m.replace(/[{}]/g, '')))].filter(v => !isDefaultVariable(v))
+}
+
+function pickVariableLabels(body: string, labels: Record<string, string>): Record<string, string> {
+  const used = new Set(extractBodyVariables(body))
+  return Object.fromEntries(
+    Object.entries(labels).filter(([key, label]) => used.has(key) && label.trim() !== ''),
+  )
 }
 
 export async function GET(req: NextRequest) {
@@ -47,6 +55,8 @@ export async function POST(req: NextRequest) {
     Object.entries(parsed.data.variableTypes ?? {}).filter(([key]) => variables.includes(key)),
   )
 
+  const variableLabels = pickVariableLabels(parsed.data.body, parsed.data.variableLabels ?? {})
+
   const template = await prisma.$transaction(async (tx) => {
     if (parsed.data.isDefault) {
       await tx.contractTemplate.updateMany({
@@ -55,7 +65,7 @@ export async function POST(req: NextRequest) {
       })
     }
     return tx.contractTemplate.create({
-      data: { ...parsed.data, variables, variableTypes },
+      data: { ...parsed.data, variables, variableTypes, variableLabels },
     })
   })
 

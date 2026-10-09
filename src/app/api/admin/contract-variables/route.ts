@@ -1,19 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-const LABELS: Record<string, string> = {
-  cpf:          'CPF',
-  name:         'Nome',
-  email:        'E-mail',
-  phone:        'Telefone',
-  date:         'Data de início',
-  date_end:     'Data de término',
-  status:       'Status',
-}
-
-function humanize(col: string): string {
-  return LABELS[col] ?? col.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-}
+import { getDefaultVariableLabel } from '@/lib/contract-defaults'
 
 type ColRow = { column_name: string }
 
@@ -26,11 +13,7 @@ function isSkipColumn(col: string): boolean {
   return false
 }
 
-const CONTRATO_VARIABLES = [
-  { key: 'contrato_valor', label: 'Valor do contrato' },
-  { key: 'contrato_status_pagamento', label: 'Status de pagamento' },
-  { key: 'contrato_informacoes_adicionais', label: 'Informações adicionais' },
-]
+const CONTRATO_KEYS = ['contrato_valor', 'contrato_status_pagamento', 'contrato_informacoes_adicionais']
 
 export async function GET() {
   const [customerCols, partyCols] = await Promise.all([
@@ -53,17 +36,17 @@ export async function GET() {
     cliente: clienteCols.map(({ column_name }) => ({
       key:      `cliente_${column_name}`,
       variable: `{{cliente_${column_name}}}`,
-      label:    humanize(column_name),
+      label:    getDefaultVariableLabel(`cliente_${column_name}`),
     })),
     festa: festaCols.map(({ column_name }) => ({
       key:      `festa_${column_name}`,
       variable: `{{festa_${column_name}}}`,
-      label:    humanize(column_name),
+      label:    getDefaultVariableLabel(`festa_${column_name}`),
     })),
-    contrato: CONTRATO_VARIABLES.map(({ key, label }) => ({
+    contrato: CONTRATO_KEYS.map((key) => ({
       key,
       variable: `{{${key}}}`,
-      label,
+      label: getDefaultVariableLabel(key),
     })),
   })
 }

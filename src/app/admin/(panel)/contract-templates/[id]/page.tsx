@@ -59,6 +59,7 @@ export default function EditTemplatePage() {
                 body: template.body,
                 isDefault: template.isDefault,
                 variableTypes: template.variableTypes ?? {},
+                variableLabels: template.variableLabels ?? {},
               }
             : undefined
         }

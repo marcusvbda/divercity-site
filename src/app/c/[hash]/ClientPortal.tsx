@@ -7,12 +7,35 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Contract, ContractVariableType, Party } from '@/types/parties'
-import { buildContractValues, buildDefaultValues, isDefaultVariable } from '@/lib/contract-defaults'
-import { getVariableInputProps, renderContractBody } from '@/lib/contract-render'
+import { buildContractValues, buildDefaultValues, getDefaultVariableLabel, isDefaultVariable } from '@/lib/contract-defaults'
+import { extractBodyVariables, getVariableInputProps, renderContractBody } from '@/lib/contract-render'
 import { ContractPreview } from '@/components/ui/contract-preview'
 import { GuestList } from './GuestList'
 
 type Props = { hash: string }
+
+const EDITABLE_DEFAULT_KEYS = new Set([
+  'cliente_name',
+  'cliente_email',
+  'cliente_phone',
+  'festa_children_count',
+  'festa_adults_count',
+  'festa_total_participants',
+])
+const INTEGER_DEFAULT_KEYS = new Set([
+  'festa_children_count',
+  'festa_adults_count',
+  'festa_total_participants',
+])
+
+function getDefaultInputProps(key: string) {
+  if (key === 'cliente_email') return { type: 'email' }
+  if (key === 'cliente_phone') return { type: 'tel', inputMode: 'tel' as const }
+  if (INTEGER_DEFAULT_KEYS.has(key)) {
+    return { type: 'number', inputMode: 'numeric' as const, step: 1, min: 0 }
+  }
+  return { type: 'text' }
+}
 
 export function ClientPortal({ hash }: Props) {
   const searchParams = useSearchParams()
@@ -69,21 +92,28 @@ export function ClientPortal({ hash }: Props) {
 
   // Derived values computed unconditionally (safe before hooks)
   const existingValues = (contract?.fieldValues as Record<string, string>) ?? {}
-  const contractParty = (contract as Contract & { party?: Party & { contractTemplate?: { variables?: string[]; body?: string; variableTypes?: Record<string, ContractVariableType> } } })?.party
+  const contractParty = (contract as Contract & { party?: Party & { contractTemplate?: { variables?: string[]; body?: string; variableTypes?: Record<string, ContractVariableType>; variableLabels?: Record<string, string> } } })?.party
   const template = contractParty?.contractTemplate
   const defaultValues = contractParty ? buildDefaultValues(contractParty as unknown as Parameters<typeof buildDefaultValues>[0]) : {}
   const mergedValues = { ...defaultValues, ...(contract ? buildContractValues(contract) : {}), ...existingValues }
 
-  const allVars: string[] = (template?.variables ?? Object.keys(existingValues)).filter(v => !isDefaultVariable(v))
+  const bodyVars = extractBodyVariables(contract?.body ?? '')
   const variableTypes = template?.variableTypes ?? {}
+  const variableLabels = template?.variableLabels ?? {}
+  const labelFor = (v: string) => variableLabels[v] || getDefaultVariableLabel(v)
   const filledKeys = contract?.clientFilledKeys ?? []
-  const editableVars = allVars.filter((v) => !existingValues[v] || filledKeys.includes(v))
+  const isEditable = (v: string) => {
+    if (v.startsWith('contrato_')) return false
+    if (isDefaultVariable(v)) return !mergedValues[v] && EDITABLE_DEFAULT_KEYS.has(v)
+    return !existingValues[v] || filledKeys.includes(v)
+  }
+  const editableVars = bodyVars.filter(isEditable)
   const hasEditable = editableVars.length > 0
   const defaultStep = dsEvent === 'signing_complete' ? 4 : hasEditable ? 1 : 2
   const step = stepOverride ?? defaultStep
   const totalSteps = hasEditable ? 3 : 2
   const stepNumber = (n: number) => (hasEditable ? n : n - 1)
-  const inputValue = (v: string) => fieldValues[v] ?? existingValues[v] ?? ''
+  const inputValue = (v: string) => fieldValues[v] ?? mergedValues[v] ?? ''
 
   const completeMutation = useMutation({
     mutationFn: () =>
@@ -159,25 +189,37 @@ export function ClientPortal({ hash }: Props) {
         </div>
 
         <div className="flex flex-col gap-4">
-          {editableVars.map((variable) => (
-            <div key={variable} className="flex flex-col gap-1.5">
-              <Label>{variable.replace(/_/g, ' ')}</Label>
-              <Input
-                {...getVariableInputProps(inputValue(variable), variableTypes[variable])}
-                value={inputValue(variable)}
-                onChange={(e) =>
-                  setFieldValues((prev) => ({ ...prev, [variable]: e.target.value }))
-                }
-                placeholder={`Seu ${variable.replace(/_/g, ' ')}...`}
-              />
-            </div>
-          ))}
+          {bodyVars.map((variable) => {
+            const editable = isEditable(variable)
+            const inputProps = isDefaultVariable(variable)
+              ? getDefaultInputProps(variable)
+              : getVariableInputProps(inputValue(variable), variableTypes[variable])
+            return (
+              <div key={variable} className="flex flex-col gap-1.5">
+                <Label htmlFor={`var-${variable}`}>{labelFor(variable)}</Label>
+                <Input
+                  id={`var-${variable}`}
+                  {...inputProps}
+                  placeholder={labelFor(variable)}
+                  value={inputValue(variable)}
+                  disabled={!editable}
+                  onChange={(e) =>
+                    setFieldValues((prev) => ({ ...prev, [variable]: e.target.value }))
+                  }
+                />
+              </div>
+            )
+          })}
 
           <Button
             className="mt-2"
             onClick={() => {
               saveMutation.mutate(
-                Object.fromEntries(editableVars.map((v) => [v, inputValue(v)])),
+                Object.fromEntries(
+                  editableVars
+                    .map((v) => [v, inputValue(v).trim()] as const)
+                    .filter(([, value]) => value !== ''),
+                ),
               )
             }}
             disabled={saveMutation.isPending}

@@ -30,7 +30,7 @@ export function renderContractBody(
   types: Record<string, ContractVariableType> | null | undefined,
   options: { highlightMissing: boolean },
 ): string {
-  return body.replace(/\{\{(\w+)\}\}/g, (_m, key: string) => {
+  return body.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, key: string) => {
     const raw = values[key]
     if (raw == null || raw === '') {
       if (options.highlightMissing && !isDefaultVariable(key)) {
@@ -41,6 +41,12 @@ export function renderContractBody(
     if (isDefaultVariable(key)) return raw
     return formatVariableValue(raw, types?.[key])
   })
+}
+
+export function extractBodyVariables(body: string): string[] {
+  const seen = new Set<string>()
+  for (const m of body.matchAll(/\{\{\s*(\w+)\s*\}\}/g)) seen.add(m[1])
+  return [...seen]
 }
 
 const INPUT_FORMATS: Record<ContractVariableType, RegExp> = {

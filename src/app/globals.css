@@ -164,7 +164,7 @@
 /* TipTap editor styles */
 .tiptap-editor .ProseMirror {
   outline: none;
-  min-height: 200px;
+  min-height: 16rem;
 }
 .tiptap-editor .ProseMirror h1 { @apply text-2xl font-bold my-2; }
 .tiptap-editor .ProseMirror h2 { @apply text-xl font-bold my-2; }

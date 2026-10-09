@@ -16,8 +16,8 @@ import { Skeleton } from '@/components/admin/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/admin/ui/tabs'
 import { TipTapEditor } from '@/components/admin/tiptap-editor'
 import type { ContractTemplateInput } from '@/lib/schemas/parties'
-import { isDefaultVariable } from '@/lib/contract-defaults'
-import { CONTRACT_VARIABLE_TYPE_LABELS } from '@/lib/contract-render'
+import { getDefaultVariableLabel, isDefaultVariable } from '@/lib/contract-defaults'
+import { CONTRACT_VARIABLE_TYPE_LABELS, extractBodyVariables } from '@/lib/contract-render'
 import type { ContractVariableType } from '@/types/parties'
 
 type VariableItem = { key: string; variable: string; label: string }
@@ -38,6 +38,9 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
   const [variableTypes, setVariableTypes] = useState<Record<string, ContractVariableType>>(
     defaultValues?.variableTypes ?? {}
   )
+  const [variableLabels, setVariableLabels] = useState<Record<string, string>>(
+    defaultValues?.variableLabels ?? {}
+  )
   const [errors, setErrors] = useState<{ name?: string; body?: string }>({})
 
   const { data: contractVars, isLoading: varsLoading } = useQuery<ContractVariables>({
@@ -46,7 +49,7 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
     staleTime: Infinity,
   })
 
-  const allDetected = [...new Set((body.match(/\{\{(\w+)\}\}/g) ?? []).map(m => m.replace(/[{}]/g, '')))]
+  const allDetected = extractBodyVariables(body)
   const customVariables = allDetected.filter(v => !isDefaultVariable(v))
 
   function handleSubmit(e: React.FormEvent) {
@@ -62,7 +65,12 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
     const usedTypes = Object.fromEntries(
       customVariables.map(v => [v, variableTypes[v] ?? 'text'] as const)
     )
-    onSubmit({ name: name.trim(), body, isDefault, variableTypes: usedTypes })
+    const usedLabels = Object.fromEntries(
+      allDetected
+        .map(v => [v, (variableLabels[v] ?? '').trim()] as const)
+        .filter(([, label]) => label !== '')
+    )
+    onSubmit({ name: name.trim(), body, isDefault, variableTypes: usedTypes, variableLabels: usedLabels })
   }
 
   function copyVariable(variable: string) {
@@ -155,37 +163,57 @@ export function TemplateForm({ title, description, defaultValues, onSubmit, isLo
               {errors.body && <FieldError>{errors.body}</FieldError>}
             </Field>
 
-            {customVariables.length > 0 && (
+            {allDetected.length > 0 && (
               <Alert>
                 <AlertTitle>
-                  Variáveis extras detectadas ({customVariables.length}) — serão preenchidas manualmente:
+                  Rótulos dos campos ({allDetected.length}) — exibidos no formulário de preenchimento.
+                  {customVariables.length > 0 && ` ${customVariables.length} extra(s) serão preenchidas manualmente.`}
                 </AlertTitle>
                 <AlertDescription>
-                  <div className="mt-2 flex flex-col gap-2">
-                    {customVariables.map(v => (
-                      <div key={v} className="flex items-center justify-between gap-3">
-                        <Badge variant="secondary" className="font-mono">
-                          {`{{${v}}}`}
-                        </Badge>
-                        <Select
-                          value={variableTypes[v] ?? 'text'}
-                          onValueChange={t =>
-                            t && setVariableTypes(prev => ({ ...prev, [v]: t as ContractVariableType }))
-                          }
-                        >
-                          <SelectTrigger size="sm" className="w-32" aria-label={`Tipo de ${v}`}>
-                            <SelectValue>{CONTRACT_VARIABLE_TYPE_LABELS[variableTypes[v] ?? 'text']}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(Object.keys(CONTRACT_VARIABLE_TYPE_LABELS) as ContractVariableType[]).map(t => (
-                              <SelectItem key={t} value={t}>
-                                {CONTRACT_VARIABLE_TYPE_LABELS[t]}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    ))}
+                  <div className="mt-2 flex flex-col gap-3">
+                    {allDetected.map(v => {
+                      const isCustom = !isDefaultVariable(v)
+                      return (
+                        <div key={v} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                          <button
+                            type="button"
+                            title="Clique para copiar"
+                            className="w-fit shrink-0 cursor-pointer sm:w-56 sm:text-left"
+                            onClick={() => copyVariable(`{{${v}}}`)}
+                          >
+                            <Badge variant="secondary" className="hover:bg-secondary/70 font-mono">
+                              {`{{${v}}}`}
+                            </Badge>
+                          </button>
+                          <Input
+                            value={variableLabels[v] ?? ''}
+                            onChange={e => setVariableLabels(prev => ({ ...prev, [v]: e.target.value }))}
+                            placeholder={getDefaultVariableLabel(v)}
+                            maxLength={80}
+                            aria-label={`Rótulo de ${v}`}
+                          />
+                          {isCustom && (
+                            <Select
+                              value={variableTypes[v] ?? 'text'}
+                              onValueChange={t =>
+                                t && setVariableTypes(prev => ({ ...prev, [v]: t as ContractVariableType }))
+                              }
+                            >
+                              <SelectTrigger size="sm" className="w-32 shrink-0" aria-label={`Tipo de ${v}`}>
+                                <SelectValue>{CONTRACT_VARIABLE_TYPE_LABELS[variableTypes[v] ?? 'text']}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(Object.keys(CONTRACT_VARIABLE_TYPE_LABELS) as ContractVariableType[]).map(t => (
+                                  <SelectItem key={t} value={t}>
+                                    {CONTRACT_VARIABLE_TYPE_LABELS[t]}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </AlertDescription>
               </Alert>

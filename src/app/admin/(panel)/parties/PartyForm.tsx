@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/admin/ui/select'
 import { CONTRACT_PAYMENT_STATUS_LABELS } from '@/lib/contract-defaults'
+import { extractBodyVariables } from '@/lib/contract-render'
 import type { Customer, ContractTemplate, ContractPaymentStatus, Party } from '@/types/parties'
 
 export type PartyFormData = {
@@ -101,6 +102,7 @@ export function PartyForm({ mode, defaultValues, onSubmit, isLoading }: Props) {
   })
   const templates = templatesData?.data ?? []
   const selectedTemplate = templates.find(t => t.id.toString() === templateId)
+  const templateVariables = selectedTemplate ? extractBodyVariables(selectedTemplate.body) : []
 
   const quoteEnabled = mode === 'create' && !!date && !!startTime
   const {
@@ -290,9 +292,9 @@ export function PartyForm({ mode, defaultValues, onSubmit, isLoading }: Props) {
           {selectedTemplate ? (
             <div className="bg-muted rounded-md p-3">
               <p className="font-medium">{selectedTemplate.name}</p>
-              {selectedTemplate.variables.length > 0 ? (
+              {templateVariables.length > 0 ? (
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {selectedTemplate.variables.map(v => (
+                  {templateVariables.map(v => (
                     <span key={v} className="bg-background text-muted-foreground rounded border px-1.5 py-0.5 font-mono text-xs">
                       {`{{${v}}}`}
                     </span>

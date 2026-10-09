@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ContractTemplateSchema } from '@/lib/schemas/parties'
 import { isDefaultVariable } from '@/lib/contract-defaults'
+import { extractBodyVariables } from '@/lib/contract-render'
 
 function extractVariables(body: string): string[] {
   const matches = body.match(/\{\{(\w+)\}\}/g) ?? []
   return [...new Set(matches.map((m) => m.replace(/[{}]/g, '')))].filter(v => !isDefaultVariable(v))
+}
+
+function pickVariableLabels(body: string, labels: Record<string, string>): Record<string, string> {
+  const used = new Set(extractBodyVariables(body))
+  return Object.fromEntries(
+    Object.entries(labels).filter(([key, label]) => used.has(key) && label.trim() !== ''),
+  )
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -28,6 +36,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         Object.entries(parsed.data.variableTypes).filter(([key]) => variables.includes(key)),
       )
     : undefined
+  const variableLabels = parsed.data.variableLabels
+    ? pickVariableLabels(parsed.data.body, parsed.data.variableLabels)
+    : undefined
 
   const template = await prisma.$transaction(async (tx) => {
     if (parsed.data.isDefault) {
@@ -39,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const updated = await tx.contractTemplate.update({
       where: { id: Number(id) },
-      data: { ...parsed.data, variables, variableTypes },
+      data: { ...parsed.data, variables, variableTypes, variableLabels },
     })
 
     const nonSignedContracts = await tx.contract.findMany({

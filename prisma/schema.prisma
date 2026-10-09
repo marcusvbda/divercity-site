@@ -124,6 +124,7 @@ model ContractTemplate {
   body      String
   variables String[]
   variableTypes Json @default("{}")
+  variableLabels Json @default("{}")
   isDefault Boolean  @default(false)
   parties   Party[]
   createdAt DateTime @default(now())

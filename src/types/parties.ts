@@ -26,6 +26,7 @@ export interface ContractTemplate {
   body: string;
   variables: string[];
   variableTypes: Record<string, ContractVariableType>;
+  variableLabels: Record<string, string>;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;
