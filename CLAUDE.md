@@ -207,6 +207,20 @@ src/
 
 ---
 
+## Harness SDD (spec-driven)
+
+Fluxo por feature em `docs/features/<feature>/` (`spec.md` = fonte da verdade, `plan.md` = fases, `contract.md` = contrato API ↔ UI, `assets/`):
+
+1. `/create-feature-spec <feature>` — escreve o spec item a item
+2. `/plan-feature <feature>` — diagnóstico spec × código e `plan.md` em fases
+3. `/exec-phase <feature> <fases>` — executa via [orchestrador](.claude/playbooks/orchestrador.md) com agentes `backend`, `frontend` e `reviewer` (`.claude/agents/`), valida e atualiza plan/spec. **Não commita.**
+4. `/update-feature-spec <feature>` — reconcilia o spec com o código
+5. `/review-task <arquivo>` — confere uma task contra o código
+
+Padrões de stack e validação: skills em `.claude/skills/` (`engineering-standards`, `nextjs`, `react`, `shadcn`, `tailwind`, `prisma`).
+
+---
+
 ## Fetching de Dados — Regra Obrigatória
 
 **NUNCA use `useEffect` + `fetch` para buscar dados em Client Components.**

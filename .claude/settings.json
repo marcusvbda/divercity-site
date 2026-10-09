@@ -16,6 +16,14 @@
       "Bash(git rev-parse *)",
       "Bash(git branch *)",
       "Bash(git show *)",
+      "Bash(git status *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(npx prisma validate*)",
+      "Bash(npx prisma generate*)",
+      "Bash(npx prisma format*)",
+      "Bash(npx prisma migrate diff *)",
+      "Agent(Explore)",
       "Read",
       "Edit",
       "Write"
@@ -26,7 +34,9 @@
       "Bash(git reset *)",
       "Bash(git checkout *)",
       "Bash(git rebase *)",
-      "Bash(rm -rf *)"
+      "Bash(rm -rf *)",
+      "Bash(npx prisma migrate reset*)",
+      "Bash(npx prisma db push*)"
     ]
   },
   "hooks": {
