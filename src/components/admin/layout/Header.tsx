@@ -20,7 +20,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   cms: 'CMS',
   'component-types': 'Tipos de conteúdo',
   customers: 'Clientes',
-  services: 'Preços e Serviços',
+  services: 'Preços',
   'passport-types': 'Passaportes',
   'contract-templates': 'Modelos de contrato',
   parties: 'Salão de Festas',

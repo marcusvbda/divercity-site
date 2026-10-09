@@ -329,28 +329,6 @@ async function main() {
   )
   const priceColorField = await getField(priceTemplateComponent.id, 'color')
 
-  // General/Tier
-  const tierTemplateComponent = await prisma.contentComponent.upsert({
-    where: {
-      name_contentTypeId: { name: 'Tier', contentTypeId: generalType.id },
-    },
-    update: {},
-    create: { name: 'Tier', contentTypeId: generalType.id },
-  })
-
-  await seedFields(tierTemplateComponent.id, [
-    { name: 'label', value: '' },
-    { name: 'valor', value: '' },
-    { name: 'acompanhante', value: '' },
-  ])
-
-  const tierLabelField = await getField(tierTemplateComponent.id, 'label')
-  const tierValorField = await getField(tierTemplateComponent.id, 'valor')
-  const tierAcompanhanteField = await getField(
-    tierTemplateComponent.id,
-    'acompanhante'
-  )
-
   // General/Benefit
   const benefitTemplateComponent = await prisma.contentComponent.upsert({
     where: {
@@ -1025,101 +1003,6 @@ async function main() {
     })
   }
 
-  // tiers — PriceSection/Tiers component with weekdayTiers and weekendTiers
-  const priceTiersComponent = await prisma.contentComponent.upsert({
-    where: {
-      name_contentTypeId: { name: 'Tiers', contentTypeId: priceSectionType.id },
-    },
-    update: {},
-    create: { name: 'Tiers', contentTypeId: priceSectionType.id },
-  })
-
-  const weekdayTiersField = await prisma.componentField.upsert({
-    where: {
-      name_contentComponentId: {
-        name: 'weekdayTiers',
-        contentComponentId: priceTiersComponent.id,
-      },
-    },
-    update: { type: 'multiple' },
-    create: {
-      name: 'weekdayTiers',
-      type: 'multiple',
-      contentComponentId: priceTiersComponent.id,
-    },
-  })
-
-  const weekendTiersField = await prisma.componentField.upsert({
-    where: {
-      name_contentComponentId: {
-        name: 'weekendTiers',
-        contentComponentId: priceTiersComponent.id,
-      },
-    },
-    update: { type: 'multiple' },
-    create: {
-      name: 'weekendTiers',
-      type: 'multiple',
-      contentComponentId: priceTiersComponent.id,
-    },
-  })
-
-  await prisma.componentFieldValue.deleteMany({
-    where: { componentFieldId: weekdayTiersField.id },
-  })
-  await prisma.componentFieldValue.deleteMany({
-    where: { componentFieldId: weekendTiersField.id },
-  })
-
-  const weekdayTiersData = [
-    { label: '30min', valor: '45', acompanhante: '10' },
-    { label: '1 Hora', valor: '55', acompanhante: '15' },
-    { label: '2 Horas', valor: '70', acompanhante: '20' },
-    { label: '3 Horas', valor: '80', acompanhante: '30' },
-  ]
-
-  const weekendTiersData = [
-    { label: '30min', valor: '50', acompanhante: '10' },
-    { label: '1 Hora', valor: '65', acompanhante: '15' },
-    { label: '2 Horas', valor: '80', acompanhante: '20' },
-    { label: '3 Horas', valor: '100', acompanhante: '30' },
-  ]
-
-  for (const [fieldRef, items] of [
-    [weekdayTiersField, weekdayTiersData],
-    [weekendTiersField, weekendTiersData],
-  ] as const) {
-    for (const item of items) {
-      const instance = await prisma.componentInstance.create({
-        data: { templateComponentId: tierTemplateComponent.id },
-      })
-
-      await prisma.componentInstanceFieldValue.createMany({
-        data: [
-          {
-            instanceId: instance.id,
-            fieldId: tierLabelField.id,
-            value: item.label,
-          },
-          {
-            instanceId: instance.id,
-            fieldId: tierValorField.id,
-            value: item.valor,
-          },
-          {
-            instanceId: instance.id,
-            fieldId: tierAcompanhanteField.id,
-            value: item.acompanhante,
-          },
-        ],
-      })
-
-      await prisma.componentFieldValue.create({
-        data: { componentFieldId: fieldRef.id, instanceId: instance.id },
-      })
-    }
-  }
-
   // disclaimers — multiple simple strings
   await seedFields(priceContentComponent.id, [
     {
@@ -1140,7 +1023,6 @@ async function main() {
     { key: 'party_salon', name: 'Salão de Festas (3 horas)', weekdayPrice: '80', weekendPrice: '100' },
     { key: 'party_passport_package', name: 'Pacote de 10 Passaportes (festa)', weekdayPrice: '150', weekendPrice: '150' },
     { key: 'party_passport_single', name: 'Passaporte Avulso (festa)', weekdayPrice: '18', weekendPrice: '18' },
-    { key: 'party_companion', name: 'Acompanhante (festa)', weekdayPrice: '30', weekendPrice: '30' },
   ]
 
   for (const service of SERVICES) {
@@ -1442,104 +1324,6 @@ async function main() {
     })
   }
 
-  // tiers — AdvancePurchaseSection/Tiers component with weekdayTiers and weekendTiers (General/Tier)
-  const advancePurchaseTiersComponent = await prisma.contentComponent.upsert({
-    where: {
-      name_contentTypeId: {
-        name: 'Tiers',
-        contentTypeId: advancePurchaseType.id,
-      },
-    },
-    update: {},
-    create: { name: 'Tiers', contentTypeId: advancePurchaseType.id },
-  })
-
-  const ticketWeekdayTiersField = await prisma.componentField.upsert({
-    where: {
-      name_contentComponentId: {
-        name: 'weekdayTiers',
-        contentComponentId: advancePurchaseTiersComponent.id,
-      },
-    },
-    update: { type: 'multiple' },
-    create: {
-      name: 'weekdayTiers',
-      type: 'multiple',
-      contentComponentId: advancePurchaseTiersComponent.id,
-    },
-  })
-
-  const ticketWeekendTiersField = await prisma.componentField.upsert({
-    where: {
-      name_contentComponentId: {
-        name: 'weekendTiers',
-        contentComponentId: advancePurchaseTiersComponent.id,
-      },
-    },
-    update: { type: 'multiple' },
-    create: {
-      name: 'weekendTiers',
-      type: 'multiple',
-      contentComponentId: advancePurchaseTiersComponent.id,
-    },
-  })
-
-  await prisma.componentFieldValue.deleteMany({
-    where: { componentFieldId: ticketWeekdayTiersField.id },
-  })
-  await prisma.componentFieldValue.deleteMany({
-    where: { componentFieldId: ticketWeekendTiersField.id },
-  })
-
-  const ticketWeekdayTiersData = [
-    { label: '30min', valor: '45', acompanhante: '10' },
-    { label: '1 Hora', valor: '55', acompanhante: '15' },
-    { label: '2 Horas', valor: '70', acompanhante: '20' },
-    { label: '3 Horas', valor: '80', acompanhante: '30' },
-  ]
-
-  const ticketWeekendTiersData = [
-    { label: '30min', valor: '50', acompanhante: '10' },
-    { label: '1 Hora', valor: '65', acompanhante: '15' },
-    { label: '2 Horas', valor: '80', acompanhante: '20' },
-    { label: '3 Horas', valor: '100', acompanhante: '30' },
-  ]
-
-  for (const [fieldRef, items] of [
-    [ticketWeekdayTiersField, ticketWeekdayTiersData],
-    [ticketWeekendTiersField, ticketWeekendTiersData],
-  ] as const) {
-    for (const item of items) {
-      const instance = await prisma.componentInstance.create({
-        data: { templateComponentId: tierTemplateComponent.id },
-      })
-
-      await prisma.componentInstanceFieldValue.createMany({
-        data: [
-          {
-            instanceId: instance.id,
-            fieldId: tierLabelField.id,
-            value: item.label,
-          },
-          {
-            instanceId: instance.id,
-            fieldId: tierValorField.id,
-            value: item.valor,
-          },
-          {
-            instanceId: instance.id,
-            fieldId: tierAcompanhanteField.id,
-            value: item.acompanhante,
-          },
-        ],
-      })
-
-      await prisma.componentFieldValue.create({
-        data: { componentFieldId: fieldRef.id, instanceId: instance.id },
-      })
-    }
-  }
-
   // ── ContactSection ───────────────────────────────────────────────────────
   const contactSectionType = await prisma.contentType.upsert({
     where: { name: 'ContactSection' },
@@ -1662,20 +1446,16 @@ async function main() {
     }
   }
 
-  // Migra os valores já usados no mock de compra antecipada (CMS AdvancePurchaseSection/Tiers)
-  // para o novo model transacional PassportType — mesmos valores reais, não inventados.
+  // Valores fixos dos passaportes (antes mantidos no CMS) no model transacional PassportType — mesmos valores reais, não inventados.
   const passportTypesData = [
-    { name: '30 minutos', durationMinutes: 30, weekdayChildPrice: '45', weekendChildPrice: '50', weekdayCompanionPrice: '10', weekendCompanionPrice: '10', sort: 0 },
-    { name: '1 Hora', durationMinutes: 60, weekdayChildPrice: '55', weekendChildPrice: '65', weekdayCompanionPrice: '15', weekendCompanionPrice: '15', sort: 1 },
-    { name: '2 Horas', durationMinutes: 120, weekdayChildPrice: '70', weekendChildPrice: '80', weekdayCompanionPrice: '20', weekendCompanionPrice: '20', sort: 2 },
-    { name: '3 Horas', durationMinutes: 180, weekdayChildPrice: '80', weekendChildPrice: '100', weekdayCompanionPrice: '30', weekendCompanionPrice: '30', sort: 3 },
+    { key: 'passport_30min', name: '30 minutos', durationMinutes: 30, weekdayChildPrice: '45', weekendChildPrice: '50', weekdayCompanionPrice: '10', weekendCompanionPrice: '10', sort: 0 },
+    { key: 'passport_1h', name: '1 Hora', durationMinutes: 60, weekdayChildPrice: '55', weekendChildPrice: '65', weekdayCompanionPrice: '15', weekendCompanionPrice: '15', sort: 1 },
+    { key: 'passport_2h', name: '2 Horas', durationMinutes: 120, weekdayChildPrice: '70', weekendChildPrice: '80', weekdayCompanionPrice: '20', weekendCompanionPrice: '20', sort: 2 },
+    { key: 'passport_3h', name: '3 Horas', durationMinutes: 180, weekdayChildPrice: '80', weekendChildPrice: '100', weekdayCompanionPrice: '30', weekendCompanionPrice: '30', sort: 3 },
   ]
   for (const data of passportTypesData) {
-    const existing = await prisma.passportType.findFirst({ where: { name: data.name } })
-    if (!existing) {
-      await prisma.passportType.create({ data })
-      console.log(`- PassportType criado: ${data.name}`)
-    }
+    await prisma.passportType.upsert({ where: { key: data.key }, update: {}, create: data })
+    console.log(`- PassportType garantido: ${data.name}`)
   }
 
   await seedDevUser({

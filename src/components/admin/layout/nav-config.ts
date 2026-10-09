@@ -7,7 +7,6 @@ import {
   QrCodeIcon,
   Settings2Icon,
   TagIcon,
-  TicketIcon,
   UsersIcon,
 } from 'lucide-react'
 
@@ -134,15 +133,9 @@ export function getNavItems({
         },
         {
           icon: TagIcon,
-          label: 'Preços e Serviços',
+          label: 'Preços',
           href: '/admin/services',
           activePath: '/admin/services',
-        },
-        {
-          icon: TicketIcon,
-          label: 'Passaportes',
-          href: '/admin/passport-types',
-          activePath: '/admin/passport-types',
         },
         operationItem,
         {

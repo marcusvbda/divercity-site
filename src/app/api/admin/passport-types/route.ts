@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/authz";
 import { PassportTypeSchema } from "@/lib/schemas/tickets";
@@ -39,5 +40,6 @@ export async function POST(req: NextRequest) {
   }
 
   const passportType = await prisma.passportType.create({ data: parsed.data });
+  revalidateTag("passport-types", "max");
   return NextResponse.json(passportType, { status: 201 });
 }

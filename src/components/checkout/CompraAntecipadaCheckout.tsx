@@ -193,8 +193,8 @@ export default function CompraAntecipadaCheckout({
                   <div className="grid grid-cols-2 gap-2">
                     {(
                       [
-                        { value: 'weekday', label: 'Dia de semana' },
-                        { value: 'weekend', label: 'Fim de semana / feriado' },
+                        { value: 'weekday', label: 'Segunda a quinta (exceto feriados)' },
+                        { value: 'weekend', label: 'Sexta a domingo e feriados' },
                       ] as { value: VisitDayType; label: string }[]
                     ).map((opt) => (
                       <button
@@ -202,7 +202,7 @@ export default function CompraAntecipadaCheckout({
                         type="button"
                         onClick={() => setValue('visitDayType', opt.value, { shouldValidate: true })}
                         className={cn(
-                          'font-body min-h-11 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors',
+                          'font-body min-h-11 rounded-xl border px-3 py-2 text-sm leading-tight font-medium transition-colors',
                           visitDayType === opt.value
                             ? 'border-brand-pink bg-brand-pink text-white'
                             : 'border-gray-200 text-gray-600 hover:border-gray-300'

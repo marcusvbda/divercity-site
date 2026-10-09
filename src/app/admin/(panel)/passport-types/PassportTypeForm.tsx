@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/admin/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/admin/ui/card'
 import { Checkbox } from '@/components/admin/ui/checkbox'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/admin/ui/field'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/admin/ui/field'
 import { Input } from '@/components/admin/ui/input'
 import type { PassportTypeInput } from '@/lib/schemas/tickets'
 
@@ -15,6 +15,7 @@ type Props = {
   defaultValues?: Partial<PassportTypeInput>
   onSubmit: (data: PassportTypeInput) => void
   isLoading?: boolean
+  isFixed?: boolean
 }
 
 type PriceFieldName =
@@ -24,13 +25,13 @@ type PriceFieldName =
   | 'weekendCompanionPrice'
 
 const priceFields: { name: PriceFieldName; label: string }[] = [
-  { name: 'weekdayChildPrice', label: 'Criança — dia de semana (R$)' },
-  { name: 'weekendChildPrice', label: 'Criança — fim de semana/feriado (R$)' },
-  { name: 'weekdayCompanionPrice', label: 'Acompanhante — dia de semana (R$)' },
-  { name: 'weekendCompanionPrice', label: 'Acompanhante — fim de semana/feriado (R$)' },
+  { name: 'weekdayChildPrice', label: 'Criança — segunda a quinta (R$)' },
+  { name: 'weekendChildPrice', label: 'Criança — sexta a domingo e feriados (R$)' },
+  { name: 'weekdayCompanionPrice', label: 'Acompanhante — segunda a quinta (R$)' },
+  { name: 'weekendCompanionPrice', label: 'Acompanhante — sexta a domingo e feriados (R$)' },
 ]
 
-export function PassportTypeForm({ title, description, defaultValues, onSubmit, isLoading }: Props) {
+export function PassportTypeForm({ title, description, defaultValues, onSubmit, isLoading, isFixed }: Props) {
   const [name, setName] = useState(defaultValues?.name ?? '')
   const [durationMinutes, setDurationMinutes] = useState(String(defaultValues?.durationMinutes ?? ''))
   const [prices, setPrices] = useState<Record<PriceFieldName, string>>({
@@ -94,9 +95,15 @@ export function PassportTypeForm({ title, description, defaultValues, onSubmit, 
                   step="1"
                   value={durationMinutes}
                   onChange={(e) => setDurationMinutes(e.target.value)}
+                  disabled={isFixed}
                   aria-invalid={!!errors.durationMinutes}
                 />
                 {errors.durationMinutes && <FieldError>{errors.durationMinutes}</FieldError>}
+                {isFixed && (
+                  <FieldDescription>
+                    Passaporte fixo do sistema: não pode ser desativado nem ter a duração alterada.
+                  </FieldDescription>
+                )}
               </Field>
             </div>
 
@@ -119,7 +126,12 @@ export function PassportTypeForm({ title, description, defaultValues, onSubmit, 
             </div>
 
             <Field orientation="horizontal">
-              <Checkbox id="active" checked={active} onCheckedChange={(v) => setActive(v === true)} />
+              <Checkbox
+                id="active"
+                checked={active}
+                onCheckedChange={(v) => setActive(v === true)}
+                disabled={isFixed}
+              />
               <FieldLabel htmlFor="active" className="font-normal">
                 Ativo (disponível para compra no site)
               </FieldLabel>
@@ -127,7 +139,7 @@ export function PassportTypeForm({ title, description, defaultValues, onSubmit, 
           </FieldGroup>
         </CardContent>
         <CardFooter className="justify-end gap-2">
-          <Button variant="outline" nativeButton={false} render={<Link href="/admin/passport-types" />}>
+          <Button variant="outline" nativeButton={false} render={<Link href="/admin/services?tab=passaportes" />}>
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>

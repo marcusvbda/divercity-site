@@ -11,6 +11,7 @@ import Atracoes from '@/components/sections/Atracoes'
 
 import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
+import { getActivePassportTypes } from '@/lib/passport-types'
 
 export default async function Home() {
   const [
@@ -23,6 +24,7 @@ export default async function Home() {
     PriceSection,
     AdvancePurchaseSection,
     ContactSection,
+    passportTypes,
   ] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
@@ -33,6 +35,7 @@ export default async function Home() {
     getContentType('PriceSection'),
     getContentType('AdvancePurchaseSection'),
     getContentType('ContactSection'),
+    getActivePassportTypes(),
   ])
 
   return (
@@ -43,7 +46,7 @@ export default async function Home() {
         <Atracoes attractions={attractionsContent} />
         <PorQueEscolher benefits={BenefitsContent} />
         <Festas partySection={PartySection} />
-        <Precos priceSection={PriceSection} />
+        <Precos priceSection={PriceSection} passportTypes={passportTypes} />
         <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
 
         <Galeria />

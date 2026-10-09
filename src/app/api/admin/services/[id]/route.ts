@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireRole } from '@/lib/authz'
 import { prisma } from '@/lib/prisma'
 import { ServiceSchema } from '@/lib/schemas/parties'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
   const { id } = await params
   const service = await prisma.service.findUnique({ where: { id: Number(id) } })
   if (!service) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -10,6 +14,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
   const { id } = await params
   const body = await req.json()
   const parsed = ServiceSchema.safeParse(body)
@@ -25,6 +32,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
   const { id } = await params
   const service = await prisma.service.findUnique({ where: { id: Number(id) } })
   if (!service) return NextResponse.json({ error: 'Not found' }, { status: 404 })

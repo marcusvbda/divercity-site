@@ -19,7 +19,7 @@ export default function NewPassportTypePage() {
     onSuccess: (result) => {
       if (result.id) {
         toast.success('Tipo de passaporte criado com sucesso')
-        router.push('/admin/passport-types')
+        router.push('/admin/services?tab=passaportes')
       } else {
         toast.error('Erro ao criar tipo de passaporte')
       }

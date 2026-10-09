@@ -211,7 +211,7 @@ function SidebarGroupedMenuItems({
                         {item.label}
                       </span>
                       {item.badge && (
-                        <SidebarMenuBadge className="bg-primary/10 max-w-24 truncate rounded-full px-1.5 font-normal">
+                        <SidebarMenuBadge className="bg-primary/10 right-8 max-w-24 truncate rounded-full px-1.5 font-normal">
                           {item.badge}
                         </SidebarMenuBadge>
                       )}

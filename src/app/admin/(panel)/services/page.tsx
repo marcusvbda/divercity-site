@@ -7,6 +7,9 @@ import { Button } from '@/components/admin/ui/button'
 import { Badge } from '@/components/admin/ui/badge'
 import { DataTable } from '@/components/admin/data-table'
 import { toast } from 'sonner'
+import { useSearchParams } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/admin/ui/tabs'
+import { PassportTypesTab } from './PassportTypesTab'
 import type { Service } from '@/types/parties'
 import type { Column } from '@/components/admin/data-table'
 
@@ -42,7 +45,7 @@ const columns: Column<Service>[] = [
   },
 ]
 
-export default function ServicesPage() {
+function ServicesTab() {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
@@ -56,14 +59,11 @@ export default function ServicesPage() {
   })
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Preços e Serviços</h1>
-          <p className="text-muted-foreground text-sm">
-            Cadastro de preços usados no orçamento e reserva de festas
-          </p>
-        </div>
+        <p className="text-muted-foreground text-sm">
+          Preços usados no orçamento e na reserva de festas
+        </p>
         <Button nativeButton={false} render={<Link href="/admin/services/new" />}>
           <PlusIcon className="size-4" />
           Novo serviço
@@ -101,6 +101,34 @@ export default function ServicesPage() {
           </div>
         )}
       />
+    </div>
+  )
+}
+
+export default function PricesPage() {
+  const tab = useSearchParams().get('tab') === 'passaportes' ? 'passaportes' : 'salao'
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Preços</h1>
+        <p className="text-muted-foreground text-sm">
+          Preços do salão de festas e dos passaportes
+        </p>
+      </div>
+
+      <Tabs defaultValue={tab}>
+        <TabsList>
+          <TabsTrigger value="salao">Salão de festas</TabsTrigger>
+          <TabsTrigger value="passaportes">Passaportes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="salao">
+          <ServicesTab />
+        </TabsContent>
+        <TabsContent value="passaportes">
+          <PassportTypesTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

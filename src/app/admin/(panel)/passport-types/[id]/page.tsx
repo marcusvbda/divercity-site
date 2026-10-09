@@ -29,7 +29,7 @@ export default function EditPassportTypePage() {
       if (result.id) {
         queryClient.invalidateQueries({ queryKey: ['admin', 'passport-types'] })
         toast.success('Tipo de passaporte atualizado')
-        router.push('/admin/passport-types')
+        router.push('/admin/services?tab=passaportes')
       } else {
         toast.error('Erro ao atualizar tipo de passaporte')
       }
@@ -67,6 +67,7 @@ export default function EditPassportTypePage() {
         }
         onSubmit={mutation.mutate}
         isLoading={mutation.isPending}
+        isFixed={!!passportType?.key}
       />
     </div>
   )

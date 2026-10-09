@@ -239,6 +239,7 @@ enum TicketPassStatus {
 
 model PassportType {
   id                    String   @id @default(cuid())
+  key                   String?  @unique
   name                  String
   durationMinutes       Int
   weekdayChildPrice     Decimal  @db.Decimal(10, 2)

@@ -1,5 +1,6 @@
 export interface PassportType {
   id: string;
+  key: string | null;
   name: string;
   durationMinutes: number;
   weekdayChildPrice: string;

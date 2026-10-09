@@ -4,6 +4,8 @@ import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
+import type { getActivePassportTypes } from '@/lib/passport-types'
+
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.15 } },
@@ -18,15 +20,6 @@ const itemVariants = {
   },
 }
 
-type TierItem = {
-  id: number
-  value: {
-    label?: string | null
-    valor?: string | null
-    acompanhante?: string | null
-  }
-}
-
 type PriceItem = {
   id: number
   value: {
@@ -38,16 +31,47 @@ type PriceItem = {
 
 type DisclaimerItem = { id: number; value: string }
 
-export default function Precos({ priceSection }: any) {
+type PassportTypeItem = Awaited<
+  ReturnType<typeof getActivePassportTypes>
+>[number]
+
+const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+function formatPrice(value: string) {
+  const amount = Number(value)
+  if (Number.isInteger(amount)) return `R$${amount}`
+  return `R$${currencyFormatter.format(amount)}`
+}
+
+type PrecosProps = {
+  priceSection: any
+  passportTypes: PassportTypeItem[]
+}
+
+export default function Precos({ priceSection, passportTypes }: PrecosProps) {
   const badge = priceSection?.Section?.badge?.value ?? ''
   const title = priceSection?.Section?.title?.value ?? ''
   const subtitle = priceSection?.Section?.subtitle?.value ?? ''
   const prices: PriceItem[] = priceSection?.Content?.prices ?? []
   const disclaimers: DisclaimerItem[] = priceSection?.Content?.disclaimers ?? []
-  const weekdayTiers: TierItem[] = priceSection?.Tiers?.weekdayTiers ?? []
-  const weekendTiers: TierItem[] = priceSection?.Tiers?.weekendTiers ?? []
 
-  const tiersByGroup = [weekdayTiers, weekendTiers]
+  const tiersByGroup = [
+    passportTypes.map((p) => ({
+      id: p.id,
+      label: p.name,
+      child: p.weekdayChildPrice,
+      companion: p.weekdayCompanionPrice,
+    })),
+    passportTypes.map((p) => ({
+      id: p.id,
+      label: p.name,
+      child: p.weekendChildPrice,
+      companion: p.weekendCompanionPrice,
+    })),
+  ]
 
   return (
     <section id="precos" className="section-padding bg-gray-50">
@@ -120,19 +144,19 @@ export default function Precos({ priceSection }: any) {
                       <div className="mb-1 flex items-center gap-1.5 text-gray-400">
                         <Clock size={13} />
                         <span className="font-body text-xs font-medium">
-                          {tier.value.label}
+                          {tier.label}
                         </span>
                       </div>
                       <span
                         className="font-heading text-4xl leading-none font-bold"
                         style={{ color }}
                       >
-                        R${tier.value.valor}
+                        {formatPrice(tier.child)}
                       </span>
                       <p className="font-body mt-1 text-xs text-gray-400">
                         Acompanhante{' '}
                         <span className="font-semibold text-gray-600">
-                          R${tier.value.acompanhante}
+                          {formatPrice(tier.companion)}
                         </span>
                       </p>
                     </div>

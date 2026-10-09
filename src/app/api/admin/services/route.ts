@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireRole } from '@/lib/authz'
 import { prisma } from '@/lib/prisma'
 import { ServiceSchema } from '@/lib/schemas/parties'
 
 export async function GET(req: NextRequest) {
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
   const page = Number(req.nextUrl.searchParams.get('page') ?? '1')
   const perPage = Math.min(Number(req.nextUrl.searchParams.get('perPage') ?? '15'), 100)
   const search = req.nextUrl.searchParams.get('search') ?? ''
@@ -31,6 +35,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
   const body = await req.json()
   const parsed = ServiceSchema.safeParse(body)
   if (!parsed.success) {
