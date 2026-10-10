@@ -12,6 +12,7 @@ import Atracoes from '@/components/sections/Atracoes'
 import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
 import { getActivePassportTypes } from '@/lib/passport-types'
+import { isAdvancePurchaseEnabled } from '@/lib/advance-purchase'
 
 export default async function Home() {
   const [
@@ -47,7 +48,9 @@ export default async function Home() {
         <PorQueEscolher benefits={BenefitsContent} />
         <Festas partySection={PartySection} />
         <Precos priceSection={PriceSection} passportTypes={passportTypes} />
-        <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
+        {isAdvancePurchaseEnabled() && (
+          <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
+        )}
 
         <Galeria />
         <Depoimentos />
