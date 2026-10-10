@@ -4,6 +4,8 @@ import Footer from '@/components/sections/Footer'
 import OrcamentoWizard from '@/components/orcamento/OrcamentoWizard'
 import { OrcamentoNavbarHeader } from '@/components/orcamento/OrcamentoNavbarHeader'
 import { getContentType } from '@/lib/cms'
+import { isFeatureEnabled } from '@/lib/features'
+import { notFound } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Orçamento de Festa | Divercity Park',
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 }
 
 export default async function OrcamentoPage() {
+  if (!(await isFeatureEnabled('party_budget'))) notFound()
+
   const [navBarContent, FooterContent] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),

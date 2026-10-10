@@ -200,6 +200,15 @@ model Setting {
   @@map("settings")
 }
 
+model Feature {
+  key       String   @id
+  name      String
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@map("features")
+}
+
 model Service {
   id           Int      @id @default(autoincrement())
   key          String?  @unique
@@ -367,4 +376,17 @@ model TicketCompanion {
   pass TicketPass?
 
   @@map("ticket_companions")
+}
+
+model ApiToken {
+  id          String    @id @default(cuid())
+  name        String
+  tokenHash   String    @unique
+  tokenPrefix String
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("api_tokens")
 }

@@ -12,7 +12,7 @@ import Atracoes from '@/components/sections/Atracoes'
 import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
 import { getActivePassportTypes } from '@/lib/passport-types'
-import { isAdvancePurchaseEnabled } from '@/lib/advance-purchase'
+import { isFeatureEnabled } from '@/lib/features'
 
 export default async function Home() {
   const [
@@ -26,6 +26,8 @@ export default async function Home() {
     AdvancePurchaseSection,
     ContactSection,
     passportTypes,
+    advancePurchaseEnabled,
+    budgetEnabled,
   ] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
@@ -37,6 +39,8 @@ export default async function Home() {
     getContentType('AdvancePurchaseSection'),
     getContentType('ContactSection'),
     getActivePassportTypes(),
+    isFeatureEnabled('advance_purchase'),
+    isFeatureEnabled('party_budget'),
   ])
 
   return (
@@ -46,9 +50,9 @@ export default async function Home() {
         <Hero hero={heroContent} />
         <Atracoes attractions={attractionsContent} />
         <PorQueEscolher benefits={BenefitsContent} />
-        <Festas partySection={PartySection} />
+        <Festas partySection={PartySection} budgetEnabled={budgetEnabled} />
         <Precos priceSection={PriceSection} passportTypes={passportTypes} />
-        {isAdvancePurchaseEnabled() && (
+        {advancePurchaseEnabled && (
           <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
         )}
 

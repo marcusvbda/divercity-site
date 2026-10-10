@@ -11,7 +11,13 @@ import { scrollTo } from '@/lib/helpers'
 type FeatureItem = { id: number; value: string }
 type ImageItem   = { id: number; value: string }
 
-export default function Festas({ partySection }: any) {
+export default function Festas({
+  partySection,
+  budgetEnabled,
+}: {
+  partySection: any
+  budgetEnabled: boolean
+}) {
   const [selectedImg, setSelectedImg] = useState<string | null>(null)
   const router = useRouter()
 
@@ -74,7 +80,7 @@ export default function Festas({ partySection }: any) {
               </ul>
 
               <div className="flex flex-col gap-4 sm:flex-row">
-                {ctaBudget && (
+                {budgetEnabled && ctaBudget && (
                   <CtaButton
                     onClick={() => goToCta(ctaBudget.href ?? '')}
                     cta={ctaBudget}

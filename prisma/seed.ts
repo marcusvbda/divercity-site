@@ -104,6 +104,22 @@ async function seedStripeSettings() {
   console.log(`- Credenciais do Stripe seedadas em Setting: ${toSeed.map(([k]) => k).join(', ')}`)
 }
 
+async function seedFeatures() {
+  const features = [
+    { key: 'advance_purchase', name: 'Compra antecipada' },
+    { key: 'party_budget', name: 'Orçamento de festa' },
+  ]
+
+  for (const feature of features) {
+    await prisma.feature.upsert({
+      where: { key: feature.key },
+      update: {},
+      create: { ...feature, enabled: true },
+    })
+  }
+  console.log(`- Features seedadas: ${features.map((f) => f.key).join(', ')}`)
+}
+
 type SimpleField = { name: string; type?: 'simple'; value: string }
 type MultipleField = { name: string; type: 'multiple'; value: string[] }
 type FieldEntry = SimpleField | MultipleField
@@ -1449,12 +1465,17 @@ async function main() {
   // Valores fixos dos passaportes (antes mantidos no CMS) no model transacional PassportType — mesmos valores reais, não inventados.
   const passportTypesData = [
     { key: 'passport_30min', name: '30 minutos', durationMinutes: 30, weekdayChildPrice: '45', weekendChildPrice: '50', weekdayCompanionPrice: '10', weekendCompanionPrice: '10', sort: 0 },
-    { key: 'passport_1h', name: '1 Hora', durationMinutes: 60, weekdayChildPrice: '55', weekendChildPrice: '65', weekdayCompanionPrice: '15', weekendCompanionPrice: '15', sort: 1 },
-    { key: 'passport_2h', name: '2 Horas', durationMinutes: 120, weekdayChildPrice: '70', weekendChildPrice: '80', weekdayCompanionPrice: '20', weekendCompanionPrice: '20', sort: 2 },
-    { key: 'passport_3h', name: '3 Horas', durationMinutes: 180, weekdayChildPrice: '80', weekendChildPrice: '100', weekdayCompanionPrice: '30', weekendCompanionPrice: '30', sort: 3 },
+    { key: 'passport_1h', name: '1 Hora', durationMinutes: 60, weekdayChildPrice: '55', weekendChildPrice: '65', weekdayCompanionPrice: '15', weekendCompanionPrice: '20', sort: 1 },
+    { key: 'passport_2h', name: '2 Horas', durationMinutes: 120, weekdayChildPrice: '70', weekendChildPrice: '80', weekdayCompanionPrice: '20', weekendCompanionPrice: '30', sort: 2 },
+    { key: 'passport_3h', name: '3 Horas', durationMinutes: 180, weekdayChildPrice: '80', weekendChildPrice: '100', weekdayCompanionPrice: '30', weekendCompanionPrice: '40', sort: 3 },
   ]
   for (const data of passportTypesData) {
-    await prisma.passportType.upsert({ where: { key: data.key }, update: {}, create: data })
+    const { weekdayChildPrice, weekendChildPrice, weekdayCompanionPrice, weekendCompanionPrice } = data
+    await prisma.passportType.upsert({
+      where: { key: data.key },
+      update: { weekdayChildPrice, weekendChildPrice, weekdayCompanionPrice, weekendCompanionPrice },
+      create: data,
+    })
     console.log(`- PassportType garantido: ${data.name}`)
   }
 
@@ -1471,6 +1492,7 @@ async function main() {
     nameEnv: 'SEED_ADMIN_NAME',
   })
   await seedStripeSettings()
+  await seedFeatures()
 
   console.log('Seed completo')
 }

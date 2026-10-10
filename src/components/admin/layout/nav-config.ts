@@ -146,6 +146,17 @@ export function getNavItems({
               label: 'Integrações',
               href: '/admin/settings',
               activePath: '/admin/settings',
+              exact: true,
+            },
+            {
+              label: 'Features',
+              href: '/admin/settings/features',
+              activePath: '/admin/settings/features',
+            },
+            {
+              label: 'API tokens',
+              href: '/admin/settings/api-tokens',
+              activePath: '/admin/settings/api-tokens',
             },
           ],
         },

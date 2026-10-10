@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isFeatureEnabled } from "@/lib/features";
 import { prisma } from "@/lib/prisma";
 import { PartyBudgetReservationSchema } from "@/lib/schemas/parties";
 import { computeQuote, getPartyDateEnd, isSlotAvailable } from "@/lib/party-budget";
 
 export async function POST(req: NextRequest) {
+  if (!(await isFeatureEnabled("party_budget"))) {
+    return NextResponse.json(
+      { error: "Orçamento de festa indisponível no momento." },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json();
   const parsed = PartyBudgetReservationSchema.safeParse(body);
   if (!parsed.success) {

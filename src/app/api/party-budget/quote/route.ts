@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isFeatureEnabled } from "@/lib/features";
 import { computeQuote, getPartyDateEnd, isSlotAvailable } from "@/lib/party-budget";
 import { PartyPaymentOptionSchema } from "@/lib/schemas/parties";
 
 export async function GET(req: NextRequest) {
+  if (!(await isFeatureEnabled("party_budget"))) {
+    return NextResponse.json(
+      { error: "Orçamento de festa indisponível no momento." },
+      { status: 403 }
+    );
+  }
+
   const dateParam = req.nextUrl.searchParams.get("date");
   const paymentOptionParam = req.nextUrl.searchParams.get("paymentOption");
   const passportSingleCountParam = req.nextUrl.searchParams.get("passportSingleCount");

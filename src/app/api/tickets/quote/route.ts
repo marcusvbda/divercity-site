@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdvancePurchaseEnabled } from "@/lib/advance-purchase";
+import { isFeatureEnabled } from "@/lib/features";
 import { TicketQuoteRequestSchema } from "@/lib/schemas/tickets";
 import { priceOrder, TicketPricingError } from "@/lib/ticket-pricing";
 
 export async function POST(req: NextRequest) {
-  if (!isAdvancePurchaseEnabled()) {
+  if (!(await isFeatureEnabled("advance_purchase"))) {
     return NextResponse.json(
       { error: "Compra antecipada indisponível no momento." },
       { status: 403 }

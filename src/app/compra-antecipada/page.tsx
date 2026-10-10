@@ -4,11 +4,11 @@ import Navbar from '@/components/ui/Navbar'
 import Footer from '@/components/sections/Footer'
 import CompraAntecipadaCheckout from '@/components/checkout/CompraAntecipadaCheckout'
 import { getContentType } from '@/lib/cms'
-import { isAdvancePurchaseEnabled } from '@/lib/advance-purchase'
+import { isFeatureEnabled } from '@/lib/features'
 import { notFound } from 'next/navigation'
 
 export default async function CompraAntecipadaPage() {
-  if (!isAdvancePurchaseEnabled()) notFound()
+  if (!(await isFeatureEnabled('advance_purchase'))) notFound()
 
   const [navBarContent, FooterContent, advancePurchaseSection] = await Promise.all([
     getContentType('NavBar'),

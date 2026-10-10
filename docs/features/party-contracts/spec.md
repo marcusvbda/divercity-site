@@ -30,6 +30,7 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 
 - Telas de admin (`/admin/parties/**`, `/admin/contract-templates/**`, `/admin/customers/**`): só role `admin`. O `proxy.ts` redireciona `operator` para `/admin/operacao`.
 - `/orcamento`, `/c/<token>`, `/api/party-budget/*`, `/api/client/contract/*` e `/api/webhooks/docusign` são públicos (o `proxy.ts` só cobre `/admin`).
+- `/orcamento` e `/api/party-budget/*` dependem da feature **Orçamento de festa** (ver 2.3); `/c/<token>`, `/api/client/contract/*` e o webhook do DocuSign não dependem.
 - O cliente acessa o contrato só com o token (UUID v4) e com o link aberto.
 
 ### 2.3 Orçamento e reserva pública (`/orcamento`)
@@ -44,6 +45,11 @@ Modelos: `Customer`, `ContractTemplate`, `Party`, `Contract`, `Guest` (`prisma/s
 - **Etapa 3, Termos e envio:** "Termo e Condições da Reserva/Festa" (texto fixo no código, caixa rolável: capacidade máx. 50, 9 mesas e 36 cadeiras, salão por até 3 horas, decoração, alimentação e bebidas, pagamento Opção A/B; termina com "Esta reserva ainda não é uma cobrança. Nossa equipe entrará em contato pelo WhatsApp para confirmar os detalhes, formalizar o contrato e combinar o pagamento."). Checkbox "Li e aceito os Termos e Condições da Reserva/Festa." (botão "Enviar reserva" desabilitado até marcar; "Enviando reserva...").
   - Erros: 400 aplica erros nos campos e mostra "Há campos inválidos no formulário. Corrija e tente novamente."; 409 mostra "Essa data/horário já está reservado. Volte à etapa 1 e escolha outra data." com botão "Escolher outra data"; demais usam `error` do servidor ou "Erro ao processar sua reserva. Tente novamente."
 - **Sucesso:** "Reserva recebida!", "Recebemos sua solicitação #{partyId}. Nossa equipe entrará em contato pelo WhatsApp em breve para confirmar os detalhes, formalizar o contrato e combinar o pagamento.", "Fique de olho no seu WhatsApp.", botão "Voltar para a home". Sem link para `/c/<token>`, sem resumo.
+- **Controle pela feature "Orçamento de festa" (`party_budget`):** ligada e desligada pelo admin em `/admin/settings/features` (ver [`site-settings`](../site-settings/spec.md)); sem linha no banco, é ativa. Com ela desativada:
+  - `/orcamento` responde 404 (`notFound()`);
+  - `GET /api/party-budget/availability`, `GET /api/party-budget/quote` e `POST /api/party-budget/reservations` respondem 403 `Orçamento de festa indisponível no momento.`, antes de qualquer validação (inclusive `date` ausente);
+  - o CTA `ctaBudget` some da seção Festas da home (prop `budgetEnabled`), que continua visível com galeria e `ctaPrices`;
+  - não são afetados: `/c/<token>`, `/api/client/contract/*`, o webhook do DocuSign e o admin de festas, contratos e clientes (mas ver "Pontos em aberto": o admin usa `GET /api/party-budget/quote`).
 - **Disponibilidade (`isSlotAvailable`, `src/lib/party-budget.ts`):** duração da reserva pública 3 h (`dateEnd = date + 3h`); bloqueiam todas as festas não `cancelled`; festa existente sem `dateEnd` assume 4 h; há um único salão (qualquer sobreposição bloqueia); sem intervalo de limpeza, horário de funcionamento ou feriados. Fim de semana (sábado/domingo) é decidido em `America/Sao_Paulo`.
 - **Cálculo (`computeQuote`):** serviços da tabela `Service` por chave (`party_salon`, `party_passport_package`, `party_passport_single`), preço de dia útil ou fim de semana conforme a data. `salon_only`: total = salão. `salon_and_passports`: total = salão + pacote + avulsos × preço do avulso. Faltando qualquer um dos 3 serviços (mesmo na Opção A): erro `Serviço "<key>" não cadastrado. Configure em /admin/services.`
 - **API `GET /api/party-budget/quote`:** 400 `Parâmetro "date" é obrigatório` / `Parâmetro "date" inválido` / `Parâmetro "paymentOption" inválido. Use "salon_only" ou "salon_and_passports"` / `Parâmetro "passportSingleCount" deve ser um inteiro ≥ 0`; 500 com a mensagem do erro. 200 `{ available, salonPrice, passportPackagePrice, passportSinglePrice, passportSingleCount, total, breakdown[] }`.
@@ -173,6 +179,8 @@ Itens marcados "parece bug" são comportamento observado no código, não regist
 - `TipTapEditor` sem `immediatelyRender: false` (aviso de hidratação, ao contrário de `ContractPreview`).
 
 **Orçamento e portal público**
+- Parece bug: com a feature "Orçamento de festa" desativada, o admin perde a sugestão de preço do salão. `PartyForm` (`/admin/parties/new`) e `PartyContractTab` (aba "Contrato") consultam o `GET /api/party-budget/quote?paymentOption=salon_only` para sugerir o valor, e a rota agora responde 403 (`if (!r.ok) throw`); o campo "Valor do contrato" fica vazio, com a ajuda "Não foi possível obter o preço do salão; informe o valor.". A decisão da feature era que o admin não fosse afetado.
+- Links do CMS (Navbar, Hero) para `/orcamento` não são escondidos com a feature desativada e levam a 404.
 - Parece bug: telefone aparece como obrigatório (`*`), mas o schema aceita vazio; data inválida mostra mensagem padrão do zod em inglês; a mensagem do refine de `totalParticipants` expõe nomes técnicos de campo.
 - Parece bug: dá para avançar na etapa 1 com a disponibilidade carregando/falha (`!== false`); sem UI de erro para essa consulta; não há validação de horário de funcionamento/dia da semana, embora os termos citem "horário limite conforme o dia".
 - Parece bug: avulsos não são recalculados se o usuário volta e muda o número de crianças com a Opção B selecionada; o contador está dentro de um `<button>` (HTML inválido, aviso de hidratação).

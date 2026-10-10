@@ -18,7 +18,7 @@ O `proxy.ts` restringe `operator` a `/admin/login` e `/admin/operacao`; qualquer
 
 ### 2.1 Dados
 
-- **`PassportType`**: `name`, `durationMinutes`, quatro preços (`weekdayChildPrice`, `weekendChildPrice`, `weekdayCompanionPrice`, `weekendCompanionPrice`), `active` (padrão `true`), `sort`. Os valores vêm do banco (cadastrados pelo admin), não do código.
+- **`PassportType`**: `key` (opcional e único; preenchido nos passaportes fixos do sistema: `passport_30min`, `passport_1h`, `passport_2h`, `passport_3h`), `name`, `durationMinutes`, quatro preços (`weekdayChildPrice`, `weekendChildPrice`, `weekdayCompanionPrice`, `weekendCompanionPrice`), `active` (padrão `true`), `sort`. Os valores vêm do banco (cadastrados pelo admin), não do código.
 - **`TicketOrder`**: `shortCode` único, `status`, dados do responsável (`guardianName`, `guardianEmail`, `guardianPhone`, `guardianWhatsapp`), `totalAmount`, `stripeCheckoutSessionId` (único), `stripePaymentIntentId`, `paidAt`. O pedido guarda só a compra e o pagamento; entrada, saída e tempo vivem em cada ticket (`TicketPass`).
 - **`TicketChild`**: `name`, `birthDate`, `passportTypeId`, `isPNE`, `unitPrice`, `hasCompanion` (nulo/true/false), `unaccompaniedTermsAcceptedAt`.
 - **`TicketCompanion`**: `name`, `phone`, `isFree`, `linkedChildId` (único, vincula o acompanhante gratuito a uma criança), `passportTypeId`, `unitPrice` (padrão 0).
@@ -37,7 +37,7 @@ O `proxy.ts` restringe `operator` a `/admin/login` e `/admin/operacao`; qualquer
 
 Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em [`../pricing/spec.md`](../pricing/spec.md) (seções 2.1 a 2.3). Aqui ficam as regras de compra:
 
-- Aceita `visitDayType` `weekday` ou `weekend` (na tela: "Dia de semana" e "Fim de semana / feriado"); define qual preço é usado.
+- Aceita `visitDayType` `weekday` ou `weekend` (na tela: "Segunda a quinta (exceto feriados)" e "Sexta a domingo e feriados"); define qual preço é usado.
 - **Acompanhante gratuito:** só para criança com menos de 60 meses (4 anos). Para essas crianças a tela exige decidir "Com acompanhante" ou "Sem acompanhante":
   - **Com acompanhante** (`hasCompanion = true`): exige os dados de 1 acompanhante vinculado (nome obrigatório, telefone opcional), `isFree = true`, preço 0. Deve ter mais de 18 anos, comprovado na entrada.
   - **Sem acompanhante** (`hasCompanion = false`): exige aceite do Termo de Responsabilidade (`unaccompaniedTermsAccepted`); o aceite é gravado em `unaccompaniedTermsAcceptedAt`. Na entrada, a criança é sinalizada com os contatos do responsável.
@@ -49,9 +49,10 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 
 ### 2.4 API pública
 
-- `GET /api/tickets/passport-types`: lista os passaportes ativos (ordem `sort`, depois `durationMinutes`), preços como string com 2 casas.
-- `POST /api/tickets/quote`: valida com `TicketQuoteRequestSchema` e devolve crianças (com `ageMonths`, `unitPrice`), acompanhantes e `total` (cálculo em [`pricing`](../pricing/spec.md)). 400 em validação ou regra.
-- `POST /api/tickets/checkout`: valida com `TicketOrderCreateSchema` (exige ao menos 1 criança; `guardianName`, `guardianEmail` válido, `guardianPhone`, `guardianWhatsapp` obrigatórios), recalcula o preço e:
+- Todas as rotas desta seção e a página `/compra-antecipada` dependem da feature **Compra antecipada** (ver 2.11).
+- `GET /api/tickets/passport-types`: lista os passaportes ativos (ordem `sort`, depois `durationMinutes`), preços como string com 2 casas. Lê de `getActivePassportTypes()` (`src/lib/passport-types.ts`), com cache de tag `passport-types` (`cacheLife('max')`), invalidada pelas APIs de admin de passaportes.
+- `POST /api/tickets/quote`: se a feature estiver desativada, 403 "Compra antecipada indisponível no momento."; valida com `TicketQuoteRequestSchema` e devolve crianças (com `ageMonths`, `unitPrice`), acompanhantes e `total` (cálculo em [`pricing`](../pricing/spec.md)). 400 em validação ou regra.
+- `POST /api/tickets/checkout`: se a feature estiver desativada, 403 "Compra antecipada indisponível no momento."; valida com `TicketOrderCreateSchema` (exige ao menos 1 criança; `guardianName`, `guardianEmail` válido, `guardianPhone`, `guardianWhatsapp` obrigatórios), recalcula o preço e:
   1. se o Stripe não estiver configurado, responde 503 "Pagamento indisponível no momento. Tente novamente mais tarde.";
   2. cria, em transação, `TicketOrder` (`pending_payment`), crianças, acompanhantes e um `TicketPass` por criança e pelo acompanhante do grupo (cada um com código próprio e a duração do seu passaporte);
   3. cria a sessão de Checkout do Stripe (`mode: payment`, moeda BRL, métodos `card` e `pix`, PIX expira em 3600 s, `customer_email` = e-mail do responsável, `metadata.orderId`), com uma linha por criança ("Passaporte - {nome}") e por acompanhante pago ("Acompanhante - {nome}"); itens de valor 0 ficam de fora;
@@ -84,13 +85,13 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 
 - Página com NavBar/Footer do CMS; título, subtítulo, `features` e `disclaimer` vêm do ContentType `AdvancePurchaseSection` do CMS, com fallback de título "Compre antecipadamente" e subtítulo "Evite filas e garanta sua diversão!". Selo fixo "Ambiente 100% seguro".
 - Checkout em 3 etapas: **Crianças** → **Acompanhantes e dados** → **Revisão e pagamento**.
-  1. **Crianças:** escolher o dia da visita (padrão "Dia de semana"); para cada criança: nome, data de nascimento (exibe a idade), tipo de passaporte, checkbox PNE (rotulado -50%) e, se tiver menos de 60 meses, a escolha "Com acompanhante"/"Sem acompanhante" (com campos do acompanhante ou aceite do Termo). Dá para adicionar/remover crianças (mínimo 1). Ao avançar, valida e bloqueia se houver criança elegível sem decisão ou sem termo aceito.
+  1. **Crianças:** escolher o dia da visita (padrão "Segunda a quinta (exceto feriados)"); para cada criança: nome, data de nascimento (exibe a idade), tipo de passaporte, checkbox PNE (rotulado -50%) e, se tiver menos de 60 meses, a escolha "Com acompanhante"/"Sem acompanhante" (com campos do acompanhante ou aceite do Termo). Dá para adicionar/remover crianças (mínimo 1). Ao avançar, valida e bloqueia se houver criança elegível sem decisão ou sem termo aceito.
   2. **Acompanhantes e dados:** 1 acompanhante do grupo opcional (nome, telefone, duração do ingresso; o botão de adicionar some depois de 1 e `addExtraCompanion` ignora a chamada se já existir) e dados do responsável (nome, e-mail, telefone, WhatsApp).
   3. **Revisão:** avisos (documento com foto; acompanhante gratuito deve provar mais de 18 anos; criança sem acompanhante), resumo do valor, `disclaimer` do CMS e botão "Pagar {total}", que redireciona ao Stripe. Texto: "Pagamento seguro via Stripe — cartão de crédito ou PIX."
 - O valor é calculado via `POST /api/tickets/quote` com debounce de 500 ms; o botão de pagar só habilita com o orçamento pronto. Há resumo lateral (desktop) ou embutido na etapa 3 (mobile).
 - Estados: carregando tipos de passaporte (spinner), erro ao carregar ("Não foi possível carregar os tipos de passaporte. Recarregue a página."), erro de etapa e erro de checkout exibidos em caixa vermelha.
 - A busca de dados usa React Query (`useQuery` para passaportes, `useMutation` para quote e checkout).
-- A seção `CompraAntecipada` da home usa o CTA do CMS, com fallback `href` `compra-antecipada`.
+- A seção `CompraAntecipada` da home usa o CTA do CMS, com fallback `href` `compra-antecipada`, e só é renderizada com a feature ativa (ver 2.11).
 
 ### 2.8 Tela de confirmação (`/compra-antecipada/confirmacao/[shortCode]`)
 
@@ -116,9 +117,19 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 
 ### 2.10 Admin de passaportes (`admin`)
 
-- `/admin/passport-types` (lista), `/new` e `/[id]`: formulário com nome, duração (minutos), preços de criança e acompanhante (semana e fim de semana/feriado), checkbox ativo; lista mostra "Inativo".
-- API `/api/admin/passport-types` (GET paginado, padrão 50 por página, máximo 100, busca por nome; POST) e `/[id]` (GET, PUT, DELETE), só `admin`. Validação: nome obrigatório, duração inteira > 0, preços ≥ 0.
+- A lista fica na aba "Passaportes" de `/admin/services?tab=passaportes` (`PassportTypesTab`): colunas nome (com selo "Fixo" e "Inativo"), duração e os quatro preços (segunda a quinta; sexta a domingo e feriados). `/admin/passport-types` só redireciona para essa aba; `/admin/passport-types/new` e `/[id]` continuam sendo o formulário (nome, duração em minutos, quatro preços, checkbox ativo) e voltam para a aba depois de salvar.
+- Passaporte **fixo** (com `key`): o formulário desabilita duração e "Ativo" ("Passaporte fixo do sistema: não pode ser desativado nem ter a duração alterada."), a lista esconde o botão de remover, e a API recusa: PUT com `active = false` (400 "Passaporte fixo não pode ser desativado."), PUT com duração diferente (400 "A duração de um passaporte fixo não pode ser alterada.") e DELETE (403 "Este passaporte é fixo do sistema e não pode ser removido, apenas editado.").
+- API `/api/admin/passport-types` (GET paginado, padrão 50 por página, máximo 100, busca por nome; POST) e `/[id]` (GET, PUT, DELETE), só `admin`; PUT e DELETE respondem 404 se o passaporte não existir. Validação: nome obrigatório, duração inteira > 0, preços ≥ 0. POST, PUT e DELETE invalidam a tag `passport-types`.
 - DELETE é bloqueado (403) se o passaporte já foi usado em alguma criança de pedido ("Desative-o em vez disso."). A verificação considera só `TicketChild`, não `TicketCompanion`.
+
+### 2.11 Controle pela feature "Compra antecipada"
+
+- A compra antecipada é ligada e desligada pelo admin em `/admin/settings/features` (feature `advance_purchase`, tabela `features`; ver [`site-settings`](../site-settings/spec.md)). Sem linha no banco, a feature é ativa. A variável de ambiente `ADVANCE_PURCHASE_ENABLED` não existe mais.
+- Com a feature desativada:
+  - a seção `CompraAntecipada` some da home;
+  - `/compra-antecipada` responde 404 (`notFound()`);
+  - `POST /api/tickets/quote` e `POST /api/tickets/checkout` respondem 403 "Compra antecipada indisponível no momento.";
+  - continuam funcionando: a confirmação (`/compra-antecipada/confirmacao/[shortCode]`), `GET /api/tickets/confirmation/[shortCode]`, `GET /api/tickets/passport-types`, o webhook do Stripe e a operação em `/admin/operacao`.
 
 ## 3. Anexos e referências
 
@@ -130,4 +141,5 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 - Pedidos `pending_payment` nunca expiram e `cancelled` nunca é gravado: não há fluxo de cancelamento, reembolso ou limpeza de pedidos abandonados.
 - Se o envio do e-mail falhar (Resend), não há reenvio nem retentativa; o comprovante continua disponível na página de confirmação.
 - Valores de excedente não são calculados pelo sistema (cobrança é feita à parte no caixa).
+- Com a feature desativada, o link "voltar à compra" da confirmação com pagamento falhou (`ConfirmationView`, `href` `/compra-antecipada`) leva a 404. Links do CMS (Navbar, Hero) para `#compra-antecipada` ou `/compra-antecipada` não são escondidos automaticamente.
 - Conteúdo não verificável pelo código: preços, durações e passaportes cadastrados no banco; textos do `AdvancePurchaseSection` no CMS; configuração do Stripe (webhook, chaves) e do Resend (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`).

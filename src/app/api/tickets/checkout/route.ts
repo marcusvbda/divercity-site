@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdvancePurchaseEnabled } from "@/lib/advance-purchase";
+import { isFeatureEnabled } from "@/lib/features";
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { getStripeClient } from "@/lib/stripe";
@@ -8,7 +8,7 @@ import { TicketOrderCreateSchema } from "@/lib/schemas/tickets";
 import { generateUniqueShortCode } from "@/lib/short-code";
 
 export async function POST(req: NextRequest) {
-  if (!isAdvancePurchaseEnabled()) {
+  if (!(await isFeatureEnabled("advance_purchase"))) {
     return NextResponse.json(
       { error: "Compra antecipada indisponível no momento." },
       { status: 403 }
