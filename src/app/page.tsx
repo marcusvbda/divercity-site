@@ -28,6 +28,7 @@ export default async function Home() {
     passportTypes,
     advancePurchaseEnabled,
     budgetEnabled,
+    instagramCarouselEnabled,
   ] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
@@ -41,11 +42,12 @@ export default async function Home() {
     getActivePassportTypes(),
     isFeatureEnabled('advance_purchase'),
     isFeatureEnabled('party_budget'),
+    isFeatureEnabled('instagram_carousel'),
   ])
 
   return (
     <>
-      <Navbar navbar={navBarContent} />
+      <Navbar navbar={navBarContent} budgetEnabled={budgetEnabled} />
       <main>
         <Hero hero={heroContent} />
         <Atracoes attractions={attractionsContent} />
@@ -56,7 +58,7 @@ export default async function Home() {
           <CompraAntecipada advancePurchaseSection={AdvancePurchaseSection} />
         )}
 
-        <Galeria />
+        {instagramCarouselEnabled && <Galeria />}
         <Depoimentos />
         <Contato contactSection={ContactSection} />
       </main>

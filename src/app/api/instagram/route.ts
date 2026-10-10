@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isFeatureEnabled } from '@/lib/features'
 import { fetchInstagramPosts, type InstagramPost } from '@/lib/instagram'
 
 export type { InstagramPost } from '@/lib/instagram'
@@ -23,6 +24,13 @@ function makeFallback(instagramUrl: string): InstagramPost[] {
 }
 
 export async function GET() {
+  if (!(await isFeatureEnabled('instagram_carousel'))) {
+    return NextResponse.json(
+      { error: 'Carousel do Instagram indisponível no momento.' },
+      { status: 403 },
+    )
+  }
+
   const [tokenSetting, urlSetting] = await Promise.all([
     prisma.setting.findUnique({ where: { key: 'instagram_access_token' } }),
     prisma.setting.findUnique({ where: { key: 'instagram_url' } }),

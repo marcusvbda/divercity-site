@@ -5,7 +5,7 @@
 Configurações do site editáveis pelo admin, no menu "Configurações":
 
 - **Integrações** (`/admin/settings`): credenciais externas (Google, Instagram e Stripe). Os valores ficam no banco, na tabela `settings`, e o app lê as credenciais de lá em runtime, não de variáveis de ambiente.
-- **Features** (`/admin/settings/features`): liga e desliga funcionalidades do site público (Compra antecipada e Orçamento de festa). Ficam na tabela `features`.
+- **Features** (`/admin/settings/features`): liga e desliga funcionalidades do site público (Compra antecipada, Orçamento de festa e Carousel do Instagram). Ficam na tabela `features`.
 
 ### Modelo
 
@@ -36,8 +36,9 @@ Chaves fixas, definidas em `FEATURES` (`src/lib/features.ts`):
 | ------------------ | -------------------- | ------------------------------------------------------------- |
 | `advance_purchase` | Compra antecipada    | Seção na home, `/compra-antecipada`, `POST /api/tickets/quote` e `/checkout` |
 | `party_budget`     | Orçamento de festa   | `/orcamento`, `/api/party-budget/*`, CTA `ctaBudget` da seção Festas |
+| `instagram_carousel` | Carousel do Instagram | Seção `Galeria` na home e `GET /api/instagram` |
 
-A migration `20261010120000_features` cria a tabela e insere as 2 linhas (`enabled = true`); `prisma/seed.ts` (`seedFeatures`) faz `upsert` sem sobrescrever o que o admin escolheu.
+A migration `20261010120000_features` cria a tabela e insere as 2 primeiras linhas (`enabled = true`); a `20261011120000_feature_instagram_carousel` insere a linha `instagram_carousel` (ativa). `prisma/seed.ts` (`seedFeatures`) faz `upsert` sem sobrescrever o que o admin escolheu.
 
 ### Chaves de `settings`
 
@@ -101,7 +102,8 @@ A migration `20261010120000_features` cria a tabela e insere as 2 linhas (`enabl
 
 - `getFeatures()` e `isFeatureEnabled(key)` (`src/lib/features.ts`) usam `'use cache'`, `cacheTag('features')` e `cacheLife('max')`. Sem linha no banco, a feature é ativa.
 - **Compra antecipada desativada:** a seção `CompraAntecipada` some da home; `/compra-antecipada` responde 404 (`notFound()`); `POST /api/tickets/quote` e `POST /api/tickets/checkout` respondem 403 "Compra antecipada indisponível no momento.". A confirmação (`/compra-antecipada/confirmacao/[shortCode]`), o webhook do Stripe e a operação no admin continuam funcionando. A variável de ambiente `ADVANCE_PURCHASE_ENABLED` não existe mais.
-- **Orçamento de festa desativado:** `/orcamento` responde 404 (`notFound()`); `GET /api/party-budget/availability`, `GET /api/party-budget/quote` e `POST /api/party-budget/reservations` respondem 403 "Orçamento de festa indisponível no momento." antes de qualquer validação; o CTA `ctaBudget` some da seção Festas (prop `budgetEnabled`), que continua visível com galeria e `ctaPrices`. `/c/<token>`, `/api/client/contract/*` e o admin não são afetados.
+- **Orçamento de festa desativado:** `/orcamento` responde 404 (`notFound()`); `GET /api/party-budget/availability`, `GET /api/party-budget/quote` e `POST /api/party-budget/reservations` respondem 403 "Orçamento de festa indisponível no momento." antes de qualquer validação; o CTA `ctaBudget` some da seção Festas (prop `budgetEnabled`), que continua visível com galeria e `ctaPrices`; o botão de ação da Navbar da home ("Reservar festa", `actionBtn` do CMS) também some, no desktop e no menu mobile (prop `budgetEnabled` da `Navbar`). `/c/<token>`, `/api/client/contract/*` e o admin não são afetados.
+- **Carousel do Instagram desativado:** a seção `Galeria` inteira (título "Siga nosso Instagram", link @divercity.park e carousel) não é renderizada na home (`src/app/page.tsx`), então o navegador não chama `/api/instagram`; `GET /api/instagram` responde 403 "Carousel do Instagram indisponível no momento." antes de ler `settings`. Os crons de renovação do token e os links de Instagram de Contato e Footer não são afetados.
 
 ### Salvamento (`updateSettings`)
 

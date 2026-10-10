@@ -108,6 +108,7 @@ async function seedFeatures() {
   const features = [
     { key: 'advance_purchase', name: 'Compra antecipada' },
     { key: 'party_budget', name: 'Orçamento de festa' },
+    { key: 'instagram_carousel', name: 'Carousel do Instagram' },
   ]
 
   for (const feature of features) {

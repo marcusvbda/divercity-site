@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 export const FEATURES = [
   { key: "advance_purchase", name: "Compra antecipada", enabled: true },
   { key: "party_budget", name: "Orçamento de festa", enabled: true },
+  { key: "instagram_carousel", name: "Carousel do Instagram", enabled: true },
 ] as const;
 
 export type FeatureKey = (typeof FEATURES)[number]["key"];

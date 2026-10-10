@@ -7,7 +7,11 @@ import { scrollTo as smoothScrollTo } from '@/lib/helpers'
 import CtaButton from './cta'
 import { useRouter } from 'next/navigation'
 
-export default function Navbar({ navbar, children = null }: any) {
+export default function Navbar({
+  navbar,
+  children = null,
+  budgetEnabled = true,
+}: any) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -83,7 +87,7 @@ export default function Navbar({ navbar, children = null }: any) {
 
               {/* CTA + Hamburger */}
               <div className="flex items-center gap-3">
-                {cta?.label && (
+                {budgetEnabled && cta?.label && (
                   <CtaButton
                     onClick={() => smoothScrollTo(cta.href ?? '')}
                     cta={cta}
@@ -130,7 +134,7 @@ export default function Navbar({ navbar, children = null }: any) {
                       </button>
                     </li>
                   ))}
-                  {cta?.label && (
+                  {budgetEnabled && cta?.label && (
                     <li>
                       <CtaButton
                         onClick={() => handleNavClick(cta.href ?? '')}
