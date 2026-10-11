@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Navbar from '@/components/ui/Navbar'
 import Hero from '@/components/sections/Hero'
 import PorQueEscolher from '@/components/sections/PorQueEscolher'
@@ -13,6 +14,24 @@ import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
 import { getActivePassportTypes } from '@/lib/passport-types'
 import { isFeatureEnabled } from '@/lib/features'
+import { getDescription, getPageMetadata } from '@/lib/seo'
+
+type CMSValue = { id: number; value: string | null } | null | undefined
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [metadata, navbar] = await Promise.all([
+    getContentType('Metadata'),
+    getContentType('NavBar'),
+  ])
+  const seo = (metadata?.SEO ?? {}) as Record<string, CMSValue>
+  const logo = (navbar?.Logo ?? {}) as Record<string, CMSValue>
+
+  return getPageMetadata({
+    title: seo.title?.value || undefined,
+    description: getDescription(seo.description?.value),
+    image: seo.og_image?.value || logo.url?.value || undefined,
+  })
+}
 
 export default async function Home() {
   const [

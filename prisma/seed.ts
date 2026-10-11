@@ -240,6 +240,7 @@ async function main() {
   })
 
   await seedFields(seoComponent.id, [
+    { name: 'siteName', value: 'Divercity Park' },
     { name: 'title', value: 'Divercity Park — Diversão para toda a família' },
     {
       name: 'description',

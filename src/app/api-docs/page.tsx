@@ -1,4 +1,9 @@
+import type { Metadata } from 'next'
 import { SwaggerDocs } from './SwaggerDocs'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default function ApiDocsPage() {
   return (

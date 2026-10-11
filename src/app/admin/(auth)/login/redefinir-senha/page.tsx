@@ -3,7 +3,10 @@ import Link from "next/link";
 import { AuthCard } from "@/components/admin/auth-card";
 import ResetPasswordForm from "./ResetPasswordForm";
 
-export const metadata = { title: "Redefinir senha — Admin Divercity" };
+export const metadata = {
+  title: "Redefinir senha — Admin Divercity",
+  robots: { index: false, follow: false },
+};
 
 export default async function ResetPasswordPage({
   searchParams,

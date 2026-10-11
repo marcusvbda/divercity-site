@@ -5,7 +5,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import LoginForm from "./LoginForm";
 
-export const metadata = { title: "Entrar — Admin Divercity" };
+export const metadata = {
+  title: { absolute: "Entrar — Admin Divercity" },
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage() {
   await connection();

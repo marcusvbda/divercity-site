@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Lock } from 'lucide-react'
 import Navbar from '@/components/ui/Navbar'
 
@@ -6,6 +7,20 @@ import CompraAntecipadaCheckout from '@/components/checkout/CompraAntecipadaChec
 import { getContentType } from '@/lib/cms'
 import { isFeatureEnabled } from '@/lib/features'
 import { notFound } from 'next/navigation'
+import { getDescription, getPageMetadata } from '@/lib/seo'
+
+type CMSValue = { id: number; value: string | null } | null | undefined
+
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getContentType('AdvancePurchaseSection')
+  const section = (content?.Section ?? {}) as Record<string, CMSValue>
+
+  return getPageMetadata({
+    title: 'Comprar Ingresso',
+    description: getDescription(section.subtitle?.value),
+    path: '/compra-antecipada',
+  })
+}
 
 export default async function CompraAntecipadaPage() {
   if (!(await isFeatureEnabled('advance_purchase'))) notFound()

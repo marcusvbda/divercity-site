@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import ReactQueryProvider from '@/providers/ReactQueryProvider'
 import { getContentType } from '@/lib/cms'
+import { SITE_URL, getDescription } from '@/lib/seo'
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -32,6 +33,7 @@ const FAVICON_ICONS: Metadata['icons'] = {
 type CMSValue = { id: number; value: string | null } | null
 
 interface SEO {
+  siteName: CMSValue
   title: CMSValue
   description: CMSValue
   keywords: CMSValue
@@ -40,40 +42,107 @@ interface SEO {
   og_image: CMSValue
 }
 
-function val(field: CMSValue, fallback = ''): string {
+function val(field: CMSValue | undefined, fallback = ''): string {
   return field?.value ?? fallback
 }
 
-export async function generateMetadata(): Promise<any> {
-  const data = await getContentType('Metadata')
-  const meta = (data?.SEO ?? {}) as SEO
+async function getSiteData() {
+  const [metadata, navbar, footer] = await Promise.all([
+    getContentType('Metadata'),
+    getContentType('NavBar'),
+    getContentType('Footer'),
+  ])
+  const seo = (metadata?.SEO ?? {}) as Partial<SEO>
+  const info = (footer?.Info ?? {}) as Record<string, CMSValue | undefined>
+  const siteName = val(seo.siteName) || 'Divercity Park'
+  const title = val(seo.title)
+  const description = getDescription(val(seo.description))
+  const logo = val(navbar?.Logo?.url)
+  const ogImage = val(seo.og_image) || logo
 
-  const ogImage = val(meta?.og_image) || '/logo-ball.png'
+  return { seo, info, siteName, title, description, logo, ogImage }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { seo, siteName, title, description, ogImage } = await getSiteData()
+  const ogTitle = val(seo.og_title) || title || siteName
+  const ogDescription = getDescription(val(seo.og_description)) || description
+  const images = ogImage ? [{ url: ogImage, alt: siteName }] : undefined
+  const isPreview = process.env.VERCEL_ENV === 'preview'
+
   return {
-    title: val(meta.title),
-    description: val(meta?.description),
-    keywords: val(meta?.keywords)
+    metadataBase: new URL(SITE_URL),
+    title: { default: title || siteName, template: `%s | ${siteName}` },
+    description,
+    applicationName: siteName,
+    keywords: val(seo.keywords)
       .split(',')
       .map((k) => k.trim())
       .filter(Boolean),
+    ...(process.env.GOOGLE_SITE_VERIFICATION && {
+      verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
+    }),
+    robots: isPreview
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: { index: true, follow: true },
+        },
     icons: FAVICON_ICONS,
     openGraph: {
-      title: val(meta?.og_title) || val(meta?.title),
-      description: val(meta?.og_description) || val(meta?.description),
+      title: ogTitle,
+      description: ogDescription,
+      images,
+      locale: 'pt_BR',
+      siteName,
       type: 'website',
-      images: [{ url: ogImage, width: 512, height: 512 }],
+    },
+    twitter: {
+      card: 'summary',
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage ? [ogImage] : undefined,
     },
   }
 }
 
-export default function RootLayout({
+function absoluteUrl(path: string) {
+  return path ? new URL(path, SITE_URL).toString() : undefined
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { info, siteName, description, logo, ogImage } = await getSiteData()
+  const instagramUrl = val(info.instagramUrl)
+  const address = val(info.address)
+  const phone = val(info.wppNumber).replace(/\D/g, '')
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AmusementPark',
+    name: siteName,
+    description,
+    url: SITE_URL,
+    logo: absoluteUrl(logo),
+    image: absoluteUrl(ogImage),
+    sameAs: instagramUrl ? [instagramUrl] : undefined,
+    address: address || undefined,
+    telephone: phone ? `+${phone}` : undefined,
+  }
+
   return (
     <html lang="pt-BR" className={`${fredoka.variable} ${poppins.variable}`}>
       <body className="font-body antialiased" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
         <ReactQueryProvider>
           <Suspense>{children}</Suspense>
         </ReactQueryProvider>

@@ -6,12 +6,14 @@ import { OrcamentoNavbarHeader } from '@/components/orcamento/OrcamentoNavbarHea
 import { getContentType } from '@/lib/cms'
 import { isFeatureEnabled } from '@/lib/features'
 import { notFound } from 'next/navigation'
+import { getPageMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Orçamento de Festa | Divercity Park',
+export const metadata: Metadata = getPageMetadata({
+  title: 'Orçamento de Festa',
   description:
     'Solicite o orçamento e reserve o salão de festas do Divercity Park online, com pagamento seguro.',
-}
+  path: '/orcamento',
+})
 
 export default async function OrcamentoPage() {
   if (!(await isFeatureEnabled('party_budget'))) notFound()
