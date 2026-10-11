@@ -48,7 +48,7 @@ const FLOATING_ELEMENTS = [
   },
 ]
 
-export default function Hero({ hero }: any) {
+export default function Hero({ hero, budgetEnabled = true }: any) {
   const title = hero?.Content?.title?.value ?? ''
   const subtitle = hero?.Content?.subtitle?.value ?? ''
   const bgImage = hero?.Media?.bgImage?.value ?? null
@@ -140,7 +140,7 @@ export default function Hero({ hero }: any) {
           transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}
           className="flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          {primaryCta?.label && (
+          {budgetEnabled && primaryCta?.label && (
             <CtaButton
               onClick={() => scrollTo(primaryCta.href ?? '')}
               cta={primaryCta}

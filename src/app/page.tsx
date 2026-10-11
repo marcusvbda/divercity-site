@@ -68,7 +68,7 @@ export default async function Home() {
     <>
       <Navbar navbar={navBarContent} budgetEnabled={budgetEnabled} />
       <main>
-        <Hero hero={heroContent} />
+        <Hero hero={heroContent} budgetEnabled={budgetEnabled} />
         <Atracoes attractions={attractionsContent} />
         <PorQueEscolher benefits={BenefitsContent} />
         <Festas partySection={PartySection} budgetEnabled={budgetEnabled} />
