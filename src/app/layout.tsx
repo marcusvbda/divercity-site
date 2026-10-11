@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Fredoka, Poppins } from 'next/font/google'
 import { Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import ReactQueryProvider from '@/providers/ReactQueryProvider'
 import { getContentType } from '@/lib/cms'
@@ -145,6 +146,7 @@ export default async function RootLayout({
           <Suspense>{children}</Suspense>
         </ReactQueryProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
