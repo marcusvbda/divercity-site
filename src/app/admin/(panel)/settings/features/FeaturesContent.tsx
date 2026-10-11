@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { Alert, AlertDescription, AlertTitle } from '@/components/admin/ui/alert'
 import { Card, CardContent } from '@/components/admin/ui/card'
 import { Label } from '@/components/admin/ui/label'
 import { Switch } from '@/components/admin/ui/switch'
@@ -11,7 +12,13 @@ import { updateFeature } from './actions'
 
 type FeatureItem = { key: FeatureKey; name: string; enabled: boolean }
 
-export function FeaturesContent({ features }: { features: FeatureItem[] }) {
+export function FeaturesContent({
+  features,
+  devOnlyLock,
+}: {
+  features: FeatureItem[]
+  devOnlyLock: boolean
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [pendingKey, setPendingKey] = useState<FeatureKey | null>(null)
@@ -39,6 +46,16 @@ export function FeaturesContent({ features }: { features: FeatureItem[] }) {
           Ative ou desative funcionalidades do site.
         </p>
       </div>
+
+      {devOnlyLock && (
+        <Alert>
+          <AlertTitle>Trava de desenvolvimento ativa</AlertTitle>
+          <AlertDescription>
+            As features só funcionam em modo de desenvolvimento, mesmo ligadas aqui. Os valores
+            abaixo passam a valer quando a trava for removida.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardContent className="divide-y">

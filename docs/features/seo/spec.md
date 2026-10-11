@@ -26,7 +26,7 @@ Replicar, no site do Divercity Park, o que o projeto de referência faz para ind
    - Descrição: `Metadata/SEO.description`.
    - Imagem OG: `Metadata/SEO.og_image`, com fallback para `NavBar/Logo.url`. Logo do JSON-LD: `NavBar/Logo.url`.
    - `sameAs`, endereço, telefone e horários: `Footer/Info` (`instagramUrl`, `address`, `wppNumber`, `weekdaysTime`, `holidaysTime`).
-10. **Variáveis de ambiente**: a URL do site reaproveita `NEXT_PUBLIC_APP_URL` (que já existe), com fallback `https://divercitypark.com.br`. O token de verificação do Google fica em `GOOGLE_SITE_VERIFICATION`. As duas vão documentadas no `.env.example` com placeholder.
+10. **Variáveis de ambiente**: a URL do site reaproveita `NEXT_PUBLIC_APP_URL` (que já existe), com fallback `https://divercitypark.com.br`. A verificação do Google Search Console é feita por registro TXT no DNS, sem variável de ambiente.
 11. **Descrições limpas**: helper que normaliza texto (remove markdown, colapsa espaços) e trunca em ~160 caracteres, sem cortar palavra (equivalente ao `getDescription`).
 
 ## 3. Anexos e referências

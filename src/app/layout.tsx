@@ -79,9 +79,6 @@ export async function generateMetadata(): Promise<Metadata> {
       .split(',')
       .map((k) => k.trim())
       .filter(Boolean),
-    ...(process.env.GOOGLE_SITE_VERIFICATION && {
-      verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
-    }),
     robots: isPreview
       ? { index: false, follow: false }
       : {

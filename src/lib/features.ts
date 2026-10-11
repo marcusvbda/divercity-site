@@ -31,7 +31,11 @@ export async function getFeatures() {
   });
 }
 
+// TEMPORARY: remove this lock (and the early return below) to restore the DB-driven features.
+export const FEATURES_DEV_ONLY_LOCK = process.env.NODE_ENV !== "development";
+
 export async function isFeatureEnabled(key: FeatureKey): Promise<boolean> {
+  if (FEATURES_DEV_ONLY_LOCK) return false;
   const features = await getFeatures();
   return features.find((feature) => feature.key === key)?.enabled ?? true;
 }

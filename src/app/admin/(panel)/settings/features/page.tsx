@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { FEATURES } from '@/lib/features'
+import { FEATURES, FEATURES_DEV_ONLY_LOCK } from '@/lib/features'
 import { FeaturesContent } from './FeaturesContent'
 
 export default async function FeaturesPage() {
@@ -15,5 +15,5 @@ export default async function FeaturesPage() {
     }
   })
 
-  return <FeaturesContent features={features} />
+  return <FeaturesContent features={features} devOnlyLock={FEATURES_DEV_ONLY_LOCK} />
 }
