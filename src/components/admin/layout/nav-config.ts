@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   BlocksIcon,
+  ClockIcon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
   PartyPopperIcon,
@@ -136,6 +137,12 @@ export function getNavItems({
           label: 'Preços',
           href: '/admin/services',
           activePath: '/admin/services',
+        },
+        {
+          icon: ClockIcon,
+          label: 'Horários',
+          href: '/admin/hours',
+          activePath: '/admin/hours',
         },
         operationItem,
         {

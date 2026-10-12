@@ -6,12 +6,14 @@ type JsonObject = Record<string, unknown>
 
 const SCHEMA_NAMES: Record<string, string> = {
   prices: 'Price',
+  hours: 'Hour',
 }
 
 const PARAM_DESCRIPTIONS: Record<string, string> = {
   id: 'Filtra pelo identificador (inteiro de 1 a 2147483647).',
   name: 'Busca por trecho do nome, sem diferenciar maiúsculas de minúsculas.',
   key: 'Filtra pela chave exata.',
+  label: 'Busca por trecho do rótulo, sem diferenciar maiúsculas de minúsculas.',
   page: 'Número da página (a partir de 1).',
   perPage: 'Itens por página (de 1 a 100).',
 }
@@ -123,7 +125,7 @@ export function buildOpenApiDocument() {
         parameters: queryParameters(entity),
         responses: {
           '200': {
-            description: 'Lista paginada, ordenada por nome.',
+            description: entity.listDescription,
             content: {
               'application/json': {
                 schema: { $ref: `#/components/schemas/${name}List` },

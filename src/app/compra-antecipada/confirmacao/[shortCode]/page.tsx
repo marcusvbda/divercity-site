@@ -3,6 +3,7 @@ import Navbar from '@/components/ui/Navbar'
 import Footer from '@/components/sections/Footer'
 import ConfirmationView from '@/components/checkout/ConfirmationView'
 import { getContentType } from '@/lib/cms'
+import { getBusinessHours } from '@/lib/business-hours'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -14,9 +15,10 @@ export default async function CompraAntecipadaConfirmacaoPage({
   params: Promise<{ shortCode: string }>
 }) {
   const { shortCode } = await params
-  const [navBarContent, footerContent] = await Promise.all([
+  const [navBarContent, footerContent, businessHours] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
+    getBusinessHours(),
   ])
 
   return (
@@ -34,7 +36,7 @@ export default async function CompraAntecipadaConfirmacaoPage({
           <ConfirmationView shortCode={shortCode} />
         </div>
       </main>
-      <Footer config={footerContent} />
+      <Footer config={footerContent} businessHours={businessHours} />
     </>
   )
 }

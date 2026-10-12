@@ -1,14 +1,26 @@
 'use client'
 
 import { Camera, MessageCircle, MapPin, Clock } from 'lucide-react'
+import { formatHourRange } from '@/lib/business-hours-format'
 
-export default function Footer({ config }: any) {
+interface FooterBusinessHour {
+  id: number
+  label: string
+  opening: number
+  close: number
+}
+
+export default function Footer({
+  config,
+  businessHours = [],
+}: {
+  config: any
+  businessHours?: FooterBusinessHour[]
+}) {
   const currentYear = new Date().getFullYear()
 
   const info = config?.Info ?? {}
   const logoFooter = info?.logoFooter?.value ?? null
-  const weekdaysTime = info?.weekdaysTime?.value ?? ''
-  const holidaysTime = info?.holidaysTime?.value ?? ''
   const googleMapsUrl = info?.googleMapsUrl?.value ?? ''
   const address = info?.address?.value ?? ''
   const instagramUrl = info?.instagramUrl?.value ?? ''
@@ -42,22 +54,24 @@ export default function Footer({ config }: any) {
 
           {/* Funcionamento + Endereço */}
           <div className="space-y-6">
-            <div>
-              <h4 className="font-heading mb-3 flex items-center gap-2 text-lg font-semibold">
-                <Clock size={16} className="text-brand-cyan" />
-                Funcionamento
-              </h4>
-              <div className="font-body space-y-1 text-sm">
-                <p>
-                  Segunda a Sábado :
-                  <span className="text-brand-cyan ml-2">{weekdaysTime}</span>
-                </p>
-                <p>
-                  Domingos e feriados :
-                  <span className="text-brand-cyan ml-2">{holidaysTime}</span>
-                </p>
+            {businessHours.length > 0 && (
+              <div>
+                <h4 className="font-heading mb-3 flex items-center gap-2 text-lg font-semibold">
+                  <Clock size={16} className="text-brand-cyan" />
+                  Funcionamento
+                </h4>
+                <div className="font-body space-y-1 text-sm">
+                  {businessHours.map((hour) => (
+                    <p key={hour.id}>
+                      {hour.label} :
+                      <span className="text-brand-cyan ml-2">
+                        {formatHourRange(hour.opening, hour.close)}
+                      </span>
+                    </p>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <h4 className="font-heading mb-3 flex items-center gap-2 text-lg font-semibold">

@@ -5,6 +5,7 @@ import Navbar from '@/components/ui/Navbar'
 import Footer from '@/components/sections/Footer'
 import CompraAntecipadaCheckout from '@/components/checkout/CompraAntecipadaCheckout'
 import { getContentType } from '@/lib/cms'
+import { getBusinessHours } from '@/lib/business-hours'
 import { isFeatureEnabled } from '@/lib/features'
 import { notFound } from 'next/navigation'
 import { getDescription, getPageMetadata } from '@/lib/seo'
@@ -25,11 +26,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CompraAntecipadaPage() {
   if (!(await isFeatureEnabled('advance_purchase'))) notFound()
 
-  const [navBarContent, FooterContent, advancePurchaseSection] = await Promise.all([
-    getContentType('NavBar'),
-    getContentType('Footer'),
-    getContentType('AdvancePurchaseSection'),
-  ])
+  const [navBarContent, FooterContent, advancePurchaseSection, businessHours] =
+    await Promise.all([
+      getContentType('NavBar'),
+      getContentType('Footer'),
+      getContentType('AdvancePurchaseSection'),
+      getBusinessHours(),
+    ])
 
   return (
     <>
@@ -58,7 +61,7 @@ export default async function CompraAntecipadaPage() {
       <main className="pt-16">
         <CompraAntecipadaCheckout advancePurchaseSection={advancePurchaseSection} />
       </main>
-      <Footer config={FooterContent} />
+      <Footer config={FooterContent} businessHours={businessHours} />
     </>
   )
 }

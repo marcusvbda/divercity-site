@@ -221,6 +221,18 @@ model Service {
   @@map("services")
 }
 
+model BusinessHour {
+  id        Int      @id @default(autoincrement())
+  key       String?  @unique
+  label     String
+  opening   Int
+  close     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("business_hours")
+}
+
 enum UserRole {
   admin
   operator

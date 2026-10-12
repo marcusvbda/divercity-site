@@ -12,6 +12,7 @@ import Atracoes from '@/components/sections/Atracoes'
 
 import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
+import { getBusinessHours } from '@/lib/business-hours'
 import { getActivePassportTypes } from '@/lib/passport-types'
 import { isFeatureEnabled } from '@/lib/features'
 import { getDescription, getPageMetadata } from '@/lib/seo'
@@ -44,6 +45,7 @@ export default async function Home() {
     PriceSection,
     AdvancePurchaseSection,
     ContactSection,
+    businessHours,
     passportTypes,
     advancePurchaseEnabled,
     budgetEnabled,
@@ -58,6 +60,7 @@ export default async function Home() {
     getContentType('PriceSection'),
     getContentType('AdvancePurchaseSection'),
     getContentType('ContactSection'),
+    getBusinessHours(),
     getActivePassportTypes(),
     isFeatureEnabled('advance_purchase'),
     isFeatureEnabled('party_budget'),
@@ -79,9 +82,12 @@ export default async function Home() {
 
         {instagramCarouselEnabled && <Galeria />}
         <Depoimentos />
-        <Contato contactSection={ContactSection} />
+        <Contato
+          contactSection={ContactSection}
+          businessHours={businessHours}
+        />
       </main>
-      <Footer config={FooterContent} />
+      <Footer config={FooterContent} businessHours={businessHours} />
     </>
   )
 }

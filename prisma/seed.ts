@@ -1051,6 +1051,20 @@ async function main() {
     })
   }
 
+  // ── Horários de funcionamento ────────────────────────────────────────────
+  const BUSINESS_HOURS: { key: string; label: string; opening: number; close: number }[] = [
+    { key: 'weekdays', label: 'Segunda a Sábado', opening: 10, close: 22 },
+    { key: 'sundays_holidays', label: 'Domingos e feriados', opening: 12, close: 20 },
+  ]
+
+  for (const hour of BUSINESS_HOURS) {
+    await prisma.businessHour.upsert({
+      where: { key: hour.key },
+      update: {},
+      create: hour,
+    })
+  }
+
   // ── PartySection ─────────────────────────────────────────────────────────
   const partySectionType = await prisma.contentType.upsert({
     where: { name: 'PartySection' },
@@ -1393,8 +1407,6 @@ async function main() {
       value:
         'https://www.google.com/maps/search/?api=1&query=Av.+Tuiuti,+710+Gleba+Patrimônio+Maringa+Maringá',
     },
-    { name: 'weekdaysTime', value: '10h às 22h' },
-    { name: 'holidaysTime', value: '12h às 20h' },
     { name: 'instagramUrl', value: 'https://www.instagram.com/divercity.park' },
     { name: 'googleMapsUrlIframe', value: '' },
   ])
@@ -1420,8 +1432,6 @@ async function main() {
       value:
         'https://vcwreoyzynyinmyuzvnr.supabase.co/storage/v1/object/public/site/logo-ball-fundo.png',
     },
-    { name: 'weekdaysTime', value: '10h às 22h' },
-    { name: 'holidaysTime', value: '12h às 20h' },
     {
       name: 'googleMapsUrl',
       value:

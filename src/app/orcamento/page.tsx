@@ -4,6 +4,7 @@ import Footer from '@/components/sections/Footer'
 import OrcamentoWizard from '@/components/orcamento/OrcamentoWizard'
 import { OrcamentoNavbarHeader } from '@/components/orcamento/OrcamentoNavbarHeader'
 import { getContentType } from '@/lib/cms'
+import { getBusinessHours } from '@/lib/business-hours'
 import { isFeatureEnabled } from '@/lib/features'
 import { notFound } from 'next/navigation'
 import { getPageMetadata } from '@/lib/seo'
@@ -18,9 +19,10 @@ export const metadata: Metadata = getPageMetadata({
 export default async function OrcamentoPage() {
   if (!(await isFeatureEnabled('party_budget'))) notFound()
 
-  const [navBarContent, FooterContent] = await Promise.all([
+  const [navBarContent, FooterContent, businessHours] = await Promise.all([
     getContentType('NavBar'),
     getContentType('Footer'),
+    getBusinessHours(),
   ])
 
   return (
@@ -31,7 +33,7 @@ export default async function OrcamentoPage() {
       <main className="pt-16">
         <OrcamentoWizard />
       </main>
-      <Footer config={FooterContent} />
+      <Footer config={FooterContent} businessHours={businessHours} />
     </>
   )
 }

@@ -56,6 +56,38 @@ function buildPriceWhere(filters: PriceFilters): Prisma.ServiceWhereInput {
   return where
 }
 
+export const hourFiltersSchema = z.object({
+  id: idSchema.optional(),
+  key: z.string().trim().min(1).optional(),
+  label: z.string().trim().min(1).optional(),
+})
+
+export type HourFilters = z.infer<typeof hourFiltersSchema>
+
+export type HourRecord = {
+  id: number
+  key: string | null
+  label: string
+  opening: number
+  close: number
+}
+
+const hourSelect = {
+  id: true,
+  key: true,
+  label: true,
+  opening: true,
+  close: true,
+} satisfies Prisma.BusinessHourSelect
+
+function buildHourWhere(filters: HourFilters): Prisma.BusinessHourWhereInput {
+  const where: Prisma.BusinessHourWhereInput = {}
+  if (filters.id !== undefined) where.id = filters.id
+  if (filters.key) where.key = filters.key
+  if (filters.label) where.label = { contains: filters.label, mode: 'insensitive' }
+  return where
+}
+
 export type ContentEntityField = {
   name: string
   type: 'integer' | 'string'
@@ -66,6 +98,7 @@ export type ContentEntityField = {
 export type ContentEntity<TFilters = unknown, TRecord = unknown> = {
   name: string
   description: string
+  listDescription: string
   filtersSchema: z.ZodType<TFilters>
   parseId: (raw: string) => number | null
   fields: ContentEntityField[]
@@ -80,6 +113,7 @@ export type ContentEntity<TFilters = unknown, TRecord = unknown> = {
 const pricesEntity: ContentEntity<PriceFilters, PriceRecord> = {
   name: 'prices',
   description: 'Preços dos serviços do salão de festas',
+  listDescription: 'Lista paginada, ordenada por nome.',
   filtersSchema: priceFiltersSchema,
   parseId: (raw) => {
     const parsed = idSchema.safeParse(raw)
@@ -122,8 +156,54 @@ const pricesEntity: ContentEntity<PriceFilters, PriceRecord> = {
   },
 }
 
+const hoursEntity: ContentEntity<HourFilters, HourRecord> = {
+  name: 'hours',
+  description: 'Horários de funcionamento do parque',
+  listDescription: 'Lista paginada, ordenada por id.',
+  filtersSchema: hourFiltersSchema,
+  parseId: (raw) => {
+    const parsed = idSchema.safeParse(raw)
+    return parsed.success ? parsed.data : null
+  },
+  fields: [
+    { name: 'id', type: 'integer', nullable: false, description: 'Identificador do horário' },
+    { name: 'key', type: 'string', nullable: true, description: 'Chave (tag) do horário' },
+    { name: 'label', type: 'string', nullable: false, description: 'Rótulo do horário' },
+    {
+      name: 'opening',
+      type: 'integer',
+      nullable: false,
+      description: 'Hora de abertura, em hora cheia (ex.: 10)',
+    },
+    {
+      name: 'close',
+      type: 'integer',
+      nullable: false,
+      description: 'Hora de fechamento, em hora cheia (ex.: 22)',
+    },
+  ],
+  list: async (filters, page, perPage) => {
+    const where = buildHourWhere(filters)
+    const [rows, total] = await Promise.all([
+      prisma.businessHour.findMany({
+        where,
+        select: hourSelect,
+        orderBy: { id: 'asc' },
+        skip: (page - 1) * perPage,
+        take: perPage,
+      }),
+      prisma.businessHour.count({ where }),
+    ])
+    return { data: rows, total }
+  },
+  find: async (id) => {
+    return prisma.businessHour.findUnique({ where: { id }, select: hourSelect })
+  },
+}
+
 export const CONTENT_ENTITIES = {
   prices: pricesEntity,
+  hours: hoursEntity,
 }
 
 export type ContentEntityName = keyof typeof CONTENT_ENTITIES

@@ -3,8 +3,22 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Camera, MessageCircle } from 'lucide-react'
+import { formatHourRange } from '@/lib/business-hours-format'
 
-export default function Contato({ contactSection }: any) {
+interface ContatoBusinessHour {
+  id: number
+  label: string
+  opening: number
+  close: number
+}
+
+export default function Contato({
+  contactSection,
+  businessHours = [],
+}: {
+  contactSection: any
+  businessHours?: ContatoBusinessHour[]
+}) {
   const badge        = contactSection?.Section?.badge?.value        ?? ''
   const title        = contactSection?.Section?.title?.value        ?? ''
   const subtitle     = contactSection?.Section?.subtitle?.value     ?? ''
@@ -13,8 +27,6 @@ export default function Contato({ contactSection }: any) {
   const wppNumber          = contactSection?.Info?.wppNumber?.value          ?? ''
   const address            = contactSection?.Info?.address?.value            ?? ''
   const googleMapsUrl      = contactSection?.Info?.googleMapsUrl?.value      ?? ''
-  const weekdaysTime       = contactSection?.Info?.weekdaysTime?.value       ?? ''
-  const holidaysTime       = contactSection?.Info?.holidaysTime?.value       ?? ''
   const instagramUrl       = contactSection?.Info?.instagramUrl?.value       ?? ''
   const googleMapsUrlIframe = contactSection?.Info?.googleMapsUrlIframe?.value ?? ''
 
@@ -86,18 +98,23 @@ export default function Contato({ contactSection }: any) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: '#8E4CCF18' }}>
-                  <Clock size={22} style={{ color: '#8E4CCF' }} />
-                </div>
-                <div>
-                  <p className="font-body text-sm font-semibold text-gray-800">Horário de Funcionamento</p>
-                  <div className="font-body mt-0.5 text-sm text-gray-500">
-                    <span className="block">Segunda a Sábado: {weekdaysTime}</span>
-                    <span className="block">Domingos e feriados: {holidaysTime}</span>
+              {businessHours.length > 0 && (
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: '#8E4CCF18' }}>
+                    <Clock size={22} style={{ color: '#8E4CCF' }} />
+                  </div>
+                  <div>
+                    <p className="font-body text-sm font-semibold text-gray-800">Horário de Funcionamento</p>
+                    <div className="font-body mt-0.5 text-sm text-gray-500">
+                      {businessHours.map((hour) => (
+                        <span key={hour.id} className="block">
+                          {hour.label}: {formatHourRange(hour.opening, hour.close)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Social */}
