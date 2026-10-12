@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CONTENT_ENTITIES, paginationSchema, idSchema } from '@/lib/content-api/entities'
+import { CONTENT_ENTITIES, paginationSchema } from '@/lib/content-api/entities'
 import type { ContentEntity } from '@/lib/content-api/entities'
 
 type JsonObject = Record<string, unknown>
@@ -10,12 +10,30 @@ const SCHEMA_NAMES: Record<string, string> = {
 }
 
 const PARAM_DESCRIPTIONS: Record<string, string> = {
-  id: 'Filtra pelo identificador (inteiro de 1 a 2147483647).',
+  type: 'Filtra pela origem do item: "salao" (salão de festas) ou "passaportes".',
   name: 'Busca por trecho do nome, sem diferenciar maiúsculas de minúsculas.',
   key: 'Filtra pela chave exata.',
   label: 'Busca por trecho do rótulo, sem diferenciar maiúsculas de minúsculas.',
   page: 'Número da página (a partir de 1).',
   perPage: 'Itens por página (de 1 a 100).',
+}
+
+const ID_DESCRIPTIONS: Record<string, { query: string; path: string }> = {
+  prices: {
+    query:
+      'Filtra pelo identificador (texto): número do item do salão, ex.: "12", ou "<passportId>:child" / "<passportId>:companion".',
+    path: 'Identificador do registro (texto): número do item do salão, ex.: "12", ou "<passportId>:child" / "<passportId>:companion".',
+  },
+  hours: {
+    query: 'Filtra pelo identificador (inteiro de 1 a 2147483647).',
+    path: 'Identificador do registro (inteiro de 1 a 2147483647).',
+  },
+}
+
+function idJsonSchema(entity: ContentEntity): JsonObject {
+  const schema = z.toJSONSchema(entity.idSchema, { io: 'input' }) as JsonObject
+  delete schema.$schema
+  return schema
 }
 
 function errorResponse(description: string, ref = '#/components/schemas/Error'): JsonObject {
@@ -36,8 +54,9 @@ function queryParameters(entity: ContentEntity): JsonObject[] {
     name,
     in: 'query',
     required: false,
-    description: PARAM_DESCRIPTIONS[name],
-    schema,
+    description:
+      name === 'id' ? ID_DESCRIPTIONS[entity.name]?.query : PARAM_DESCRIPTIONS[name],
+    schema: name === 'id' ? idJsonSchema(entity) : schema,
   }))
 }
 
@@ -46,6 +65,7 @@ function recordSchema(entity: ContentEntity): JsonObject {
   for (const field of entity.fields) {
     properties[field.name] = {
       type: field.type,
+      ...(field.enum ? { enum: [...field.enum] } : {}),
       ...(field.nullable ? { nullable: true } : {}),
       description: field.description,
     }
@@ -58,8 +78,6 @@ function recordSchema(entity: ContentEntity): JsonObject {
 }
 
 export function buildOpenApiDocument() {
-  const idPathSchema = z.toJSONSchema(idSchema, { io: 'input' }) as JsonObject
-  delete idPathSchema.$schema
   const paths: Record<string, JsonObject> = {}
   const schemas: Record<string, JsonObject> = {
     Pagination: {
@@ -150,8 +168,8 @@ export function buildOpenApiDocument() {
             name: 'id',
             in: 'path',
             required: true,
-            description: 'Identificador do registro (inteiro de 1 a 2147483647).',
-            schema: idPathSchema,
+            description: ID_DESCRIPTIONS[entity.name]?.path,
+            schema: idJsonSchema(entity),
           },
         ],
         responses: {

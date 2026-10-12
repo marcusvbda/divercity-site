@@ -31,6 +31,20 @@ API de consulta de conteúdo acessada por token. Em settings haverá uma página
 - Filtro `name` de `prices`: por trecho (contém).
 - Paginação, resposta e erros: adotado o recomendado — `page` e `perPage` (padrão 15, máximo 100); erros 401 (token ausente/inválido/revogado), 404 (entidade ou id inexistente) e 400 (filtro ou parâmetro inválido).
 
+### Passaportes em `prices`
+
+- A entidade `prices` hoje expõe só o preço do salão de festas (`Service`). Ela também deve expor os preços dos passaportes.
+- Entram apenas os passaportes ativos (`PassportType`).
+- Salão de festas e passaportes vêm na mesma lista da entidade `prices`, sem entidade própria para passaporte.
+- Todos os `prices` da API seguem o mesmo formato, sejam salão de festas ou passaporte.
+- Existe apenas 1 campo para diferenciar o item (salão de festas ou passaporte); fora isso, os itens são mostrados iguais.
+- O campo de diferenciação se chama `type` e tem dois valores: `salao` e `passaportes`.
+- O campo de diferenciação também é filtro de `prices`.
+- Os filtros `id`, `name` e `key` valem também para os passaportes.
+- Cada passaporte entra como 2 itens: um de criança e um de acompanhante, cada um com `weekdayPrice` e `weekendPrice` do respectivo par de preços.
+- O `id` de `prices` passa a ser texto para todos os itens (inclusive salão de festas); `findEntity` e o filtro `id` buscam nas duas tabelas.
+- Mudança só na API; a landing page e as telas que consomem preços não mudam.
+
 ### Horários de funcionamento
 
 - Criar um cadastro próprio de horários de funcionamento no admin, no mesmo molde do cadastro de preços (`prices`).
