@@ -54,7 +54,7 @@ export default function Navbar({
           {/* Logo */}
           <button
             onClick={() => router.push('/')}
-            className="flex flex-shrink-0 items-center gap-2"
+            className="relative z-10 flex flex-shrink-0 items-center gap-2"
             aria-label="Ir para o início"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
