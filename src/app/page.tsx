@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Navbar from '@/components/ui/Navbar'
 import Hero from '@/components/sections/Hero'
@@ -6,6 +7,7 @@ import Festas from '@/components/sections/Festas'
 import Precos from '@/components/sections/Precos'
 import CompraAntecipada from '@/components/sections/CompraAntecipada'
 import Galeria from '@/components/sections/Galeria'
+import FaqSection from '@/components/sections/FaqSection'
 import Depoimentos from '@/components/sections/Depoimentos'
 import Contato from '@/components/sections/Contato'
 import Atracoes from '@/components/sections/Atracoes'
@@ -13,11 +15,17 @@ import Atracoes from '@/components/sections/Atracoes'
 import Footer from '@/components/sections/Footer'
 import { getContentType } from '@/lib/cms'
 import { getBusinessHours } from '@/lib/business-hours'
+import { getPublishedFaqsOrEmpty } from '@/lib/faqs'
 import { getActivePassportTypes } from '@/lib/passport-types'
 import { isFeatureEnabled } from '@/lib/features'
 import { getDescription, getPageMetadata } from '@/lib/seo'
 
 type CMSValue = { id: number; value: string | null } | null | undefined
+
+async function HomeFaq({ faqSection }: { faqSection: Awaited<ReturnType<typeof getContentType>> }) {
+  const faqs = await getPublishedFaqsOrEmpty('home')
+  return <FaqSection faqSection={faqSection} faqs={faqs} />
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [metadata, navbar] = await Promise.all([
@@ -45,6 +53,7 @@ export default async function Home() {
     PriceSection,
     AdvancePurchaseSection,
     ContactSection,
+    faqSectionContent,
     businessHours,
     passportTypes,
     advancePurchaseEnabled,
@@ -60,6 +69,7 @@ export default async function Home() {
     getContentType('PriceSection'),
     getContentType('AdvancePurchaseSection'),
     getContentType('ContactSection'),
+    getContentType('FaqSection'),
     getBusinessHours(),
     getActivePassportTypes(),
     isFeatureEnabled('advance_purchase'),
@@ -81,6 +91,9 @@ export default async function Home() {
         )}
 
         {instagramCarouselEnabled && <Galeria />}
+        <Suspense fallback={null}>
+          <HomeFaq faqSection={faqSectionContent} />
+        </Suspense>
         <Depoimentos />
         <Contato
           contactSection={ContactSection}

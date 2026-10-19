@@ -794,6 +794,34 @@ async function main() {
     })
   }
 
+  // ── FaqSection ───────────────────────────────────────────────────────────
+  const faqSectionType = await prisma.contentType.upsert({
+    where: { name: 'FaqSection' },
+    update: {},
+    create: { name: 'FaqSection' },
+  })
+
+  const faqSectionComponent = await prisma.contentComponent.upsert({
+    where: {
+      name_contentTypeId: {
+        name: 'Section',
+        contentTypeId: faqSectionType.id,
+      },
+    },
+    update: {},
+    create: { name: 'Section', contentTypeId: faqSectionType.id },
+  })
+
+  await seedFields(faqSectionComponent.id, [
+    { name: 'badge', value: 'Dúvidas' },
+    { name: 'title', value: 'Perguntas frequentes' },
+    {
+      name: 'subtitle',
+      value: 'Tire suas dúvidas antes de visitar o Divercity Park.',
+    },
+    { name: 'ctaLabel', value: 'Ver todas as perguntas' },
+  ])
+
   // ── BenefitsSection ──────────────────────────────────────────────────────
   const benefitsSectionType = await prisma.contentType.upsert({
     where: { name: 'BenefitsSection' },

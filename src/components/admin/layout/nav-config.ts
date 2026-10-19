@@ -4,6 +4,7 @@ import {
   ClockIcon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
+  MessageCircleQuestionIcon,
   PartyPopperIcon,
   QrCodeIcon,
   Settings2Icon,
@@ -143,6 +144,12 @@ export function getNavItems({
           label: 'Horários',
           href: '/admin/hours',
           activePath: '/admin/hours',
+        },
+        {
+          icon: MessageCircleQuestionIcon,
+          label: 'FAQs',
+          href: '/admin/faqs',
+          activePath: '/admin/faqs',
         },
         operationItem,
         {
