@@ -52,3 +52,33 @@ export async function revokeApiToken(id: string): Promise<void> {
     data: { revokedAt: new Date() },
   })
 }
+
+export async function regenerateApiToken(id: string): Promise<CreatedApiToken> {
+  await requireAdmin()
+
+  if (typeof id !== 'string' || !id) throw new Error('Token inválido')
+
+  const { token, tokenHash, tokenPrefix } = generateApiToken()
+
+  const result = await prisma.apiToken.updateMany({
+    where: { id, revokedAt: null },
+    data: { tokenHash, tokenPrefix, lastUsedAt: null },
+  })
+  if (result.count === 0) throw new Error('Token não encontrado ou revogado')
+
+  const updated = await prisma.apiToken.findUnique({ where: { id }, select: { id: true, name: true } })
+  if (!updated) throw new Error('Token não encontrado')
+
+  return { id: updated.id, name: updated.name, token }
+}
+
+export async function deleteApiToken(id: string): Promise<void> {
+  await requireAdmin()
+
+  if (typeof id !== 'string' || !id) throw new Error('Token inválido')
+
+  const result = await prisma.apiToken.deleteMany({
+    where: { id, revokedAt: { not: null } },
+  })
+  if (result.count === 0) throw new Error('Só tokens revogados podem ser excluídos')
+}

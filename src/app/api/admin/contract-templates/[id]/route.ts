@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireRole } from '@/lib/authz'
+import { deletePartiesCascade } from '@/lib/parties'
 import { ContractTemplateSchema } from '@/lib/schemas/parties'
 import { isDefaultVariable } from '@/lib/contract-defaults'
 import { extractBodyVariables } from '@/lib/contract-render'
@@ -79,7 +81,47 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  await prisma.contractTemplate.delete({ where: { id: Number(id) } })
-  return NextResponse.json({ success: true })
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
+  const id = Number((await params).id)
+  if (!Number.isInteger(id)) return NextResponse.json({ error: 'Modelo não encontrado' }, { status: 404 })
+
+  const result = await prisma.$transaction(async (tx) => {
+    const template = await tx.contractTemplate.findUnique({ where: { id }, select: { isDefault: true } })
+    if (!template) return { kind: 'not_found' as const }
+    if (template.isDefault) return { kind: 'default' as const }
+
+    const activeCount = await tx.party.count({
+      where: { contractTemplateId: id, status: { not: 'cancelled' } },
+    })
+    if (activeCount > 0) return { kind: 'in_use' as const, count: activeCount }
+
+    const cancelled = await tx.party.findMany({
+      where: { contractTemplateId: id, status: 'cancelled' },
+      select: { id: true },
+    })
+    const deletedParties = await deletePartiesCascade(tx, cancelled.map((p) => p.id))
+    await tx.contractTemplate.delete({ where: { id } })
+    return { kind: 'deleted' as const, deletedParties }
+  })
+
+  switch (result.kind) {
+    case 'not_found':
+      return NextResponse.json({ error: 'Modelo não encontrado' }, { status: 404 })
+    case 'default':
+      return NextResponse.json(
+        { error: 'O modelo padrão não pode ser excluído. Marque outro modelo como padrão antes.' },
+        { status: 409 },
+      )
+    case 'in_use':
+      return NextResponse.json(
+        {
+          error: `Modelo em uso por ${result.count} festa(s) não cancelada(s). Cancele ou exclua essas festas antes de remover o modelo.`,
+        },
+        { status: 409 },
+      )
+    default:
+      return NextResponse.json({ success: true, deletedParties: result.deletedParties })
+  }
 }

@@ -22,8 +22,10 @@ API de consulta de conteúdo acessada por token. Em settings haverá uma página
 - O token é enviado no header `Authorization: Bearer <token>`.
 - Gestão dos tokens:
   - cada token tem um nome;
-  - o valor é exibido uma única vez, na criação; o banco guarda apenas o hash SHA-256;
+  - o valor é exibido uma única vez, na criação ou na regeração; o banco guarda apenas o hash SHA-256 (o valor não pode ser visto de novo);
   - a página lista os tokens (nome, criação, último uso) e permite revogar;
+  - tokens ativos podem ser regerados: botão "Regerar" só em tokens ativos, com diálogo de confirmação avisando que o valor atual para de funcionar na hora; o mesmo registro recebe um valor novo (mantém nome e data de criação, zera "último uso") e o novo valor é exibido uma única vez para copiar;
+  - tokens revogados podem ser excluídos: botão "Excluir" só em tokens revogados, com diálogo de confirmação; o registro é apagado do banco e some da listagem;
   - tokens não expiram.
 - Documentação Swagger (OpenAPI) da Content API:
   - Swagger UI em `/api-docs`, pública (fora do `/admin`), com "Authorize" (Bearer) para testar as rotas;

@@ -26,7 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/admin/ui/table'
-import { createApiToken, revokeApiToken } from './actions'
+import {
+  createApiToken,
+  deleteApiToken,
+  regenerateApiToken,
+  revokeApiToken,
+} from './actions'
 
 type ApiTokenItem = {
   id: string
@@ -53,6 +58,9 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
   const [createdToken, setCreatedToken] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [revokeTarget, setRevokeTarget] = useState<ApiTokenItem | null>(null)
+  const [regenerateTarget, setRegenerateTarget] = useState<ApiTokenItem | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ApiTokenItem | null>(null)
+  const [regenerated, setRegenerated] = useState(false)
 
   function handleCreateOpenChange(open: boolean) {
     if (!open && isPending) return
@@ -61,6 +69,7 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
       setName('')
       setCreatedToken(null)
       setCopied(false)
+      setRegenerated(false)
     }
   }
 
@@ -103,6 +112,44 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : 'Erro ao revogar token'
+        )
+      }
+    })
+  }
+
+  function handleRegenerate() {
+    if (!regenerateTarget) return
+    const target = regenerateTarget
+    startTransition(async () => {
+      try {
+        const result = await regenerateApiToken(target.id)
+        setRegenerateTarget(null)
+        setCopied(false)
+        setRegenerated(true)
+        setCreatedToken(result.token)
+        setCreateOpen(true)
+        toast.success('Token regerado')
+        router.refresh()
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Erro ao regerar token'
+        )
+      }
+    })
+  }
+
+  function handleDelete() {
+    if (!deleteTarget) return
+    const target = deleteTarget
+    startTransition(async () => {
+      try {
+        await deleteApiToken(target.id)
+        toast.success('Token excluído')
+        setDeleteTarget(null)
+        router.refresh()
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : 'Erro ao excluir token'
         )
       }
     })
@@ -170,15 +217,34 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        {!revoked && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setRevokeTarget(token)}
-                          >
-                            Revogar
-                          </Button>
-                        )}
+                        <div className="flex justify-end gap-2">
+                          {revoked ? (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => setDeleteTarget(token)}
+                            >
+                              Excluir
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setRegenerateTarget(token)}
+                              >
+                                Regerar
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setRevokeTarget(token)}
+                              >
+                                Revogar
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   )
@@ -194,7 +260,9 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
           {createdToken ? (
             <>
               <DialogHeader>
-                <DialogTitle>Token criado</DialogTitle>
+                <DialogTitle>
+                  {regenerated ? 'Token regerado' : 'Token criado'}
+                </DialogTitle>
                 <DialogDescription>
                   Copie o token agora. Ele não será exibido novamente.
                 </DialogDescription>
@@ -282,6 +350,68 @@ export function ApiTokensContent({ tokens }: { tokens: ApiTokenItem[] }) {
               onClick={handleRevoke}
             >
               {isPending ? 'Revogando…' : 'Revogar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={regenerateTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !isPending) setRegenerateTarget(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Regerar token</DialogTitle>
+            <DialogDescription>
+              O token &quot;{regenerateTarget?.name}&quot; receberá um novo
+              valor e o valor atual deixará de funcionar imediatamente.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={isPending}
+              onClick={() => setRegenerateTarget(null)}
+            >
+              Cancelar
+            </Button>
+            <Button disabled={isPending} onClick={handleRegenerate}>
+              {isPending ? 'Regerando…' : 'Regerar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !isPending) setDeleteTarget(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir token</DialogTitle>
+            <DialogDescription>
+              O token &quot;{deleteTarget?.name}&quot; será removido
+              permanentemente e a ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={isPending}
+              onClick={() => setDeleteTarget(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={handleDelete}
+            >
+              {isPending ? 'Excluindo…' : 'Excluir'}
             </Button>
           </DialogFooter>
         </DialogContent>

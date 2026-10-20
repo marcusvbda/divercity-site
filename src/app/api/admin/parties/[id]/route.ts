@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireRole } from '@/lib/authz'
+import { deletePartiesCascade } from '@/lib/parties'
 import { PartySchema } from '@/lib/schemas/parties'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -47,7 +49,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  await prisma.party.delete({ where: { id: Number(id) } })
+  const { response } = await requireRole(['admin'])
+  if (response) return response
+
+  const id = Number((await params).id)
+  if (!Number.isInteger(id)) return NextResponse.json({ error: 'Festa não encontrada' }, { status: 404 })
+
+  const result = await prisma.$transaction(async (tx) => {
+    const party = await tx.party.findUnique({ where: { id }, select: { status: true } })
+    if (!party) return 'not_found' as const
+    if (party.status !== 'cancelled') return 'not_cancelled' as const
+    await deletePartiesCascade(tx, [id])
+    return 'deleted' as const
+  })
+
+  if (result === 'not_found') return NextResponse.json({ error: 'Festa não encontrada' }, { status: 404 })
+  if (result === 'not_cancelled') {
+    return NextResponse.json({ error: 'Só festas canceladas podem ser excluídas' }, { status: 409 })
+  }
   return NextResponse.json({ success: true })
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { BanIcon } from 'lucide-react'
+import { BanIcon, Trash2Icon } from 'lucide-react'
 import { Skeleton } from '@/components/admin/ui/skeleton'
 import { Badge } from '@/components/admin/ui/badge'
 import { Button } from '@/components/admin/ui/button'
@@ -28,6 +28,7 @@ const STATUS_VARIANT: Record<PartyStatus, 'default' | 'secondary' | 'destructive
 export default function EditPartyPage() {
   const { id } = useParams<{ id: string }>()
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const { data: party, isLoading } = useQuery<Party>({
     queryKey: ['admin', 'parties', id],
@@ -65,6 +66,22 @@ export default function EditPartyPage() {
       }
     },
     onError: () => toast.error('Erro ao cancelar festa'),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const r = await fetch(`/api/admin/parties/${id}`, { method: 'DELETE' })
+      const json = await r.json().catch(() => null)
+      if (!r.ok) throw new Error(json?.error)
+      return json
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['admin', 'parties', id] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'parties'] })
+      toast.success('Festa excluída')
+      router.push('/admin/parties')
+    },
+    onError: (error: Error) => toast.error(error.message || 'Erro ao excluir festa'),
   })
 
   if (isLoading) {
@@ -108,6 +125,21 @@ export default function EditPartyPage() {
           >
             <BanIcon className="size-4" />
             {cancelMutation.isPending ? 'Cancelando...' : 'Cancelar festa'}
+          </Button>
+        )}
+
+        {party?.status === 'cancelled' && (
+          <Button
+            variant="destructive"
+            disabled={deleteMutation.isPending}
+            onClick={() => {
+              if (confirm('Excluir esta festa? O contrato e a lista de convidados também serão excluídos. Esta ação não pode ser desfeita.')) {
+                deleteMutation.mutate()
+              }
+            }}
+          >
+            <Trash2Icon className="size-4" />
+            {deleteMutation.isPending ? 'Excluindo...' : 'Excluir festa'}
           </Button>
         )}
       </div>

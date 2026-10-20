@@ -58,13 +58,18 @@ export default function ContractTemplatesPage() {
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) =>
-      fetch(`/api/admin/contract-templates/${id}`, { method: 'DELETE' }).then(r => r.json()),
+    mutationFn: async (id: number) => {
+      const r = await fetch(`/api/admin/contract-templates/${id}`, { method: 'DELETE' })
+      const json = await r.json().catch(() => null)
+      if (!r.ok) throw new Error(json?.error)
+      return json
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'contract-templates'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'parties'] })
       toast.success('Modelo removido')
     },
-    onError: () => toast.error('Erro ao remover modelo'),
+    onError: (error: Error) => toast.error(error.message || 'Erro ao remover modelo'),
   })
 
   return (
@@ -94,7 +99,7 @@ export default function ContractTemplatesPage() {
               variant="ghost"
               size="icon"
               onClick={() => {
-                if (confirm('Remover este modelo?')) {
+                if (confirm('Remover este modelo? Festas canceladas vinculadas a ele também serão excluídas.')) {
                   deleteMutation.mutate(template.id)
                 }
               }}
