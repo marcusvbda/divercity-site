@@ -135,7 +135,7 @@ export function getNavItems({
         },
         {
           icon: TagIcon,
-          label: 'Preços',
+          label: 'Valores',
           href: '/admin/services',
           activePath: '/admin/services',
         },

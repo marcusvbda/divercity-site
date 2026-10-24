@@ -338,6 +338,7 @@ async function main() {
     { name: 'title', value: '' },
     { name: 'subtitle', value: '' },
     { name: 'color', value: '' },
+    { name: 'dayType', value: '' },
   ])
 
   const priceTitleField = await getField(priceTemplateComponent.id, 'title')
@@ -346,6 +347,10 @@ async function main() {
     'subtitle'
   )
   const priceColorField = await getField(priceTemplateComponent.id, 'color')
+  const priceDayTypeField = await getField(
+    priceTemplateComponent.id,
+    'dayType'
+  )
 
   // General/Benefit
   const benefitTemplateComponent = await prisma.contentComponent.upsert({
@@ -1011,11 +1016,13 @@ async function main() {
       title: 'Segunda a Quinta-feira',
       subtitle: 'exceto feriados',
       color: '#12C7C8',
+      dayType: 'weekday',
     },
     {
       title: 'Sexta a Sábado, Domingo e feriados',
       subtitle: '-',
       color: '#8E4CCF',
+      dayType: 'weekend',
     },
   ]
 
@@ -1041,6 +1048,11 @@ async function main() {
           fieldId: priceColorField.id,
           value: item.color,
         },
+        {
+          instanceId: instance.id,
+          fieldId: priceDayTypeField.id,
+          value: item.dayType,
+        },
       ],
     })
 
@@ -1055,8 +1067,8 @@ async function main() {
       name: 'disclaimers',
       type: 'multiple',
       value: [
-        `**👨‍👧 Sobre Acompanhantes**\n\n🧒 Crianças de 1 a 4 anos — Recomenda-se estar acompanhadas de um responsável legal (maior de 18 anos). O acompanhante não paga. (Limite de 1 por criança.)\n\n♿ Pessoas com Necessidades Especiais (PNE) — Recomenda-se acompanhante maior de idade. O acompanhante é isento de pagamento. (Limite de 1 por pessoa.)\n\n👦 Crianças a partir de 5 anos — Acompanhante é opcional. Caso entre na área de brinquedos, será cobrada a taxa de acompanhante correspondente ao tempo escolhido.`,
-        `**💰 Sobre Valores e Descontos**\n\n👶 Crianças de 0 a 1 ano — Caso utilizem os brinquedos (inclusive área baby): ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n♿ Pessoas com Necessidades Especiais (PNE) — ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n🧒 Crianças a partir de 1 ano — Pagam o valor integral do passaporte escolhido.`,
+        `**👨‍👧 Sobre Acompanhantes**\n\n🧒 Crianças de 12 meses a 4 anos — Recomenda-se estar acompanhadas de um responsável legal (maior de 18 anos). O acompanhante não paga. (Limite de 1 por criança.)\n\n♿ Pessoas com Necessidades Especiais (PNE) — Recomenda-se acompanhante maior de idade. O acompanhante é isento de pagamento. (Limite de 1 por pessoa.)\n\n👦 Crianças a partir de 5 anos — Acompanhante é opcional. Caso entre na área de brinquedos, será cobrada a taxa de acompanhante correspondente ao tempo escolhido.`,
+        `**💰 Sobre Valores e Descontos**\n\n👶 Crianças de 0 a 12 meses — Caso utilizem os brinquedos (inclusive área baby): ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n♿ Pessoas com Necessidades Especiais (PNE) — ✨ 50% de desconto sobre o valor do passaporte escolhido.\n\n🧒 Crianças a partir de 12 meses — Pagam o valor integral do passaporte escolhido.`,
       ],
     },
   ])
@@ -1167,22 +1179,6 @@ async function main() {
       { fieldId: ctaColorField.id, value: '#fefefe' },
       { fieldId: ctaBgColorField.id, value: '#FF4F8A' },
       { fieldId: ctaBorderField.id, value: '' },
-      { fieldId: ctaHoverColorField.id, value: '' },
-      { fieldId: ctaHoverBgColorField.id, value: '' },
-      { fieldId: ctaHoverBorderField.id, value: '' },
-    ]
-  )
-
-  await seedInstanceField(
-    partyCTAsComponent.id,
-    'ctaPrices',
-    ctaTemplateComponent.id,
-    [
-      { fieldId: ctaLabelField.id, value: 'Ver preços dos passaportes' },
-      { fieldId: ctaHrefField.id, value: '#precos' },
-      { fieldId: ctaColorField.id, value: 'black' },
-      { fieldId: ctaBgColorField.id, value: 'transparent' },
-      { fieldId: ctaBorderField.id, value: '1px solid gray' },
       { fieldId: ctaHoverColorField.id, value: '' },
       { fieldId: ctaHoverBgColorField.id, value: '' },
       { fieldId: ctaHoverBorderField.id, value: '' },
@@ -1346,11 +1342,13 @@ async function main() {
       title: 'Segunda a Quinta-feira',
       subtitle: 'exceto feriados',
       color: '#12C7C8',
+      dayType: 'weekday',
     },
     {
       title: 'Sexta a Sábado, Domingo e feriados',
       subtitle: '-',
       color: '#8E4CCF',
+      dayType: 'weekend',
     },
   ]
 
@@ -1375,6 +1373,11 @@ async function main() {
           instanceId: instance.id,
           fieldId: priceColorField.id,
           value: item.color,
+        },
+        {
+          instanceId: instance.id,
+          fieldId: priceDayTypeField.id,
+          value: item.dayType,
         },
       ],
     })

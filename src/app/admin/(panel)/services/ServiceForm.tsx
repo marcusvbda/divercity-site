@@ -76,7 +76,7 @@ export function ServiceForm({ title, description, serviceKey, defaultValues, onS
 
             <div className="grid grid-cols-1 gap-7 sm:grid-cols-2">
               <Field data-invalid={!!errors.weekdayPrice}>
-                <FieldLabel htmlFor="weekdayPrice">Preço dia de semana (R$)</FieldLabel>
+                <FieldLabel htmlFor="weekdayPrice">Valor dia de semana (R$)</FieldLabel>
                 <Input
                   id="weekdayPrice"
                   type="number"
@@ -90,7 +90,7 @@ export function ServiceForm({ title, description, serviceKey, defaultValues, onS
               </Field>
 
               <Field data-invalid={!!errors.weekendPrice}>
-                <FieldLabel htmlFor="weekendPrice">Preço fim de semana (R$)</FieldLabel>
+                <FieldLabel htmlFor="weekendPrice">Valor fim de semana (R$)</FieldLabel>
                 <Input
                   id="weekendPrice"
                   type="number"

@@ -301,7 +301,7 @@ function PaymentCard({
             </div>
             {quoteError && !hasStoredValue && !valueEdited && !locked && (
               <p className="text-muted-foreground text-xs">
-                Não foi possível obter o preço do salão; informe o valor.
+                Não foi possível obter o valor do salão; informe o valor.
               </p>
             )}
             {errors.value && <p className="text-destructive text-xs">{errors.value}</p>}

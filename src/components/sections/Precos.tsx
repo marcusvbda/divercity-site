@@ -26,6 +26,7 @@ type PriceItem = {
     title?: string | null
     subtitle?: string | null
     color?: string | null
+    dayType?: string | null
   }
 }
 
@@ -58,20 +59,23 @@ export default function Precos({ priceSection, passportTypes }: PrecosProps) {
   const prices: PriceItem[] = priceSection?.Content?.prices ?? []
   const disclaimers: DisclaimerItem[] = priceSection?.Content?.disclaimers ?? []
 
-  const tiersByGroup = [
-    passportTypes.map((p) => ({
-      id: p.id,
-      label: p.name,
-      child: p.weekdayChildPrice,
-      companion: p.weekdayCompanionPrice,
-    })),
-    passportTypes.map((p) => ({
-      id: p.id,
-      label: p.name,
-      child: p.weekendChildPrice,
-      companion: p.weekendCompanionPrice,
-    })),
-  ]
+  const weekdayTiers = passportTypes.map((p) => ({
+    id: p.id,
+    label: p.name,
+    child: p.weekdayChildPrice,
+    companion: p.weekdayCompanionPrice,
+  }))
+  const weekendTiers = passportTypes.map((p) => ({
+    id: p.id,
+    label: p.name,
+    child: p.weekendChildPrice,
+    companion: p.weekendCompanionPrice,
+  }))
+
+  function tiersFor(group: PriceItem, idx: number) {
+    const dayType = group.value.dayType || (idx === 0 ? 'weekday' : 'weekend')
+    return dayType === 'weekday' ? weekdayTiers : weekendTiers
+  }
 
   return (
     <section id="precos" className="section-padding bg-gray-50">
@@ -105,7 +109,7 @@ export default function Precos({ priceSection, passportTypes }: PrecosProps) {
         >
           {prices.map((group, idx) => {
             const color = group.value.color ?? '#12C7C8'
-            const tiers = tiersByGroup[idx] ?? []
+            const tiers = tiersFor(group, idx)
             return (
               <motion.div
                 key={group.id}

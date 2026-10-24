@@ -413,7 +413,7 @@ export function PartyForm({ mode, defaultValues, onSubmit, isLoading }: Props) {
                 </div>
                 {quoteError && !valueEdited && (
                   <p className="text-muted-foreground text-xs">
-                    Não foi possível obter o preço do salão; informe o valor.
+                    Não foi possível obter o valor do salão; informe o valor.
                   </p>
                 )}
                 {errors.value && <p className="text-destructive text-xs">{errors.value}</p>}

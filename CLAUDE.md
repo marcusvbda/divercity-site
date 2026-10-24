@@ -100,7 +100,7 @@ npx tsx prisma/seed.ts
 - `Hero` — Content (title, subtitle), Media (bgImage, image), Actions (primaryCta, secondaryCta)
 - `Attractions` — Section (badge, title, subtitle), Content (Attraction[] múltiplo)
 - `BenefitsSection` — Section (badge, title, subtitle), Content (Benefit[] múltiplo)
-- `PartySection` — Section (badge, title, description, features[]), Media (images[]), CTAs (ctaBudget, ctaPrices)
+- `PartySection` — Section (badge, title, description, features[]), Media (images[]), CTAs (ctaBudget)
 - `PriceSection` — Section (badge, title, subtitle), Content (prices[] múltiplo, disclaimers[])
 - `AdvancePurchaseSection` — Section (title, subtitle), Content (features[] múltiplo, disclaimer), Actions (cta)
 - `ContactSection` — Section (badge, title, subtitle, formBtnLabel), Info (wppNumber, address, googleMapsUrl, instagramUrl, googleMapsUrlIframe)

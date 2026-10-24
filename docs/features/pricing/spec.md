@@ -3,7 +3,7 @@
 > Estado atual, descrito a partir do código. Este documento descreve o que o sistema faz hoje; o que o usuário quiser mudar entra em `## 3. Anexos e referências
 
 - Compra de ingressos (fluxo, regras de elegibilidade, Stripe, tickets): [`../ticket-in-advance/spec.md`](../ticket-in-advance/spec.md).
-- Telas admin de Preços e Serviços e Passaportes: [`../admin-interface/spec.md`](../admin-interface/spec.md) (seções 2.7 e 2.8).
+- Telas admin de Valores e Serviços e Passaportes: [`../admin-interface/spec.md`](../admin-interface/spec.md) (seções 2.7 e 2.8).
 
 ## 4. Pontos em aberto
 

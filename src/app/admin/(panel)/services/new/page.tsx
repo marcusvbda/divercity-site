@@ -31,7 +31,7 @@ export default function NewServicePage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
       <ServiceForm
         title="Novo Serviço"
-        description="Cadastre um novo serviço/produto e seus preços"
+        description="Cadastre um novo serviço/produto e seus valores"
         onSubmit={mutation.mutate} isLoading={mutation.isPending}
       />
     </div>

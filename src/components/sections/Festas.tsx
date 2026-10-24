@@ -32,7 +32,6 @@ export default function Festas({
   const features: FeatureItem[] = partySection?.Section?.features ?? []
   const images: ImageItem[]     = partySection?.Media?.images    ?? []
   const ctaBudget   = partySection?.CTAs?.ctaBudget?.value      ?? null
-  const ctaPrices   = partySection?.CTAs?.ctaPrices?.value      ?? null
 
   return (
     <>
@@ -79,8 +78,8 @@ export default function Festas({
                 ))}
               </ul>
 
-              <div className="flex flex-col gap-4 sm:flex-row">
-                {budgetEnabled && ctaBudget && (
+              {budgetEnabled && ctaBudget && (
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <CtaButton
                     onClick={() => goToCta(ctaBudget.href ?? '')}
                     cta={ctaBudget}
@@ -88,17 +87,8 @@ export default function Festas({
                   >
                     {ctaBudget.label}
                   </CtaButton>
-                )}
-                {ctaPrices && (
-                  <CtaButton
-                    onClick={() => goToCta(ctaPrices.href ?? '')}
-                    cta={ctaPrices}
-                    className="px-8! py-4! text-lg!"
-                  >
-                    {ctaPrices.label}
-                  </CtaButton>
-                )}
-              </div>
+                </div>
+              )}
             </motion.div>
 
             {/* Right: Image grid */}

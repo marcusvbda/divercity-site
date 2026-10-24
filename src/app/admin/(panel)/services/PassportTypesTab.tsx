@@ -78,7 +78,7 @@ export function PassportTypesTab() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          Preços por duração, usados na compra antecipada e na vitrine do site
+          Valores por duração, usados na compra antecipada e na vitrine do site
         </p>
         <Button nativeButton={false} render={<Link href="/admin/passport-types/new" />}>
           <PlusIcon className="size-4" />

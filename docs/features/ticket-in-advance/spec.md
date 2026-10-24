@@ -117,7 +117,7 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 
 ### 2.10 Admin de passaportes (`admin`)
 
-- A lista fica na aba "Passaportes" de `/admin/services?tab=passaportes` (`PassportTypesTab`): colunas nome (com selo "Fixo" e "Inativo"), duração e os quatro preços (segunda a quinta; sexta a domingo e feriados). `/admin/passport-types` só redireciona para essa aba; `/admin/passport-types/new` e `/[id]` continuam sendo o formulário (nome, duração em minutos, quatro preços, checkbox ativo) e voltam para a aba depois de salvar.
+- A lista fica na aba "Passaportes" de `/admin/services?tab=passaportes` (`PassportTypesTab`): colunas nome (com selo "Fixo" e "Inativo"), duração e os quatro valores (segunda a quinta; sexta a domingo e feriados). `/admin/passport-types` só redireciona para essa aba; `/admin/passport-types/new` e `/[id]` continuam sendo o formulário (nome, duração em minutos, quatro valores, checkbox ativo) e voltam para a aba depois de salvar.
 - Passaporte **fixo** (com `key`): o formulário desabilita duração e "Ativo" ("Passaporte fixo do sistema: não pode ser desativado nem ter a duração alterada."), a lista esconde o botão de remover, e a API recusa: PUT com `active = false` (400 "Passaporte fixo não pode ser desativado."), PUT com duração diferente (400 "A duração de um passaporte fixo não pode ser alterada.") e DELETE (403 "Este passaporte é fixo do sistema e não pode ser removido, apenas editado.").
 - API `/api/admin/passport-types` (GET paginado, padrão 50 por página, máximo 100, busca por nome; POST) e `/[id]` (GET, PUT, DELETE), só `admin`; PUT e DELETE respondem 404 se o passaporte não existir. Validação: nome obrigatório, duração inteira > 0, preços ≥ 0. POST, PUT e DELETE invalidam a tag `passport-types`.
 - DELETE é bloqueado (403) se o passaporte já foi usado em alguma criança de pedido ("Desative-o em vez disso."). A verificação considera só `TicketChild`, não `TicketCompanion`.
@@ -131,6 +131,14 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
   - `POST /api/tickets/quote` e `POST /api/tickets/checkout` respondem 403 "Compra antecipada indisponível no momento.";
   - continuam funcionando: a confirmação (`/compra-antecipada/confirmacao/[shortCode]`), `GET /api/tickets/confirmation/[shortCode]`, `GET /api/tickets/passport-types`, o webhook do Stripe e a operação em `/admin/operacao`.
 
+## Mudanças pendentes
+
+- **Texto "valores" no lugar de "preços":** nos textos visíveis do admin de passaportes e da página compartilhada `/admin/services`, trocar "Preço(s)" por "Valor(es)": item "Preços" da sidebar e do breadcrumb, título e descrições de `/admin/services` e da aba Salão, descrição da aba Passaportes, descrição de `/admin/passport-types/new` e de `/admin/services/new`, e os rótulos "Preço dia de semana (R$)" e "Preço fim de semana (R$)" do formulário de serviço. Landing, seed do CMS, Content API, dashboard e telas de festa ficam fora desta feature.
+- **Seed não sobrescreve valores:** o `upsert` dos passaportes fixos (`passport_30min`, `passport_1h`, `passport_2h`, `passport_3h`) em `prisma/seed.ts` só cria; rodar o seed de novo não pode regravar os quatro valores editados pelo admin.
+- **Webhook atômico:** `checkout.session.async_payment_failed` e `checkout.session.expired` só marcam `payment_failed` se o pedido ainda estiver em `pending_payment`, na mesma operação (`updateMany` condicionado), sem ler antes; um pedido `paid` nunca volta para `payment_failed`.
+- **Acompanhante validado no servidor:** o `POST /api/tickets/checkout` recusa (400) criança com menos de 60 meses sem `hasCompanion` definido; o quote continua aceitando (a tela consulta o valor antes da decisão). Quote e checkout recusam (400) mais de 1 acompanhante vinculado à mesma criança e acompanhante vinculado a criança sem `hasCompanion = true`.
+- **E-mail sem HTML injetado:** nomes digitados pelo cliente (responsável, crianças, acompanhantes) passam por escape no HTML do e-mail de confirmação.
+
 ## 3. Anexos e referências
 
 - Precificação (preços, descontos, total, quote): [`../pricing/spec.md`](../pricing/spec.md).
@@ -138,6 +146,7 @@ Os preços, descontos e o total são calculados pelo `priceOrder` e descritos em
 
 ## 4. Pontos em aberto
 
+- Trava temporária mantida por decisão: `FEATURES_DEV_ONLY_LOCK` em `src/lib/features.ts` (marcada `TEMPORARY`) faz `isFeatureEnabled` devolver `false` fora de `NODE_ENV=development`. Enquanto existir, a compra antecipada fica desligada em produção (home sem a seção, `/compra-antecipada` 404, quote e checkout 403) independentemente do banco, e "sem linha no banco, a feature é ativa" (2.11) só vale em desenvolvimento. Remover a trava é decisão separada.
 - Pedidos `pending_payment` nunca expiram e `cancelled` nunca é gravado: não há fluxo de cancelamento, reembolso ou limpeza de pedidos abandonados.
 - Se o envio do e-mail falhar (Resend), não há reenvio nem retentativa; o comprovante continua disponível na página de confirmação.
 - Valores de excedente não são calculados pelo sistema (cobrança é feita à parte no caixa).

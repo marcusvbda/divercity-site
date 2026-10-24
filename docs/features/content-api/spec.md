@@ -49,8 +49,8 @@ API de consulta de conteúdo acessada por token. Em settings haverá uma página
 
 ### Horários de funcionamento
 
-- Criar um cadastro próprio de horários de funcionamento no admin, no mesmo molde do cadastro de preços (`prices`).
-- Cada horário tem um rótulo (`label`), dois campos de horário (`opening` e `close`), exatamente como no print, e uma `key` única de identificação, como em preços: ![Funcionamento na landing page](assets/horario-funcionamento-lp.png)
+- Criar um cadastro próprio de horários de funcionamento no admin, no mesmo molde do cadastro de valores (`prices`).
+- Cada horário tem um rótulo (`label`), dois campos de horário (`opening` e `close`), exatamente como no print, e uma `key` única de identificação, como em valores: ![Funcionamento na landing page](assets/horario-funcionamento-lp.png)
   - No print: "Segunda a Sábado: 10h às 22h" e "Domingos e feriados: 12h às 20h".
 - A landing page passa a exibir o horário de funcionamento vindo desse cadastro, em vez do valor atual vindo do CMS.
 - Os valores atuais de `weekdaysTime`/`holidaysTime` no CMS (ContactSection e Footer) migram para o novo cadastro e deixam de existir no CMS.
@@ -62,7 +62,7 @@ API de consulta de conteúdo acessada por token. Em settings haverá uma página
 - Regra geral dos filtros da API, para qualquer entidade: `id` e `key` são sempre filtrados por igualdade (idênticos).
 - Quando não houver nenhum horário cadastrado, a landing page não mostra nada (o bloco "Funcionamento" não aparece).
 - O cadastro fica num item de menu próprio no admin, "Horários", em `/admin/hours` (listagem, `/admin/hours/new`, `/admin/hours/[id]`), acessível só por `admin`.
-- A `key` segue o padrão de preços: é opcional e única, só a migration/seed a define (`weekdays` para "Segunda a Sábado" e `sundays_holidays` para "Domingos e feriados"), aparece como somente leitura no formulário, e um horário com `key` não pode ser removido. Horários criados pelo admin ficam sem `key`.
+- A `key` segue o padrão de valores: é opcional e única, só a migration/seed a define (`weekdays` para "Segunda a Sábado" e `sundays_holidays` para "Domingos e feriados"), aparece como somente leitura no formulário, e um horário com `key` não pode ser removido. Horários criados pelo admin ficam sem `key`.
 - A migração dos dados lê os valores atuais de `weekdaysTime`/`holidaysTime` do CMS (`Footer.Info`), no formato "Xh às Yh". Se não conseguir ler, usa os valores do print (10–22 e 12–20). Os rótulos ficam "Segunda a Sábado" e "Domingos e feriados".
 - `opening` e `close` são inteiros: `opening` de 0 a 23, `close` de 1 a 24, e `close` maior que `opening`. A API devolve o número (ex.: `10`) e a landing page exibe "10h às 22h".
 

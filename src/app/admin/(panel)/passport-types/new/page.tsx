@@ -31,7 +31,7 @@ export default function NewPassportTypePage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
       <PassportTypeForm
         title="Novo Tipo de Passaporte"
-        description="Cadastre uma duração e seus preços para a compra antecipada"
+        description="Cadastre uma duração e seus valores para a compra antecipada"
         onSubmit={mutation.mutate}
         isLoading={mutation.isPending}
       />

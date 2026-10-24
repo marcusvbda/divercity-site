@@ -58,8 +58,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     );
   }
 
-  const inUse = await prisma.ticketChild.findFirst({ where: { passportTypeId: id } });
-  if (inUse) {
+  const [usedByChild, usedByCompanion] = await Promise.all([
+    prisma.ticketChild.findFirst({ where: { passportTypeId: id } }),
+    prisma.ticketCompanion.findFirst({ where: { passportTypeId: id } }),
+  ]);
+  if (usedByChild || usedByCompanion) {
     return NextResponse.json(
       { error: "Este tipo de passaporte já foi usado em compras e não pode ser removido. Desative-o em vez disso." },
       { status: 403 }

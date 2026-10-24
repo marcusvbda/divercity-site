@@ -51,7 +51,11 @@ function ServicesTab() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
       fetch(`/api/admin/services/${id}`, { method: 'DELETE' }).then((r) => r.json()),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (result.error) {
+        toast.error(result.error)
+        return
+      }
       queryClient.invalidateQueries({ queryKey: ['admin', 'services'] })
       toast.success('Serviço removido')
     },
@@ -62,7 +66,7 @@ function ServicesTab() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          Preços usados no orçamento e na reserva de festas
+          Valores usados no orçamento e na reserva de festas
         </p>
         <Button nativeButton={false} render={<Link href="/admin/services/new" />}>
           <PlusIcon className="size-4" />
@@ -111,9 +115,9 @@ export default function PricesPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold">Preços</h1>
+        <h1 className="text-2xl font-semibold">Valores</h1>
         <p className="text-muted-foreground text-sm">
-          Preços do salão de festas e dos passaportes
+          Valores do salão de festas e dos passaportes
         </p>
       </div>
 
