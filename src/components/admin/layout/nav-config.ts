@@ -172,6 +172,11 @@ export function getNavItems({
               href: '/admin/settings/api-tokens',
               activePath: '/admin/settings/api-tokens',
             },
+            {
+              label: 'Chat bot',
+              href: '/admin/chat-bot',
+              activePath: '/admin/chat-bot',
+            },
           ],
         },
       ],
