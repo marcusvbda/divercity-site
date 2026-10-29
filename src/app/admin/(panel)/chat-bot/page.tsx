@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { MarkdownField } from '@/components/admin/markdown-field'
 import { Alert, AlertDescription } from '@/components/admin/ui/alert'
 import { Badge } from '@/components/admin/ui/badge'
 import { Button } from '@/components/admin/ui/button'
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/admin/ui/card'
@@ -22,7 +22,6 @@ import {
 } from '@/components/admin/ui/field'
 import { Input } from '@/components/admin/ui/input'
 import { Skeleton } from '@/components/admin/ui/skeleton'
-import { Textarea } from '@/components/admin/ui/textarea'
 import { BOT_CONFIG_MAX_LENGTH } from '@/lib/schemas/bot-config'
 import type { BotConfig, BotConfigField } from '@/types/bot-config'
 
@@ -74,9 +73,45 @@ async function saveBotConfig(values: BotConfig): Promise<BotConfig> {
   return res.json()
 }
 
+function isDirty(values: BotConfig, saved: BotConfig) {
+  return (
+    FIELDS.some((field) => values[field.name] !== saved[field.name]) ||
+    parseHolidays(values.FERIADOS).join(',') !==
+      parseHolidays(saved.FERIADOS).join(',')
+  )
+}
+
+function SaveBar({
+  dirty = false,
+  pending = false,
+  disabled = false,
+}: {
+  dirty?: boolean
+  pending?: boolean
+  disabled?: boolean
+}) {
+  return (
+    <div className="bg-card sticky bottom-0 z-10 flex flex-col gap-2 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-between">
+      {dirty ? (
+        <p role="status" className="text-muted-foreground text-sm">
+          Alterações não salvas
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        disabled={disabled || pending}
+        className="w-full sm:ml-auto sm:w-auto"
+      >
+        {pending ? 'Salvando…' : 'Salvar'}
+      </Button>
+    </div>
+  )
+}
+
 function BotConfigForm({ initialValues }: { initialValues: BotConfig }) {
   const queryClient = useQueryClient()
   const [values, setValues] = useState<BotConfig>(initialValues)
+  const [saved, setSaved] = useState<BotConfig>(initialValues)
   const [pendingDate, setPendingDate] = useState('')
   const holidays = parseHolidays(values.FERIADOS)
 
@@ -90,10 +125,13 @@ function BotConfigForm({ initialValues }: { initialValues: BotConfig }) {
     setPendingDate('')
   }
 
+  const dirty = isDirty(values, saved)
+
   const mutation = useMutation({
     mutationFn: saveBotConfig,
     onSuccess: (data) => {
       queryClient.setQueryData(QUERY_KEY, data)
+      setSaved(data)
       toast.success('Configurações do bot salvas com sucesso.')
     },
     onError: () =>
@@ -116,13 +154,12 @@ function BotConfigForm({ initialValues }: { initialValues: BotConfig }) {
             {field.name}
           </span>
         </FieldLabel>
-        <Textarea
+        <MarkdownField
           id={field.name}
-          className="field-sizing-fixed h-75 resize-y"
           maxLength={BOT_CONFIG_MAX_LENGTH}
           value={values[field.name]}
-          onChange={(e) =>
-            setValues((prev) => ({ ...prev, [field.name]: e.target.value }))
+          onChange={(value) =>
+            setValues((prev) => ({ ...prev, [field.name]: value }))
           }
         />
       </Field>
@@ -130,7 +167,7 @@ function BotConfigForm({ initialValues }: { initialValues: BotConfig }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Chat bot</CardTitle>
@@ -204,12 +241,8 @@ function BotConfigForm({ initialValues }: { initialValues: BotConfig }) {
             {FIELDS.slice(3).map((field) => renderField(field))}
           </FieldGroup>
         </CardContent>
-        <CardFooter className="justify-end">
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Salvando…' : 'Salvar'}
-          </Button>
-        </CardFooter>
       </Card>
+      <SaveBar dirty={dirty} pending={mutation.isPending} />
     </form>
   )
 }
@@ -218,38 +251,39 @@ function SkeletonField() {
   return (
     <Field>
       <Skeleton className="h-4 w-48" />
-      <Skeleton className="h-75 w-full" />
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-9 w-40" />
+        <Skeleton className="h-75 w-full" />
+      </div>
     </Field>
   )
 }
 
 function BotConfigSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Chat bot</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          {FIELDS.slice(0, 3).map((field) => (
-            <SkeletonField key={field.name} />
-          ))}
-          <Field>
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-7 w-40" />
-          </Field>
-          {FIELDS.slice(3).map((field) => (
-            <SkeletonField key={field.name} />
-          ))}
-        </FieldGroup>
-      </CardContent>
-      <CardFooter className="justify-end">
-        <Button type="submit" disabled>
-          Salvar
-        </Button>
-      </CardFooter>
-    </Card>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Chat bot</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            {FIELDS.slice(0, 3).map((field) => (
+              <SkeletonField key={field.name} />
+            ))}
+            <Field>
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-7 w-40" />
+            </Field>
+            {FIELDS.slice(3).map((field) => (
+              <SkeletonField key={field.name} />
+            ))}
+          </FieldGroup>
+        </CardContent>
+      </Card>
+      <SaveBar disabled />
+    </>
   )
 }
 
@@ -261,7 +295,7 @@ export default function ChatBotPage() {
   })
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+    <div className="mx-auto flex w-full flex-col gap-6 p-6">
       {isLoading ? (
         <BotConfigSkeleton />
       ) : isError || !data ? (

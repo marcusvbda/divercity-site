@@ -52,9 +52,20 @@ Página "Chat bot" no admin para configurar as instruções do bot, editando o d
 
 - Limite de **20.000 caracteres por campo**, validado no servidor e no `maxLength` do textarea.
 
+#### Editor de markdown
+
+- Todos os campos que hoje são textarea (`PERSONA_E_REGRAS`, `FATOS_DO_PARQUE`, `AVISOS_DE_HOJE`, `MSG_HANDOFF_CLIENTE`, `MSG_MIDIA`, `MSG_CONFIRMACAO`) passam a ser **editor de markdown com preview**, para melhor visualização do conteúdo.
+- `FERIADOS` não muda (continua lista de pills).
+- Preview por **abas "Editar" / "Visualizar"** em cada campo: "Editar" mostra o textarea; "Visualizar" mostra o markdown renderizado. Abre em "Editar".
+- O valor gravado no n8n continua sendo o **texto em markdown puro**, na mesma coluna de hoje. Nada muda no n8n nem no contrato da API.
+- O limite de 20.000 caracteres (`maxLength`) continua valendo no textarea da aba "Editar".
+
 ### 2.4 Salvar
 
 - Um único botão salva **todos os campos de uma vez**.
+- **Confiabilidade no celular:** o botão de salvar precisa funcionar de forma consistente no celular. Relato: no celular da esposa do usuário, em alguns momentos ela clicava no botão e **não salvava**. O comportamento do botão deve ser revisado para que todo clique resulte em salvamento (ou em erro visível).
+- **Barra de salvar fixa:** o botão "Salvar" fica numa barra fixa (sticky) no rodapé da área de conteúdo, sempre visível durante a rolagem, inclusive no celular.
+- **Aviso de alterações não salvas:** quando os valores do formulário forem diferentes dos últimos valores carregados/salvos, a barra mostra o texto "Alterações não salvas". O aviso some depois de salvar com sucesso.
 
 ### 2.5 Estados e mensagens
 
@@ -75,4 +86,4 @@ Textos definidos a critério da implementação, conforme pedido do usuário. A 
 
 ## 4. Pontos em aberto
 
-_Nenhum no momento._
+- **Salvar no celular:** o sintoma exato ainda não é conhecido (nada acontece ao tocar, aparece erro, ou aparece sucesso mas o valor não persiste?), nem o aparelho/navegador. Nesta feature entra só a barra de salvar fixa. Outras causas possíveis encontradas no `/plan-feature` ficaram **fora do escopo** por decisão do usuário: data escolhida no calendário e não adicionada é descartada ao salvar; recarga ao voltar o foco para a aba pode trocar o formulário pelo alerta de erro e perder o texto; sessão expira em cerca de 1h (token Supabase não é renovado) e o salvar recebe 401 ou desloga; edição simultânea em dois aparelhos sobrescreve. Conferir o sintoma com a usuária depois da entrega.
